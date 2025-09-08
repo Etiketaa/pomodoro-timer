@@ -1,0 +1,490 @@
+.language-selector {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.9rem;
+}
+.language-selector a {
+    color: #a0a0a0;
+    text-decoration: none;
+    margin: 0 5px;
+}
+.language-selector a:hover {
+    text-decoration: underline;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Use min-height to allow content to push down */
+    background-color: #1a1a1a; /* Very dark background */
+    color: #ffffff; /* White text */
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.timer-container {
+    background-color: #2c2c2c; /* Slightly lighter dark background */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* More pronounced shadow */
+    text-align: center;
+    width: 100%;
+    max-width: 450px; /* Increased max-width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    margin-top: 20px; /* Add some top margin */
+}
+
+.mode-selector {
+    display: flex;
+    margin-bottom: 30px;
+    background-color: #3a3a3a;
+    border-radius: 10px;
+    padding: 5px;
+}
+.mode-selector button {
+    background-color: transparent;
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.mode-selector button.active {
+    color: #1a1a1a; /* Dark text for active button */
+}
+.mode-selector button#pomodoro.active { background-color: #ef4444; }
+.mode-selector button#short-break.active { background-color: #22c55e; }
+.mode-selector button#long-break.active { background-color: #3b82f6; }
+
+#time {
+    font-size: 7.5rem; /* Larger font size */
+    font-weight: 700; /* Bolder */
+    margin-bottom: 30px;
+    color: #ffffff;
+}
+
+.task-input-container {
+    width: 100%;
+    margin-bottom: 30px;
+}
+.task-input-container input {
+    width: calc(100% - 20px); /* Adjust for padding */
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: center;
+}
+.task-input-container input::placeholder {
+    color: #a0a0a0;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.buttons button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin: 0 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: #4a4a4a; /* Darker button background */
+    color: #ffffff;
+}
+.buttons button:hover { background-color: #5a5a5a; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+.buttons button:active { background-color: #3a3a3a; transform: translateY(0); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+#tomato-svg {
+    margin-bottom: 20px;
+    transform: scale(0.1);
+    transform-origin: center;
+    transition: transform 1s linear; /* Smooth transition for scaling */
+}
+
+.project-description {
+    font-size: 0.95rem;
+    color: #a0a0a0; /* Lighter gray for description */
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.5;
+    margin-top: 30px; /* Add some top margin */
+}
+
+.audio-controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap */
+    justify-content: center;
+    align-items: center; /* Align items vertically */
+}
+.audio-controls button {
+    background-color: #4a4a4a;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem; /* Larger font size for icons */
+    transition: background-color 0.3s ease;
+}
+.audio-controls button:hover {
+    background-color: #5a5a5a;
+}
+
+/* Volume Slider Styling */
+#volume-slider {
+    -webkit-appearance: none; /* Override default appearance */
+    width: 100px; /* Adjust width as needed */
+    height: 8px;
+    background: #5a5a5a;
+    outline: none;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: opacity .2s;
+}
+
+#volume-slider:hover {
+    opacity: 1;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ef4444; /* Accent color for thumb */
+    cursor: pointer;
+}
+
+#volume-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ef4444;
+    cursor: pointer;
+}
+
+.settings-container {
+    margin-top: 30px;
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 450px;
+    text-align: left;
+}
+.settings-container h3 {
+    text-align: center;
+    margin-top: 0;
+    color: #ffffff;
+}
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.setting-item label {
+    flex: 1;
+    margin-right: 10px;
+    color: #a0a0a0;
+}
+.setting-item input[type="number"] {
+    width: 80px;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    font-size: 1rem;
+    text-align: center;
+}
+
+/* Responsiveness */
+@media (max-width: 500px) {
+    .timer-container,
+    .settings-container {
+        padding: 30px;
+        margin-bottom: 20px;
+        margin-top: 10px; /* Adjust for smaller screens */
+    }
+    #time {
+        font-size: 6rem;
+    }
+    .mode-selector button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+    .buttons button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        margin: 0 5px;
+    }
+    .project-description {
+        font-size: 0.85rem;
+        padding: 0 15px;
+        margin-top: 20px; /* Adjust for smaller screens */
+    }
+    .audio-controls {
+        flex-wrap: wrap; /* Allow buttons to wrap */
+        justify-content: center;
+    }
+}
+
+/* Feedback Form Styling */
+.feedback-container {
+    margin-top: 30px;
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 450px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+.feedback-container h3 {
+    text-align: center;
+    margin-top: 0;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+.feedback-container .form-group {
+    margin-bottom: 15px;
+}
+.feedback-container label {
+    display: block;
+    margin-bottom: 8px;
+    color: #a0a0a0;
+    font-size: 0.95rem;
+}
+.feedback-container textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    font-size: 1rem;
+    resize: vertical; /* Allow vertical resizing */
+}
+.feedback-container textarea::placeholder {
+    color: #a0a0a0;
+}
+.feedback-container button[type="submit"] {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    background-color: #ef4444; /* Red submit button */
+    color: #ffffff;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+.feedback-container button[type="submit"]:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+.feedback-container button[type="submit"]:active {
+    background-color: #b91c1c;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.feedback-container .message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+.feedback-container .message.success {
+    color: #22c55e; /* Green for success */
+}
+.feedback-container .message.error {
+    color: #ef4444; /* Red for error */
+}
+
+/* Rating Stars */
+.rating-stars {
+    display: flex;
+    flex-direction: row-reverse; /* To make 5 stars appear first */
+    justify-content: center;
+    margin-top: 10px;
+}
+.rating-stars input[type="radio"] {
+    display: none;
+}
+.rating-stars label {
+    font-size: 2rem;
+    color: #4a4a4a; /* Gray stars */
+    cursor: pointer;
+    padding: 0 5px;
+    transition: color 0.2s ease;
+}
+.rating-stars input[type="radio"]:checked ~ label {
+    color: #facc15; /* Yellow for checked stars */
+}
+.rating-stars label:hover,
+.rating-stars label:hover ~ label {
+    color: #facc15; /* Yellow on hover */
+}
+
+/* Task Manager Styling */
+.task-manager-container {
+    margin-top: 30px;
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 450px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+.task-manager-container h3 {
+    text-align: center;
+    margin-top: 0;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+.task-manager-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.task-manager-container input[type="text"],
+.task-manager-container textarea,
+.task-manager-container input[type="date"] {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    font-size: 1rem;
+    width: calc(100% - 20px); /* Adjust for padding */
+}
+.task-manager-container textarea {
+    resize: vertical;
+}
+.task-manager-container input::placeholder,
+.task-manager-container textarea::placeholder {
+    color: #a0a0a0;
+}
+.task-manager-container button[type="submit"] {
+    background-color: #22c55e; /* Green for add task */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+.task-manager-container button[type="submit"]:hover {
+    background-color: #16a34a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+.task-manager-container button[type="submit"]:active {
+    background-color: #15803d;
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.task-item {
+    background-color: #3a3a3a;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative; /* For absolute positioning of buttons */
+}
+.task-item h4 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.1rem;
+}
+.task-item p {
+    margin: 0;
+    color: #a0a0a0;
+    font-size: 0.9rem;
+}
+.task-item .task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #707070;
+    margin-top: 5px;
+}
+.task-item .task-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+.task-item .task-actions button {
+    background-color: #4a4a4a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.task-item .task-actions button:hover {
+    background-color: #5a5a5a;
+}
+.task-item .task-actions button.delete {
+    background-color: #ef4444;
+}
+.task-item .task-actions button.delete:hover {
+    background-color: #dc2626;
+}
+.task-item .task-actions button.complete {
+    background-color: #22c55e;
+}
+.task-item .task-actions button.complete:hover {
+    background-color: #16a34a;
+}
+.task-item.done {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+.task-item.done .task-actions button.complete {
+    background-color: #4a4a4a; /* Change color when done */
+    cursor: not-allowed;
+}
+.task-item.done .task-actions button.complete:hover {
+    background-color: #4a4a4a;
+}
