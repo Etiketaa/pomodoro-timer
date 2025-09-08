@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, g, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, g
 from flask_babel import Babel, gettext
 import csv
 from datetime import datetime
 import os
 import sqlite3
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.config['SECRET_KEY'] = 'your_secret_key_here' # Replace with a strong secret key
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
@@ -158,9 +158,7 @@ def delete_task(task_id):
     except sqlite3.Error as e:
         return jsonify({'error': gettext('Database error: ') + str(e)}), 500
 
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
+
 
 if __name__ == '__main__':
     init_db() # Initialize the database when the app starts
