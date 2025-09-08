@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-07 17:57-0300\n"
-"PO-Revision-Date: 2025-09-07 17:57-0300\n"
+"POT-Creation-Date: 2025-09-08 14:37-0300\n"
+"PO-Revision-Date: 2025-09-08 14:37-0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -18,7 +18,115 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:50
+#: app.py:51
 msgid "Feedback submitted successfully!"
 msgstr "Mensaje enviado con éxito!"
 
+#: templates/index.html:6
+msgid "Pomodoro Timer"
+msgstr "Temporizador Pomodoro"
+
+#: templates/index.html:370
+msgid "Pomodoro"
+msgstr "Pomodoro"
+
+#: templates/index.html:371
+msgid "Short Break"
+msgstr "Descanso corto"
+
+#: templates/index.html:372
+msgid "Long Break"
+msgstr "Descanso largo"
+
+#: templates/index.html:382
+msgid "What are you working on?"
+msgstr "¿En qué estás trabajando?"
+
+#: templates/index.html:386
+msgid "Start"
+msgstr "Iniciar"
+
+#: templates/index.html:387
+msgid "Pause"
+msgstr "Pausar"
+
+#: templates/index.html:388
+msgid "Reset"
+msgstr "Reiniciar"
+
+#: templates/index.html:403
+msgid "Timer Settings (minutes)"
+msgstr "Configuración del temporizador (minutos)"
+
+#: templates/index.html:405
+msgid "Pomodoro:"
+msgstr "Pomodoro:"
+
+#: templates/index.html:409
+msgid "Short Break:"
+msgstr "Descanso corto:"
+
+#: templates/index.html:413
+msgid "Long Break:"
+msgstr "Descanso largo:"
+
+#: templates/index.html:419
+msgid "Give Us Feedback!"
+msgstr "¡Danos tu opinión!"
+
+#: templates/index.html:422
+msgid "Your Feedback:"
+msgstr "Tu opinión:"
+
+#: templates/index.html:423
+msgid "Tell us what you think..."
+msgstr "Cuéntanos qué piensas..."
+
+#: templates/index.html:426
+msgid "Rating:"
+msgstr "Calificación:"
+
+#: templates/index.html:428
+msgid "5 stars"
+msgstr "5 estrellas"
+
+#: templates/index.html:429
+msgid "4 stars"
+msgstr "4 estrellas"
+
+#: templates/index.html:430
+msgid "3 stars"
+msgstr "3 estrellas"
+
+#: templates/index.html:431
+msgid "2 stars"
+msgstr "2 estrellas"
+
+#: templates/index.html:432
+msgid "1 star"
+msgstr "1 estrella"
+
+#: templates/index.html:435
+msgid "Submit Feedback"
+msgstr "Enviar opinión"
+
+#: templates/index.html:441
+msgid ""
+"This is a simple Pomodoro Timer application built with Flask. The "
+"Pomodoro Technique is a time management method that uses a timer to break"
+" down work into intervals, traditionally 25 minutes in length, separated "
+"by short breaks."
+msgstr "Esta es una aplicación simple de Temporizador Pomodoro creada con Flask.\n"
+"La Técnica Pomodoro es un método de gestión del tiempo que utiliza un temporizador para dividir el trabajo en intervalos, tradicionalmente de 25 minutos de duración, separados por descansos cortos."
+
+#: templates/index.html:678
+msgid "Please provide both feedback and a rating."
+msgstr "Por favor, proporciona tanto tu opinión como una calificación."
+
+#: templates/index.html:705
+msgid "Failed to submit feedback."
+msgstr "No se pudo enviar la opinión."
+
+#: templates/index.html:710
+msgid "An error occurred. Please try again later."
+msgstr "Ocurrió un error. Inténtalo de nuevo más tarde."

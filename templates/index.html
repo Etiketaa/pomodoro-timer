@@ -3,9 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pomodoro Timer</title>
+    <title>{{ _('Pomodoro Timer') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        .language-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.9rem;
+        }
+        .language-selector a {
+            color: #a0a0a0;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        .language-selector a:hover {
+            text-decoration: underline;
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
             display: flex;
@@ -345,12 +360,16 @@
     </style>
 </head>
 <body>
+    <div class="language-selector">
+        <a href="{{ url_for('set_language', lang='en') }}">English</a> |
+        <a href="{{ url_for('set_language', lang='es') }}">Español</a>
+    </div>
 
 <div class="timer-container">
     <div class="mode-selector">
-        <button id="pomodoro" class="active">Pomodoro</button>
-        <button id="short-break">Short Break</button>
-        <button id="long-break">Long Break</button>
+        <button id="pomodoro" class="active">{{ _('Pomodoro') }}</button>
+        <button id="short-break">{{ _('Short Break') }}</button>
+        <button id="long-break">{{ _('Long Break') }}</button>
     </div>
 
     <svg id="tomato-svg" width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -360,13 +379,13 @@
     <div id="time">25:00</div>
 
     <div class="task-input-container">
-        <input type="text" id="task-input" placeholder="What are you working on?">
+        <input type="text" id="task-input" placeholder="{{ _('What are you working on?') }}">
     </div>
 
     <div class="buttons">
-        <button id="start">Start</button>
-        <button id="pause">Pause</button>
-        <button id="reset">Reset</button>
+        <button id="start">{{ _('Start') }}</button>
+        <button id="pause">{{ _('Pause') }}</button>
+        <button id="reset">{{ _('Reset') }}</button>
     </div>
 
     <div class="audio-controls">
@@ -381,45 +400,45 @@
 </div>
 
 <div class="settings-container">
-    <h3>Timer Settings (minutes)</h3>
+    <h3>{{ _('Timer Settings (minutes)') }}</h3>
     <div class="setting-item">
-        <label for="work-time-input">Pomodoro:</label>
+        <label for="work-time-input">{{ _('Pomodoro:') }}</label>
         <input type="number" id="work-time-input" value="25" min="1">
     </div>
     <div class="setting-item">
-        <label for="short-break-input">Short Break:</label>
+        <label for="short-break-input">{{ _('Short Break:') }}</label>
         <input type="number" id="short-break-input" value="5" min="1">
     </div>
     <div class="setting-item">
-        <label for="long-break-input">Long Break:</label>
+        <label for="long-break-input">{{ _('Long Break:') }}</label>
         <input type="number" id="long-break-input" value="15" min="1">
     </div>
 </div>
 
 <div class="feedback-container">
-    <h3>Give Us Feedback!</h3>
+    <h3>{{ _('Give Us Feedback!') }}</h3>
     <form id="feedback-form">
         <div class="form-group">
-            <label for="feedback-text">Your Feedback:</label>
-            <textarea id="feedback-text" rows="5" placeholder="Tell us what you think..."></textarea>
+            <label for="feedback-text">{{ _('Your Feedback:') }}</label>
+            <textarea id="feedback-text" rows="5" placeholder="{{ _('Tell us what you think...') }}"></textarea>
         </div>
         <div class="form-group">
-            <label>Rating:</label>
+            <label>{{ _('Rating:') }}</label>
             <div class="rating-stars">
-                <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">&#9733;</label>
-                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">&#9733;</label>
-                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">&#9733;</label>
-                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">&#9733;</label>
-                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">&#9733;</label>
+                <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="{{ _('5 stars') }}">&#9733;</label>
+                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="{{ _('4 stars') }}">&#9733;</label>
+                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="{{ _('3 stars') }}">&#9733;</label>
+                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="{{ _('2 stars') }}">&#9733;</label>
+                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="{{ _('1 star') }}">&#9733;</label>
             </div>
         </div>
-        <button type="submit" id="submit-feedback">Submit Feedback</button>
+        <button type="submit" id="submit-feedback">{{ _('Submit Feedback') }}</button>
         <div id="feedback-message" class="message"></div>
     </form>
 </div>
 
 <div class="project-description">
-    This is a simple Pomodoro Timer application built with Flask. The Pomodoro Technique is a time management method that uses a timer to break down work into intervals, traditionally 25 minutes in length, separated by short breaks.
+    {{ _('This is a simple Pomodoro Timer application built with Flask. The Pomodoro Technique is a time management method that uses a timer to break down work into intervals, traditionally 25 minutes in length, separated by short breaks.') }}
 </div>
 
 <script>
@@ -656,7 +675,7 @@
         const rating = selectedRating ? parseInt(selectedRating.value) : null;
 
         if (!feedbackText || !rating) {
-            feedbackMessageDiv.textContent = 'Please provide both feedback and a rating.';
+            feedbackMessageDiv.textContent = '{{ _('Please provide both feedback and a rating.') }}';
             feedbackMessageDiv.className = 'message error';
             return;
         }
@@ -683,12 +702,12 @@
                     selectedRating.checked = false; // Uncheck rating
                 }
             } else {
-                feedbackMessageDiv.textContent = result.message || 'Failed to submit feedback.';
+                feedbackMessageDiv.textContent = result.message || '{{ _('Failed to submit feedback.') }}';
                 feedbackMessageDiv.className = 'message error';
             }
         } catch (error) {
             console.error('Error submitting feedback:', error);
-            feedbackMessageDiv.textContent = 'An error occurred. Please try again later.';
+            feedbackMessageDiv.textContent = '{{ _('An error occurred. Please try again later.') }}';
             feedbackMessageDiv.className = 'message error';
         }
     });
