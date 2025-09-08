@@ -20,5 +20,5 @@ msgstr ""
 
 #: app.py:50
 msgid "Feedback submitted successfully!"
-msgstr ""
+msgstr "Mensaje enviado con éxito!"
 
