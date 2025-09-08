@@ -1,16 +1,38 @@
-# pomodoro_app
+# Pomodoro Timer
 
-A new Flutter project.
+A simple Pomodoro Timer application built with Flask and JavaScript.
+
+## Features
+
+*   Pomodoro, Short Break, and Long Break modes.
+*   Customizable timer settings.
+*   Lofi music player with play, pause, skip, and volume controls.
+*   Task manager to keep track of your tasks.
+*   Internationalization (English and Spanish).
+*   Feedback form.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1.  Clone the repository:
 
-A few resources to get you started if this is your first Flutter project:
+    ```
+    git clone https://github.com/your-username/pomodoro-app.git
+    ```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+2.  Install the dependencies:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+    ```
+    pip install -r requirements.txt
+    ```
+
+3.  Run the application:
+
+    ```
+    python app.py
+    ```
+
+4.  Open your browser and go to `http://127.0.0.1:5000/`.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.

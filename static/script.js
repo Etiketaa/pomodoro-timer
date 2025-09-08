@@ -5,14 +5,14 @@
 
     const lofiTracks = [
         '/static/lo-fi-loop.mp3',
-        '/static/fiesta-de-cumbia.mp3',
-        '/static/carnaval-des-tromepetter.mp3',
-        '/static/cumbia-de-celebracion.mp3',
-        '/static/lofi-backround music.mp3',
+        '/static/fiesta-de-la-cumbia-306743.mp3',
+        '/static/carnaval-des-trompettes-276501.mp3',
+        '/static/cumbia-de-celebracion-289760.mp3',
+        '/static/lofi-background-music-314199.mp3',
         '/static/lofi-295209.mp3',
-        '/static/lofi-lofi-chill.mp3',
-        '/static/lofi-study-calm-peacefull-chill-hop.mp3',
-        '/static/good-night-lofi-cozy-chill-music.mp3'
+        '/static/lofi-lofi-chill-398290.mp3',
+        '/static/lofi-study-calm-peaceful-chill-hop-112191.mp3',
+        '/static/good-night-lofi-cozy-chill-music-160166.mp3'
     ];
     let currentTrackIndex = 0;
 
@@ -67,24 +67,22 @@
         SHORT_BREAK_TIME_MINUTES = parseInt(shortBreakInput.value) || 5;
         LONG_BREAK_TIME_MINUTES = parseInt(longBreakInput.value) || 15;
 
-        // If timer is paused and not running, update current time based on new settings
-        if (isPaused && timer === null) {
-            if (mode === 'work') {
-                timeLeft = WORK_TIME_MINUTES * 60;
-                totalTimeForCurrentMode = WORK_TIME_MINUTES * 60;
-            } else {
-                timeLeft = SHORT_BREAK_TIME_MINUTES * 60;
-                totalTimeForCurrentMode = SHORT_BREAK_TIME_MINUTES * 60;
-            } else {
-                timeLeft = LONG_BREAK_TIME_MINUTES * 60;
-                totalTimeForCurrentMode = LONG_BREAK_TIME_MINUTES * 60;
-            }
-            updateDisplay();
+        if (mode === 'work') {
+            timeLeft = WORK_TIME_MINUTES * 60;
+            totalTimeForCurrentMode = WORK_TIME_MINUTES * 60;
+        } else if (mode === 'short') {
+            timeLeft = SHORT_BREAK_TIME_MINUTES * 60;
+            totalTimeForCurrentMode = SHORT_BREAK_TIME_MINUTES * 60;
+        } else if (mode === 'long') {
+            timeLeft = LONG_BREAK_TIME_MINUTES * 60;
+            totalTimeForCurrentMode = LONG_BREAK_TIME_MINUTES * 60;
         }
+        updateDisplay();
     }
 
     function setMode(newMode) {
         clearInterval(timer);
+        timer = null;
         isPaused = true;
         mode = newMode;
 
@@ -95,19 +93,13 @@
 
         // Set time and active class based on new mode
         if (mode === 'work') {
-            timeLeft = WORK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = WORK_TIME_MINUTES * 60;
             pomodoroButton.classList.add('active');
         } else if (mode === 'short') {
-            timeLeft = SHORT_BREAK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = SHORT_BREAK_TIME_MINUTES * 60;
             shortBreakButton.classList.add('active');
-        } else {
-            timeLeft = LONG_BREAK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = LONG_BREAK_TIME_MINUTES * 60;
+        } else if (mode === 'long') {
             longBreakButton.classList.add('active');
         }
-        updateDisplay();
+        applySettings();
     }
 
     function switchMode() {
@@ -141,14 +133,18 @@
                     switchMode();
                 }
             }, 1000);
-            lofiAudio.play();
+            if (lofiAudio.paused) {
+                lofiAudio.play();
+            }
         }
     }
 
     function pauseTimer() {
         isPaused = true;
         clearInterval(timer);
-        lofiAudio.pause();
+        if (!lofiAudio.paused) {
+            lofiAudio.pause();
+        }
     }
 
     function resetTimer() {
@@ -231,7 +227,9 @@
         const rating = selectedRating ? parseInt(selectedRating.value) : null;
 
         if (!feedbackText || !rating) {
-            feedbackMessageDiv.textContent = '{{ _('Please provide both feedback and a rating.') }}';
+            // NOTE: We are using hardcoded strings here because this is a JavaScript file
+            // and we cannot use the Jinja2 `_()` function for translation.
+            feedbackMessageDiv.textContent = 'Please provide both feedback and a rating.';
             feedbackMessageDiv.className = 'message error';
             return;
         }
@@ -258,12 +256,12 @@
                     selectedRating.checked = false; // Uncheck rating
                 }
             } else {
-                feedbackMessageDiv.textContent = result.message || '{{ _('Failed to submit feedback.') }}';
+                feedbackMessageDiv.textContent = result.message || 'Failed to submit feedback.';
                 feedbackMessageDiv.className = 'message error';
             }
         } catch (error) {
             console.error('Error submitting feedback:', error);
-            feedbackMessageDiv.textContent = '{{ _('An error occurred. Please try again later.') }}';
+            feedbackMessageDiv.textContent = 'An error occurred. Please try again later.';
             feedbackMessageDiv.className = 'message error';
         }
     });
