@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, g
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, g, send_from_directory
 from flask_babel import Babel, gettext
 import csv
 from datetime import datetime
@@ -157,6 +157,10 @@ def delete_task(task_id):
         return jsonify({'message': gettext('Task deleted successfully!')}), 200
     except sqlite3.Error as e:
         return jsonify({'error': gettext('Database error: ') + str(e)}), 500
+
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 if __name__ == '__main__':
     init_db() # Initialize the database when the app starts
