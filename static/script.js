@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTaskDisplay = document.getElementById('current-task-display');
     const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
 
-    const alarmSound = new Audio("{{ url_for('static', filename='alarm.mp3') }}");
+    const alarmSound = new Audio('/static/alarm.mp3');
 
     // --- STATE ---
     let settings = {};
@@ -147,10 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
-        if (mode === 'pomodoro') {
-            document.body.classList.add('focus-mode');
-            updateCurrentTaskDisplay();
-        }
+        updateCurrentTaskDisplay();
         timerId = setInterval(() => {
             remainingTime--;
             updateTimerDisplay();
@@ -169,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         isPaused = true;
         startPauseBtn.textContent = 'INICIAR';
-        document.body.classList.remove('focus-mode');
         clearInterval(timerId);
     }
 
