@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const musicToggleBtn = document.getElementById('music-toggle-btn');
     const volumeSlider = document.getElementById('volume-slider');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
     const tabs = document.querySelectorAll('.tab-link');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     function init() {
+        loadTheme();
         loadSettings();
         loadTasks();
         loadStats();
@@ -93,6 +95,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LOCALSTORAGE HELPERS ---
     const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
     const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+
+    // --- THEME ---
+    function loadTheme() {
+        const theme = localStorage.getItem('pomodoroTheme') || 'light';
+        document.body.classList.toggle('dark-mode', theme === 'dark');
+        updateThemeIcons(theme);
+    }
+
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        const theme = isDark ? 'dark' : 'light';
+        localStorage.setItem('pomodoroTheme', theme);
+        updateThemeIcons(theme);
+    }
+
+    function updateThemeIcons(theme) {
+        const sunIcon = document.getElementById('theme-sun-icon');
+        const moonIcon = document.getElementById('theme-moon-icon');
+        sunIcon.classList.toggle('hidden', theme === 'dark');
+        moonIcon.classList.toggle('hidden', theme === 'light');
+    }
 
     // --- SETTINGS ---
     function loadSettings() {
@@ -127,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
-        if (mode === 'pomodoro') {
+        if (mode === 'pomodoro' && !isPaused) {
             document.body.classList.add('focus-mode');
             updateCurrentTaskDisplay();
         }
@@ -355,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         musicToggleBtn.addEventListener('click', toggleMusic);
         volumeSlider.addEventListener('input', setVolume);
+        themeToggleBtn.addEventListener('click', toggleTheme);
 
         tabs.forEach(tab => tab.addEventListener('click', () => showTab(tab.dataset.tab)));
         document.addEventListener('keydown', handleKeyboard);

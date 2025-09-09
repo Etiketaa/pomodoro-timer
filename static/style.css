@@ -11,6 +11,16 @@
     --font-primary: 'Inter', sans-serif;
 }
 
+body.dark-mode {
+    --primary-color: #3b82f6;
+    --background-color: #111827; /* Gris oscuro azulado */
+    --surface-color: #1f2937; /* Gris azulado más claro */
+    --text-color: #f9fafb; /* Blanco grisáceo */
+    --text-secondary-color: #9ca3af; /* Gris medio */
+    --border-color: #374151; /* Gris para bordes */
+    --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
 *,
 *::before,
 *::after {
@@ -28,6 +38,7 @@ body {
     align-items: flex-start;
     min-height: 100vh;
     padding: 2rem 1rem;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #youtube-player {
@@ -456,8 +467,7 @@ button {
 /* Focus Mode */
 body.focus-mode header,
 body.focus-mode .tabs,
-body.focus-mode .timer-controls,
-body.focus-mode .task-container {
+body.focus-mode .timer-controls {
     display: none !important;
 }
 
