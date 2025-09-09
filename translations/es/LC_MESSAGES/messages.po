@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-08 15:07-0300\n"
+"POT-Creation-Date: 2025-09-08 18:01-0300\n"
 "PO-Revision-Date: 2025-09-08 15:07-0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -55,134 +55,145 @@ msgid "Pomodoro Timer"
 msgstr "Temporizador Pomodoro"
 
 #: templates/index.html:7 templates/index.html:14 templates/index.html:21
-msgid "Boost your productivity with this simple Pomodoro Timer. Stay focused with customizable work and break intervals, ambient music, and task management."
-msgstr "Mejora tu productividad con este sencillo Temporizador Pomodoro. Mantente concentrado con intervalos de trabajo y descanso personalizables, música ambiental y gestión de tareas."
+msgid ""
+"Boost your productivity with this simple Pomodoro Timer. Stay focused "
+"with customizable work and break intervals, ambient music, and task "
+"management."
+msgstr ""
+"Mejora tu productividad con este sencillo Temporizador Pomodoro. Mantente"
+" concentrado con intervalos de trabajo y descanso personalizables, música"
+" ambiental y gestión de tareas."
 
 #: templates/index.html:8
-msgid "Pomodoro, Timer, Productivity, Focus, Task Management, Study, Work, Break, Flask, Python"
-msgstr "Pomodoro, Temporizador, Productividad, Enfoque, Gestión de Tareas, Estudio, Trabajo, Descanso, Flask, Python"
+msgid ""
+"Pomodoro, Timer, Productivity, Focus, Task Management, Study, Work, "
+"Break, Flask, Python"
+msgstr ""
+"Pomodoro, Temporizador, Productividad, Enfoque, Gestión de Tareas, "
+"Estudio, Trabajo, Descanso, Flask, Python"
 
 #: templates/index.html:13 templates/index.html:20
 msgid "Pomodoro Timer - Boost Your Productivity"
 msgstr "Temporizador Pomodoro - Mejora tu Productividad"
 
-#: templates/index.html:36
+#: templates/index.html:35
 msgid "Pomodoro"
 msgstr "Pomodoro"
 
-#: templates/index.html:37
+#: templates/index.html:36
 msgid "Short Break"
 msgstr "Descanso corto"
 
-#: templates/index.html:38
+#: templates/index.html:37
 msgid "Long Break"
 msgstr "Descanso largo"
 
-#: templates/index.html:48
+#: templates/index.html:47
 msgid "What are you working on?"
 msgstr "¿En qué estás trabajando?"
 
-#: templates/index.html:52
+#: templates/index.html:51
 msgid "Start"
 msgstr "Iniciar"
 
-#: templates/index.html:53
+#: templates/index.html:52
 msgid "Pause"
 msgstr "Pausar"
 
-#: templates/index.html:54
+#: templates/index.html:53
 msgid "Reset"
 msgstr "Reiniciar"
 
-#: templates/index.html:69
+#: templates/index.html:68
 msgid "Timer Settings (minutes)"
 msgstr "Configuración del temporizador (minutos)"
 
-#: templates/index.html:71
+#: templates/index.html:70
 msgid "Pomodoro:"
 msgstr "Pomodoro:"
 
-#: templates/index.html:75
+#: templates/index.html:74
 msgid "Short Break:"
 msgstr "Descanso corto:"
 
-#: templates/index.html:79
+#: templates/index.html:78
 msgid "Long Break:"
 msgstr "Descanso largo:"
 
-#: templates/index.html:85
+#: templates/index.html:84
 msgid "Give Us Feedback!"
 msgstr "¡Danos tu opinión!"
 
-#: templates/index.html:88
+#: templates/index.html:87
 msgid "Your Feedback:"
 msgstr "Tu opinión:"
 
-#: templates/index.html:89
+#: templates/index.html:88
 msgid "Tell us what you think..."
 msgstr "Cuéntanos qué piensas..."
 
-#: templates/index.html:92
+#: templates/index.html:91
 msgid "Rating:"
 msgstr "Calificación:"
 
-#: templates/index.html:94
+#: templates/index.html:93
 msgid "5 stars"
 msgstr "5 estrellas"
 
-#: templates/index.html:95
+#: templates/index.html:94
 msgid "4 stars"
 msgstr "4 estrellas"
 
-#: templates/index.html:96
+#: templates/index.html:95
 msgid "3 stars"
 msgstr "3 estrellas"
 
-#: templates/index.html:97
+#: templates/index.html:96
 msgid "2 stars"
 msgstr "2 estrellas"
 
-#: templates/index.html:98
+#: templates/index.html:97
 msgid "1 star"
 msgstr "1 estrella"
 
-#: templates/index.html:101
+#: templates/index.html:100
 msgid "Submit Feedback"
 msgstr "Enviar opinión"
 
-#: templates/index.html:107
+#: templates/index.html:106
 msgid "Task Manager"
 msgstr "Gestor de Tareas"
 
-#: templates/index.html:109
+#: templates/index.html:108
 msgid "New task title"
 msgstr "Nuevo título de tarea"
 
-#: templates/index.html:110
+#: templates/index.html:109
 msgid "Description (optional)"
 msgstr "Descripción (opcional)"
 
-#: templates/index.html:112
+#: templates/index.html:111
 msgid "Add Task"
 msgstr "Añadir Tarea"
 
-#: templates/index.html:120
+#: templates/index.html:119
 msgid ""
 "This is a simple Pomodoro Timer application built with Flask. The "
 "Pomodoro Technique is a time management method that uses a timer to break"
 " down work into intervals, traditionally 25 minutes in length, separated "
 "by short breaks."
-msgstr "Esta es una aplicación simple de Temporizador Pomodoro creada con Flask. La Técnica Pomodoro es un método de gestión del tiempo que utiliza un temporizador para dividir el trabajo en intervalos, tradicionalmente de 25 minutos de duración, separados por descansos cortos."
+msgstr ""
+"Esta es una aplicación simple de Temporizador Pomodoro creada con Flask. "
+"La Técnica Pomodoro es un método de gestión del tiempo que utiliza un "
+"temporizador para dividir el trabajo en intervalos, tradicionalmente de "
+"25 minutos de duración, separados por descansos cortos."
 
+#~ msgid "Please provide both feedback and a rating."
+#~ msgstr "Por favor, proporciona tanto tu opinión como una calificación."
 
-#: templates/index.html:678
-msgid "Please provide both feedback and a rating."
-msgstr "Por favor, proporciona tanto tu opinión como una calificación."
+#~ msgid "Failed to submit feedback."
+#~ msgstr "No se pudo enviar la opinión."
 
-#: templates/index.html:705
-msgid "Failed to submit feedback."
-msgstr "No se pudo enviar la opinión."
+#~ msgid "An error occurred. Please try again later."
+#~ msgstr "Ocurrió un error. Inténtalo de nuevo más tarde."
 
-#: templates/index.html:710
-msgid "An error occurred. Please try again later."
-msgstr "Ocurrió un error. Inténtalo de nuevo más tarde."

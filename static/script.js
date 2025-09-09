@@ -1,267 +1,365 @@
-    // Initial values, will be updated from inputs
-    let WORK_TIME_MINUTES = 25;
-    let SHORT_BREAK_TIME_MINUTES = 5;
-    let LONG_BREAK_TIME_MINUTES = 15;
+let ytPlayer;
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('youtube-player', {
+        height: '0',
+        width: '0',
+        videoId: 'jfKfPfyJRdk', // Lofi Girl Video ID
+        playerVars: {
+            'autoplay': 0,
+            'controls': 0,
+            'loop': 1,
+            'playlist': 'jfKfPfyJRdk' // Required for loop to work
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
 
-    const lofiTracks = [
-        '/static/lo-fi-loop.mp3',
-        '/static/fiesta-de-la-cumbia-306743.mp3',
-        '/static/carnaval-des-trompettes-276501.mp3',
-        '/static/cumbia-de-celebracion-289760.mp3',
-        '/static/lofi-background-music-314199.mp3',
-        '/static/lofi-295209.mp3',
-        '/static/lofi-lofi-chill-398290.mp3',
-        '/static/lofi-study-calm-peaceful-chill-hop-112191.mp3',
-        '/static/good-night-lofi-cozy-chill-music-160166.mp3'
-    ];
-    let currentTrackIndex = 0;
+function onPlayerReady(event) {
+    const volumeSlider = document.getElementById('volume-slider');
+    const initialVolume = getFromLS('pomodoroMusicVolume', 50);
+    volumeSlider.value = initialVolume;
+    event.target.setVolume(initialVolume);
+}
 
-    let timer = null;
-    let timeLeft = WORK_TIME_MINUTES * 60;
-    let isPaused = true;
-    let mode = 'work'; // work, short, long
-    let pomodoroCount = 0;
-    let totalTimeForCurrentMode = WORK_TIME_MINUTES * 60; // To calculate scale
-    let isAlertSoundEnabled = true; // New state for alert sound
+function onPlayerStateChange(event) {
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    if (event.data === YT.PlayerState.PLAYING) {
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+    } else {
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+    }
+}
 
-    const timeDisplay = document.getElementById('time');
-    const pomodoroButton = document.getElementById('pomodoro');
-    const shortBreakButton = document.getElementById('short-break');
-    const longBreakButton = document.getElementById('long-break');
-    const startButton = document.getElementById('start');
-    const pauseButton = document.getElementById('pause');
-    const resetButton = document.getElementById('reset');
-    const tomatoSvg = document.getElementById('tomato-svg');
-    const lofiAudio = document.getElementById('lofi-audio');
-    const alertAudio = document.getElementById('alert-audio');
-    const toggleLofiButton = document.getElementById('toggle-lofi');
-    const prevLofiButton = document.getElementById('prev-lofi');
-    const nextLofiButton = document.getElementById('next-lofi');
-    const toggleAlertButton = document.getElementById('toggle-alert');
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM ELEMENTS ---
+    const timerDisplay = document.getElementById('timer-display');
+    const modeDisplay = document.getElementById('mode-display');
+    const startPauseBtn = document.getElementById('start-pause-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const skipBtn = document.getElementById('skip-btn');
+
+    const taskForm = document.getElementById('task-form');
+    const taskInput = document.getElementById('task-input');
+    const taskList = document.getElementById('task-list');
+
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const settingsForm = document.getElementById('settings-form');
+
+    const musicToggleBtn = document.getElementById('music-toggle-btn');
     const volumeSlider = document.getElementById('volume-slider');
 
-    // Settings inputs
-    const workTimeInput = document.getElementById('work-time-input');
-    const shortBreakInput = document.getElementById('short-break-input');
-    const longBreakInput = document.getElementById('long-break-input');
+    const tabs = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    // Initialize audio source and volume
-    lofiAudio.src = lofiTracks[currentTrackIndex];
-    lofiAudio.volume = volumeSlider.value;
+    const pomodorosTodaySpan = document.getElementById('pomodoros-today');
+    const pomodorosWeekSpan = document.getElementById('pomodoros-week');
+    const chartCanvas = document.getElementById('pomodoro-chart');
 
-    function updateDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    const currentTaskDisplay = document.getElementById('current-task-display');
+    const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
 
-        // Update tomato scale
-        const initialScale = 0.1;
-        const maxScale = 1.0;
-        const progress = (totalTimeForCurrentMode - timeLeft) / totalTimeForCurrentMode;
-        const currentScale = initialScale + (maxScale - initialScale) * progress;
-        tomatoSvg.style.transform = `scale(${currentScale})`;
+    const alarmSound = new Audio('static/alarm.mp3');
+
+    // --- STATE ---
+    let settings = {};
+    let tasks = [];
+    let stats = {};
+
+    let timerId = null;
+    let mode = 'pomodoro'; // pomodoro, shortBreak, longBreak
+    let remainingTime = 0;
+    let pomodorosInCycle = 0;
+    let isPaused = true;
+
+    // --- INITIALIZATION ---
+    function init() {
+        loadSettings();
+        loadTasks();
+        loadStats();
+        resetTimer();
+        renderTasks();
+        renderStats();
+        setupEventListeners();
     }
 
-    function applySettings() {
-        WORK_TIME_MINUTES = parseInt(workTimeInput.value) || 25;
-        SHORT_BREAK_TIME_MINUTES = parseInt(shortBreakInput.value) || 5;
-        LONG_BREAK_TIME_MINUTES = parseInt(longBreakInput.value) || 15;
+    // --- LOCALSTORAGE HELPERS ---
+    const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
+    const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
-        if (mode === 'work') {
-            timeLeft = WORK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = WORK_TIME_MINUTES * 60;
-        } else if (mode === 'short') {
-            timeLeft = SHORT_BREAK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = SHORT_BREAK_TIME_MINUTES * 60;
-        } else if (mode === 'long') {
-            timeLeft = LONG_BREAK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = LONG_BREAK_TIME_MINUTES * 60;
-        }
-        updateDisplay();
+    // --- SETTINGS ---
+    function loadSettings() {
+        settings = getFromLS('pomodoroSettings', {
+            pomodoro: 25,
+            shortBreak: 5,
+            longBreak: 15,
+        });
+        document.getElementById('pomodoro-duration').value = settings.pomodoro;
+        document.getElementById('short-break-duration').value = settings.shortBreak;
+        document.getElementById('long-break-duration').value = settings.longBreak;
     }
 
-    function setMode(newMode) {
-        clearInterval(timer);
-        timer = null;
-        isPaused = true;
-        mode = newMode;
-
-        // Remove active class from all buttons
-        pomodoroButton.classList.remove('active');
-        shortBreakButton.classList.remove('active');
-        longBreakButton.classList.remove('active');
-
-        // Set time and active class based on new mode
-        if (mode === 'work') {
-            pomodoroButton.classList.add('active');
-        } else if (mode === 'short') {
-            shortBreakButton.classList.add('active');
-        } else if (mode === 'long') {
-            longBreakButton.classList.add('active');
-        }
-        applySettings();
+    function saveSettings(e) {
+        e.preventDefault();
+        settings.pomodoro = parseInt(document.getElementById('pomodoro-duration').value, 10);
+        settings.shortBreak = parseInt(document.getElementById('short-break-duration').value, 10);
+        settings.longBreak = parseInt(document.getElementById('long-break-duration').value, 10);
+        saveToLS('pomodoroSettings', settings);
+        closeSettingsModal();
+        resetTimer();
     }
 
-    function switchMode() {
-        clearInterval(timer);
-        isPaused = true;
-
-        if (isAlertSoundEnabled) {
-            alertAudio.play(); // Play alert sound when timer ends
-        }
-
-        if (mode === 'work') {
-            pomodoroCount++;
-            if (pomodoroCount % 4 === 0) {
-                setMode('long');
-            } else {
-                setMode('short');
-            }
-        } else {
-            setMode('work');
-        }
+    // --- TIMER LOGIC ---
+    function updateTimerDisplay() {
+        const minutes = Math.floor(remainingTime / 60).toString().padStart(2, '0');
+        const seconds = (remainingTime % 60).toString().padStart(2, '0');
+        timerDisplay.textContent = `${minutes}:${seconds}`;
+        document.title = `${minutes}:${seconds} - Pomodoro`;
     }
 
     function startTimer() {
-        if (isPaused) {
-            isPaused = false;
-            timer = setInterval(() => {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    updateDisplay();
-                } else {
-                    switchMode();
-                }
-            }, 1000);
-            if (lofiAudio.paused) {
-                lofiAudio.play();
-            }
+        isPaused = false;
+        startPauseBtn.textContent = 'PAUSAR';
+        if (mode === 'pomodoro') {
+            document.body.classList.add('focus-mode');
+            updateCurrentTaskDisplay();
         }
+        timerId = setInterval(() => {
+            remainingTime--;
+            updateTimerDisplay();
+            if (remainingTime <= 0) {
+                clearInterval(timerId);
+                alarmSound.play();
+                if (mode === 'pomodoro') {
+                    recordPomodoro();
+                    pomodorosInCycle++;
+                }
+                switchMode();
+            }
+        }, 1000);
     }
 
     function pauseTimer() {
         isPaused = true;
-        clearInterval(timer);
-        if (!lofiAudio.paused) {
-            lofiAudio.pause();
-        }
+        startPauseBtn.textContent = 'INICIAR';
+        document.body.classList.remove('focus-mode');
+        clearInterval(timerId);
     }
 
     function resetTimer() {
         pauseTimer();
-        // Reset to the current mode's initial time based on settings
-        if (mode === 'work') {
-            timeLeft = WORK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = WORK_TIME_MINUTES * 60;
-        } else if (mode === 'short') {
-            timeLeft = SHORT_BREAK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = SHORT_BREAK_TIME_MINUTES * 60;
+        remainingTime = settings[mode] * 60;
+        updateTimerDisplay();
+    }
+
+    function switchMode(nextMode) {
+        pauseTimer();
+        mode = nextMode || getNextMode();
+        modeDisplay.textContent = {
+            pomodoro: 'Pomodoro',
+            shortBreak: 'Descanso Corto',
+            longBreak: 'Descanso Largo'
+        }[mode];
+        resetTimer();
+    }
+
+    function getNextMode() {
+        if (mode === 'pomodoro') {
+            return pomodorosInCycle % 4 === 0 ? 'longBreak' : 'shortBreak';
         } else {
-            timeLeft = LONG_BREAK_TIME_MINUTES * 60;
-            totalTimeForCurrentMode = LONG_BREAK_TIME_MINUTES * 60;
+            return 'pomodoro';
         }
-        updateDisplay();
     }
 
-    function playNextTrack() {
-        currentTrackIndex = (currentTrackIndex + 1) % lofiTracks.length;
-        lofiAudio.src = lofiTracks[currentTrackIndex];
-        lofiAudio.play();
+    // --- TASKS ---
+    function loadTasks() {
+        tasks = getFromLS('pomodoroTasks', []);
     }
 
-    function playPreviousTrack() {
-        currentTrackIndex = (currentTrackIndex - 1 + lofiTracks.length) % lofiTracks.length;
-        lofiAudio.src = lofiTracks[currentTrackIndex];
-        lofiAudio.play();
+    function saveTasks() {
+        saveToLS('pomodoroTasks', tasks);
     }
 
-    toggleLofiButton.addEventListener('click', () => {
-        if (lofiAudio.paused) {
-            lofiAudio.play();
-            toggleLofiButton.innerHTML = '&#10074;&#10074;'; // Pause icon
-        } else {
-            lofiAudio.pause();
-            toggleLofiButton.innerHTML = '&#9654;'; // Play icon
+    function renderTasks() {
+        taskList.innerHTML = '';
+        tasks.forEach(task => {
+            const li = document.createElement('li');
+            li.setAttribute('data-id', task.id);
+            li.innerHTML = `
+                <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                <span class="task-text ${task.completed ? 'completed' : ''}" contenteditable="false">${task.text}</span>
+                <div class="task-actions">
+                    <button class="edit-btn">Editar</button>
+                    <button class="delete-btn">Borrar</button>
+                </div>
+            `;
+            taskList.appendChild(li);
+        });
+        updateCurrentTaskDisplay();
+    }
+
+    function addTask(e) {
+        e.preventDefault();
+        const text = taskInput.value.trim();
+        if (text) {
+            tasks.push({ id: Date.now(), text, completed: false });
+            taskInput.value = '';
+            saveTasks();
+            renderTasks();
         }
-    });
-    prevLofiButton.addEventListener('click', playPreviousTrack);
-    nextLofiButton.addEventListener('click', playNextTrack);
+    }
 
-    toggleAlertButton.addEventListener('click', () => {
-        isAlertSoundEnabled = !isAlertSoundEnabled;
-        toggleAlertButton.innerHTML = isAlertSoundEnabled ? '&#128266;' : '&#128265;'; // Bell or muted bell
-    });
+    function handleTaskAction(e) {
+        const li = e.target.closest('li');
+        if (!li) return;
+        const id = Number(li.dataset.id);
 
-    volumeSlider.addEventListener('input', () => {
-        lofiAudio.volume = volumeSlider.value;
-    });
-
-    // Event listeners for settings inputs
-    workTimeInput.addEventListener('change', applySettings);
-    shortBreakInput.addEventListener('change', applySettings);
-    longBreakInput.addEventListener('change', applySettings);
-
-    pomodoroButton.addEventListener('click', () => setMode('work'));
-    shortBreakButton.addEventListener('click', () => setMode('short'));
-    longBreakButton.addEventListener('click', () => setMode('long'));
-    startButton.addEventListener('click', startTimer);
-    pauseButton.addEventListener('click', pauseTimer);
-    resetButton.addEventListener('click', resetTimer);
-
-    // Initial setup
-    applySettings(); // Apply initial settings from input values
-    updateDisplay(); // Initial display
-    toggleLofiButton.innerHTML = lofiAudio.paused ? '&#9654;' : '&#10074;&#10074;'; // Set initial play/pause icon
-    toggleAlertButton.innerHTML = isAlertSoundEnabled ? '&#128266;' : '&#128265;'; // Set initial alert icon
-
-    // Feedback Form Logic
-    const feedbackForm = document.getElementById('feedback-form');
-    const feedbackTextarea = document.getElementById('feedback-text');
-    const feedbackMessageDiv = document.getElementById('feedback-message');
-
-    feedbackForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission
-
-        const feedbackText = feedbackTextarea.value;
-        const selectedRating = document.querySelector('input[name="rating"]:checked');
-        const rating = selectedRating ? parseInt(selectedRating.value) : null;
-
-        if (!feedbackText || !rating) {
-            // NOTE: We are using hardcoded strings here because this is a JavaScript file
-            // and we cannot use the Jinja2 `_()` function for translation.
-            feedbackMessageDiv.textContent = 'Please provide both feedback and a rating.';
-            feedbackMessageDiv.className = 'message error';
-            return;
-        }
-
-        try {
-            const response = await fetch('/submit_feedback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    feedback_text: feedbackText,
-                    rating: rating
-                }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                feedbackMessageDiv.textContent = result.message;
-                feedbackMessageDiv.className = 'message success';
-                feedbackTextarea.value = ''; // Clear textarea
-                if (selectedRating) {
-                    selectedRating.checked = false; // Uncheck rating
-                }
-            } else {
-                feedbackMessageDiv.textContent = result.message || 'Failed to submit feedback.';
-                feedbackMessageDiv.className = 'message error';
+        if (e.target.type === 'checkbox') {
+            const task = tasks.find(t => t.id === id);
+            task.completed = e.target.checked;
+        } else if (e.target.classList.contains('delete-btn')) {
+            tasks = tasks.filter(t => t.id !== id);
+        } else if (e.target.classList.contains('edit-btn')) {
+            const span = li.querySelector('.task-text');
+            const isEditing = span.isContentEditable;
+            span.contentEditable = !isEditing;
+            span.focus();
+            e.target.textContent = isEditing ? 'Editar' : 'Guardar';
+            if (isEditing) {
+                const task = tasks.find(t => t.id === id);
+                task.text = span.textContent.trim();
             }
-        } catch (error) {
-            console.error('Error submitting feedback:', error);
-            feedbackMessageDiv.textContent = 'An error occurred. Please try again later.';
-            feedbackMessageDiv.className = 'message error';
         }
-    });
+        saveTasks();
+        renderTasks();
+    }
+
+    function updateCurrentTaskDisplay() {
+        const firstUncompleted = tasks.find(t => !t.completed);
+        if (firstUncompleted) {
+            currentTaskTextSpan.textContent = firstUncompleted.text;
+            currentTaskDisplay.classList.remove('hidden');
+        } else {
+            currentTaskDisplay.classList.add('hidden');
+        }
+    }
+
+    // --- STATS ---
+    function loadStats() {
+        stats = getFromLS('pomodoroStats', {});
+    }
+
+    function saveStats() {
+        saveToLS('pomodoroStats', stats);
+    }
+
+    function recordPomodoro() {
+        const today = new Date().toISOString().slice(0, 10);
+        stats[today] = (stats[today] || 0) + 1;
+        saveStats();
+        renderStats();
+    }
+
+    let pomodoroChart = null;
+    function renderStats() {
+        const today = new Date();
+        const todayStr = today.toISOString().slice(0, 10);
+        pomodorosTodaySpan.textContent = stats[todayStr] || 0;
+
+        let weekCount = 0;
+        const labels = [];
+        const data = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(today.getDate() - i);
+            const dateStr = date.toISOString().slice(0, 10);
+            const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' });
+            labels.push(dayName);
+            const count = stats[dateStr] || 0;
+            data.push(count);
+            const dayOfWeek = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            if (i <= dayOfWeek) {
+                weekCount += count;
+            }
+        }
+        pomodorosWeekSpan.textContent = weekCount;
+
+        if (pomodoroChart) pomodoroChart.destroy();
+        pomodoroChart = new Chart(chartCanvas, {
+            type: 'bar',
+            data: { labels, datasets: [{ data, backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1, borderRadius: 4 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // --- UI & EVENT LISTENERS ---
+    function toggleMusic() {
+        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+        const playerState = ytPlayer.getPlayerState();
+        if (playerState === YT.PlayerState.PLAYING) {
+            ytPlayer.pauseVideo();
+        } else {
+            ytPlayer.playVideo();
+        }
+    }
+
+    function setVolume(e) {
+        const volume = e.target.value;
+        if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+            ytPlayer.setVolume(volume);
+            saveToLS('pomodoroMusicVolume', volume);
+        }
+    }
+
+    function openSettingsModal() { settingsModal.classList.remove('hidden'); }
+    function closeSettingsModal() { settingsModal.classList.add('hidden'); }
+
+    function showTab(tabId) {
+        tabContents.forEach(content => content.classList.remove('active'));
+        tabs.forEach(tab => tab.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        if (tabId === 'stats-section') renderStats();
+    }
+
+    function handleKeyboard(e) {
+        if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
+        if (e.code === 'Space') { e.preventDefault(); isPaused ? startTimer() : pauseTimer(); }
+        if (e.code === 'KeyR') resetTimer();
+        if (e.code === 'KeyN') switchMode();
+    }
+
+    function setupEventListeners() {
+        startPauseBtn.addEventListener('click', () => isPaused ? startTimer() : pauseTimer());
+        resetBtn.addEventListener('click', resetTimer);
+        skipBtn.addEventListener('click', () => switchMode());
+
+        taskForm.addEventListener('submit', addTask);
+        taskList.addEventListener('click', handleTaskAction);
+
+        settingsBtn.addEventListener('click', openSettingsModal);
+        closeModalBtn.addEventListener('click', closeSettingsModal);
+        settingsModal.addEventListener('click', (e) => e.target === settingsModal && closeSettingsModal());
+        settingsForm.addEventListener('submit', saveSettings);
+
+        musicToggleBtn.addEventListener('click', toggleMusic);
+        volumeSlider.addEventListener('input', setVolume);
+
+        tabs.forEach(tab => tab.addEventListener('click', () => showTab(tab.dataset.tab)));
+        document.addEventListener('keydown', handleKeyboard);
+    }
+
+    // --- START THE APP ---
+    init();
+});

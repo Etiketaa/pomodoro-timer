@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-09-08 15:07-0300\n"
+"POT-Creation-Date: 2025-09-08 18:01-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,107 +70,107 @@ msgstr ""
 msgid "Pomodoro Timer - Boost Your Productivity"
 msgstr ""
 
-#: templates/index.html:36
+#: templates/index.html:35
 msgid "Pomodoro"
 msgstr ""
 
-#: templates/index.html:37
+#: templates/index.html:36
 msgid "Short Break"
 msgstr ""
 
-#: templates/index.html:38
+#: templates/index.html:37
 msgid "Long Break"
 msgstr ""
 
-#: templates/index.html:48
+#: templates/index.html:47
 msgid "What are you working on?"
 msgstr ""
 
-#: templates/index.html:52
+#: templates/index.html:51
 msgid "Start"
 msgstr ""
 
-#: templates/index.html:53
+#: templates/index.html:52
 msgid "Pause"
 msgstr ""
 
-#: templates/index.html:54
+#: templates/index.html:53
 msgid "Reset"
 msgstr ""
 
-#: templates/index.html:69
+#: templates/index.html:68
 msgid "Timer Settings (minutes)"
 msgstr ""
 
-#: templates/index.html:71
+#: templates/index.html:70
 msgid "Pomodoro:"
 msgstr ""
 
-#: templates/index.html:75
+#: templates/index.html:74
 msgid "Short Break:"
 msgstr ""
 
-#: templates/index.html:79
+#: templates/index.html:78
 msgid "Long Break:"
 msgstr ""
 
-#: templates/index.html:85
+#: templates/index.html:84
 msgid "Give Us Feedback!"
 msgstr ""
 
-#: templates/index.html:88
+#: templates/index.html:87
 msgid "Your Feedback:"
 msgstr ""
 
-#: templates/index.html:89
+#: templates/index.html:88
 msgid "Tell us what you think..."
 msgstr ""
 
-#: templates/index.html:92
+#: templates/index.html:91
 msgid "Rating:"
 msgstr ""
 
-#: templates/index.html:94
+#: templates/index.html:93
 msgid "5 stars"
 msgstr ""
 
-#: templates/index.html:95
+#: templates/index.html:94
 msgid "4 stars"
 msgstr ""
 
-#: templates/index.html:96
+#: templates/index.html:95
 msgid "3 stars"
 msgstr ""
 
-#: templates/index.html:97
+#: templates/index.html:96
 msgid "2 stars"
 msgstr ""
 
-#: templates/index.html:98
+#: templates/index.html:97
 msgid "1 star"
 msgstr ""
 
-#: templates/index.html:101
+#: templates/index.html:100
 msgid "Submit Feedback"
 msgstr ""
 
-#: templates/index.html:107
+#: templates/index.html:106
 msgid "Task Manager"
 msgstr ""
 
-#: templates/index.html:109
+#: templates/index.html:108
 msgid "New task title"
 msgstr ""
 
-#: templates/index.html:110
+#: templates/index.html:109
 msgid "Description (optional)"
 msgstr ""
 
-#: templates/index.html:112
+#: templates/index.html:111
 msgid "Add Task"
 msgstr ""
 
-#: templates/index.html:120
+#: templates/index.html:119
 msgid ""
 "This is a simple Pomodoro Timer application built with Flask. The "
 "Pomodoro Technique is a time management method that uses a timer to break"
