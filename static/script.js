@@ -64,6 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
     const chartCanvas = document.getElementById('pomodoro-chart');
 
+    const feedbackForm = document.getElementById('feedback-form');
+    const reviewsList = document.getElementById('reviews-list');
+
     const currentTaskDisplay = document.getElementById('current-task-display');
     const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
 
@@ -276,6 +279,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    }
+    }
+
+    // --- FEEDBACK ---
+    const FIREBASE_URL = ''; // <-- AQUÍ VA TU URL DE FIREBASE
+
+    async function submitFeedback(e) {
+        e.preventDefault();
+        if (!FIREBASE_URL) {
+            alert('La funcionalidad de Feedback no está configurada. El desarrollador debe añadir la URL de Firebase.');
+            return;
+        }
+
+        const name = document.getElementById('feedback-name').value || 'Anónimo';
+        const rating = feedbackForm.querySelector('input[name="rating"]:checked')?.value;
+        const message = document.getElementById('feedback-message').value;
+
+        if (!rating || !message) {
+            alert('Por favor, deja una calificación y un mensaje.');
+            return;
+        }
+
+        const feedbackData = { name, rating, message, createdAt: new Date().toISOString() };
+
+        try {
+            const response = await fetch(`${FIREBASE_URL}/feedback.json`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(feedbackData)
+            });
+            if (!response.ok) throw new Error('No se pudo enviar el feedback.');
+            
+            feedbackForm.reset();
+            fetchReviews(); // Refresh reviews list
+            alert('¡Gracias por tu feedback!');
+        } catch (error) {
+            console.error("Error enviando feedback:", error);
+            alert('Hubo un error al enviar tu feedback. Inténtalo de nuevo.');
+        }
+    }
+
+    async function fetchReviews() {
+        if (!FIREBASE_URL) return; // No hacer nada si la URL no está configurada
+
+        reviewsList.innerHTML = '<p>Cargando reseñas...</p>';
+        try {
+            const response = await fetch(`${FIREBASE_URL}/feedback.json`);
+            if (!response.ok) throw new Error('No se pudieron cargar las reseñas.');
+            
+            const data = await response.json();
+            renderReviews(data);
+        } catch (error) {
+            console.error("Error cargando reseñas:", error);
+            reviewsList.innerHTML = '<p>No se pudieron cargar las reseñas.</p>';
+        }
+    }
+
+    function renderReviews(reviews) {
+        reviewsList.innerHTML = '';
+        if (!reviews) {
+            reviewsList.innerHTML = '<p>Aún no hay reseñas. ¡Sé el primero!</p>'
+            return;
+        }
+
+        Object.values(reviews).reverse().forEach(review => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            card.innerHTML = `
+                <div class="review-header">
+                    <span class="review-name">${review.name}</span>
+                    <span class="review-rating">${stars}</span>
+                </div>
+                <p class="review-message">${review.message}</p>
+            `;
+            reviewsList.appendChild(card);
+        });
+    }
+
     // --- STATS ---
     function loadStats() {
         stats = getFromLS('pomodoroStats', {});
@@ -356,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(tabId).classList.add('active');
         document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
         if (tabId === 'stats-section') renderStats();
+        if (tabId === 'feedback-section') fetchReviews();
     }
 
     function handleKeyboard(e) {
@@ -383,6 +466,8 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModalBtn.addEventListener('click', closeSettingsModal);
         settingsModal.addEventListener('click', (e) => e.target === settingsModal && closeSettingsModal());
         settingsForm.addEventListener('submit', saveSettings);
+
+        feedbackForm.addEventListener('submit', submitFeedback);
 
         musicToggleBtn.addEventListener('click', toggleMusic);
         volumeSlider.addEventListener('input', setVolume);

@@ -252,6 +252,99 @@ button {
     border-color: var(--text-color);
 }
 
+/* Feedback Section */
+#feedback-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+#feedback-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary-color);
+    font-weight: 500;
+}
+
+#feedback-form input[type="text"],
+#feedback-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-primary);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#feedback-form input[type="text"]:focus,
+#feedback-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2rem;
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffc107;
+}
+
+.reviews-container {
+    margin-top: 3rem;
+}
+
+.reviews-container h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.review-card {
+    background-color: var(--background-color);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.review-card .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.review-card .review-name {
+    font-weight: 700;
+}
+
+.review-card .review-rating {
+    color: #ffc107;
+}
+
+.review-card .review-message {
+    color: var(--text-secondary-color);
+}
+
 #current-task-display {
     text-align: center;
     padding: 1rem;
