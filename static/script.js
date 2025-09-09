@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
-    const taskList = document.getElementById('task-list');
+    const taskColumns = document.querySelectorAll('.task-list-column');
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -67,15 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTaskDisplay = document.getElementById('current-task-display');
     const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
 
-    const alarmSound = new Audio('static/alarm.mp3');
+    const alarmSound = new Audio("{{ url_for('static', filename='alarm.mp3') }}");
 
     // --- STATE ---
     let settings = {};
-    let tasks = [];
+    let tasks = []; // Single array for all tasks
     let stats = {};
 
     let timerId = null;
-    let mode = 'pomodoro'; // pomodoro, shortBreak, longBreak
+    let mode = 'pomodoro';
     let remainingTime = 0;
     let pomodorosInCycle = 0;
     let isPaused = true;
@@ -90,9 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTasks();
         renderStats();
         setupEventListeners();
+        initSortable();
     }
 
-    // --- LOCALSTORAGE HELPERS ---
+    // --- LOCALSTORAGE & HELPERS ---
     const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
     const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
@@ -119,11 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- SETTINGS ---
     function loadSettings() {
-        settings = getFromLS('pomodoroSettings', {
-            pomodoro: 25,
-            shortBreak: 5,
-            longBreak: 15,
-        });
+        settings = getFromLS('pomodoroSettings', { pomodoro: 25, shortBreak: 5, longBreak: 15 });
         document.getElementById('pomodoro-duration').value = settings.pomodoro;
         document.getElementById('short-break-duration').value = settings.shortBreak;
         document.getElementById('long-break-duration').value = settings.longBreak;
@@ -150,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
-        if (mode === 'pomodoro' && !isPaused) {
+        if (mode === 'pomodoro') {
             document.body.classList.add('focus-mode');
             updateCurrentTaskDisplay();
         }
@@ -185,23 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchMode(nextMode) {
         pauseTimer();
         mode = nextMode || getNextMode();
-        modeDisplay.textContent = {
-            pomodoro: 'Pomodoro',
-            shortBreak: 'Descanso Corto',
-            longBreak: 'Descanso Largo'
-        }[mode];
+        modeDisplay.textContent = { pomodoro: 'Pomodoro', shortBreak: 'Descanso Corto', longBreak: 'Descanso Largo' }[mode];
         resetTimer();
     }
 
     function getNextMode() {
-        if (mode === 'pomodoro') {
-            return pomodorosInCycle % 4 === 0 ? 'longBreak' : 'shortBreak';
-        } else {
-            return 'pomodoro';
-        }
+        return mode === 'pomodoro' ? (pomodorosInCycle % 4 === 0 ? 'longBreak' : 'shortBreak') : 'pomodoro';
     }
 
-    // --- TASKS ---
+    // --- TASKS (KANBAN BOARD) ---
     function loadTasks() {
         tasks = getFromLS('pomodoroTasks', []);
     }
@@ -211,19 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTasks() {
-        taskList.innerHTML = '';
+        taskColumns.forEach(col => col.innerHTML = '');
         tasks.forEach(task => {
-            const li = document.createElement('li');
-            li.setAttribute('data-id', task.id);
-            li.innerHTML = `
-                <input type="checkbox" ${task.completed ? 'checked' : ''}>
-                <span class="task-text ${task.completed ? 'completed' : ''}" contenteditable="false">${task.text}</span>
-                <div class="task-actions">
-                    <button class="edit-btn">Editar</button>
-                    <button class="delete-btn">Borrar</button>
-                </div>
-            `;
-            taskList.appendChild(li);
+            const column = document.querySelector(`.task-list-column[data-status='${task.status}']`);
+            if (column) {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.setAttribute('data-id', task.id);
+                card.innerHTML = `
+                    <span class="task-text">${task.text}</span>
+                    <button class="delete-btn" aria-label="Borrar tarea">&times;</button>
+                `;
+                column.appendChild(card);
+            }
         });
         updateCurrentTaskDisplay();
     }
@@ -232,42 +221,59 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const text = taskInput.value.trim();
         if (text) {
-            tasks.push({ id: Date.now(), text, completed: false });
+            tasks.push({ id: Date.now(), text, status: 'todo' });
             taskInput.value = '';
             saveTasks();
             renderTasks();
         }
     }
 
-    function handleTaskAction(e) {
-        const li = e.target.closest('li');
-        if (!li) return;
-        const id = Number(li.dataset.id);
-
-        if (e.target.type === 'checkbox') {
-            const task = tasks.find(t => t.id === id);
-            task.completed = e.target.checked;
-        } else if (e.target.classList.contains('delete-btn')) {
-            tasks = tasks.filter(t => t.id !== id);
-        } else if (e.target.classList.contains('edit-btn')) {
-            const span = li.querySelector('.task-text');
-            const isEditing = span.isContentEditable;
-            span.contentEditable = !isEditing;
-            span.focus();
-            e.target.textContent = isEditing ? 'Editar' : 'Guardar';
-            if (isEditing) {
-                const task = tasks.find(t => t.id === id);
-                task.text = span.textContent.trim();
-            }
-        }
+    function deleteTask(id) {
+        tasks = tasks.filter(t => t.id !== id);
         saveTasks();
         renderTasks();
     }
 
+    function initSortable() {
+        taskColumns.forEach(column => {
+            new Sortable(column, {
+                group: 'tasks',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: (evt) => {
+                    const taskId = evt.item.dataset.id;
+                    const newStatus = evt.to.dataset.status;
+                    const task = tasks.find(t => t.id == taskId);
+                    if (task) {
+                        task.status = newStatus;
+                    }
+                    
+                    // Reorder tasks array based on DOM
+                    const newOrderedTasks = [];
+                    taskColumns.forEach(col => {
+                        const status = col.dataset.status;
+                        col.querySelectorAll('.task-card').forEach(card => {
+                            const id = card.dataset.id;
+                            const foundTask = tasks.find(t => t.id == id);
+                            if(foundTask) newOrderedTasks.push(foundTask);
+                        });
+                    });
+                    tasks = newOrderedTasks;
+
+                    saveTasks();
+                    renderTasks(); // Re-render to ensure consistency
+                }
+            });
+        });
+    }
+
     function updateCurrentTaskDisplay() {
-        const firstUncompleted = tasks.find(t => !t.completed);
-        if (firstUncompleted) {
-            currentTaskTextSpan.textContent = firstUncompleted.text;
+        const firstInProgress = tasks.find(t => t.status === 'inProgress');
+        const firstTodo = tasks.find(t => t.status === 'todo');
+        const currentTask = firstInProgress || firstTodo;
+
+        if (currentTask) {
+            currentTaskTextSpan.textContent = currentTask.text;
             currentTaskDisplay.classList.remove('hidden');
         } else {
             currentTaskDisplay.classList.add('hidden');
@@ -369,7 +375,13 @@ document.addEventListener('DOMContentLoaded', () => {
         skipBtn.addEventListener('click', () => switchMode());
 
         taskForm.addEventListener('submit', addTask);
-        taskList.addEventListener('click', handleTaskAction);
+        document.getElementById('task-board').addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const card = e.target.closest('.task-card');
+                const id = Number(card.dataset.id);
+                deleteTask(id);
+            }
+        });
 
         settingsBtn.addEventListener('click', openSettingsModal);
         closeModalBtn.addEventListener('click', closeSettingsModal);

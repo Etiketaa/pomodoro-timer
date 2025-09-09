@@ -62,15 +62,26 @@
                     <span></span>
                 </div>
 
-                <div class="task-container">
-                    <h2>Lista de Tareas</h2>
+                <div id="task-board-container">
+                    <h2>Tablero de Tareas</h2>
+                    <div id="task-board">
+                        <div class="task-column" id="todo-column">
+                            <h3>Por Hacer</h3>
+                            <div class="task-list-column" data-status="todo"></div>
+                        </div>
+                        <div class="task-column" id="inprogress-column">
+                            <h3>En Proceso</h3>
+                            <div class="task-list-column" data-status="inProgress"></div>
+                        </div>
+                        <div class="task-column" id="done-column">
+                            <h3>Hecho</h3>
+                            <div class="task-list-column" data-status="done"></div>
+                        </div>
+                    </div>
                     <form id="task-form">
-                        <input type="text" id="task-input" placeholder="Añadir nueva tarea..." autocomplete="off">
+                        <input type="text" id="task-input" placeholder="Añadir nueva tarea en 'Por Hacer'..." autocomplete="off">
                         <button type="submit" aria-label="Añadir tarea">+</button>
                     </form>
-                    <ul id="task-list">
-                        <!-- Las tareas se insertarán aquí con JS -->
-                    </ul>
                 </div>
             </div>
 
@@ -119,6 +130,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>

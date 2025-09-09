@@ -289,6 +289,8 @@ button {
     border-radius: 8px;
     font-size: 1rem;
     font-family: var(--font-primary);
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 #task-form button {
@@ -301,46 +303,82 @@ button {
     line-height: 1;
 }
 
-#task-list {
-    list-style: none;
+/* Task Board */
+#task-board-container h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
 }
 
-#task-list li {
+#task-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.task-column h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.task-list-column {
+    min-height: 150px;
+    border-radius: 8px;
+    padding: 0.5rem;
+    background-color: rgba(128, 128, 128, 0.05);
+}
+
+.task-card {
+    background-color: var(--surface-color);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    cursor: grab;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 0.25rem;
-    border-bottom: 1px solid var(--border-color);
 }
 
-#task-list li:last-child {
-    border-bottom: none;
+.task-card:active {
+    cursor: grabbing;
 }
 
-#task-list input[type="checkbox"] {
-    margin-right: 0.75rem;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary-color);
-}
-
-#task-list .task-text {
+.task-card .task-text {
     flex-grow: 1;
-    transition: color 0.2s;
 }
 
-#task-list .task-text.completed {
+.task-card .delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary-color);
+    padding: 0.25rem;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.task-card:hover .delete-btn {
+    opacity: 1;
+}
+
+.task-card .delete-btn:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+#done-column .task-text {
     text-decoration: line-through;
     color: var(--text-secondary-color);
 }
 
-#task-list .task-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-#task-list .task-actions button {
-    font-size: 0.9rem;
-    padding: 0.25rem 0.5rem;
+.sortable-ghost {
+    opacity: 0.4;
+    background: var(--primary-color);
+    border: 1px dashed var(--primary-color);
 }
 
 /* Stats Section */
