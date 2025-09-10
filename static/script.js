@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let remainingTime = 0;
     let pomodorosInCycle = 0;
     let isPaused = true;
+    let animationIntervalId = null;
 
     // --- INITIALIZATION ---
     function init() {
@@ -166,7 +167,15 @@ document.addEventListener('DOMContentLoaded', () => {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
         if (mode === 'pomodoro') {
-            pomodoroImage.src = '/static/images/pomo-2.png';
+            // Inicia la animación del tomate
+            pomodoroImage.src = '/static/images/pomo-2.png'; // Asegura que empieza en pomo-2
+            animationIntervalId = setInterval(() => {
+                if (pomodoroImage.src.includes('pomo-1.png')) {
+                    pomodoroImage.src = '/static/images/pomo-2.png';
+                } else {
+                    pomodoroImage.src = '/static/images/pomo-1.png';
+                }
+            }, 500); // Alterna cada 0.5 segundos
         }
         updateCurrentTaskDisplay();
         timerId = setInterval(() => {
@@ -187,7 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         isPaused = true;
         startPauseBtn.textContent = 'INICIAR';
-        pomodoroImage.src = '/static/images/pomo-1.png';
+        clearInterval(animationIntervalId); // Detiene la animación
+        pomodoroImage.src = '/static/images/pomo-1.png'; // Vuelve a la imagen inicial
         clearInterval(timerId);
     }
 
