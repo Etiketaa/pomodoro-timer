@@ -1,0 +1,21 @@
+{
+  "name": "Pomodoro Timer Lofi",
+  "short_name": "Pomodoro",
+  "description": "Un temporizador Pomodoro con tablero de tareas y música lofi para ayudarte a concentrarte.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/static/images/pomo-1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/images/pomo-2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
