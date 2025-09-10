@@ -68,6 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
     const chartCanvas = document.getElementById('pomodoro-chart');
 
+    const pomodoroImage = document.getElementById('pomodoro-image');
+
     const feedbackForm = document.getElementById('feedback-form');
     const reviewsList = document.getElementById('reviews-list');
 
@@ -150,6 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
+        if (mode === 'pomodoro') {
+            pomodoroImage.src = '/static/images/pomo-2.png';
+        }
         updateCurrentTaskDisplay();
         timerId = setInterval(() => {
             remainingTime--;
@@ -169,12 +174,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         isPaused = true;
         startPauseBtn.textContent = 'INICIAR';
+        pomodoroImage.src = '/static/images/pomo-1.png';
         clearInterval(timerId);
     }
 
     function resetTimer() {
         pauseTimer();
         remainingTime = settings[mode] * 60;
+        pomodoroImage.src = '/static/images/pomo-1.png';
         updateTimerDisplay();
     }
 
@@ -182,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseTimer();
         mode = nextMode || getNextMode();
         modeDisplay.textContent = { pomodoro: 'Pomodoro', shortBreak: 'Descanso Corto', longBreak: 'Descanso Largo' }[mode];
+        pomodoroImage.src = '/static/images/pomo-1.png';
         resetTimer();
     }
 
