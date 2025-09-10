@@ -7,12 +7,15 @@
       "config": {
         "includeFiles": [
           "../static/**",
-          "../templates/**"
+          "../templates/**",
+          "sw.js"
         ]
       }
     }
   ],
   "rewrites": [
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/static/(.*)", "destination": "/static/$1" },
     { "source": "/(.*)", "destination": "/api" }
   ]
 }
