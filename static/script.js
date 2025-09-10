@@ -279,9 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    }
-    }
-
     // --- FEEDBACK ---
     const FIREBASE_URL = 'https://pomodoro-feedback-default-rtdb.firebaseio.com/'; // <-- AQUÍ VA TU URL DE FIREBASE
 
