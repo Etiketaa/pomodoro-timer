@@ -36,6 +36,10 @@ function onPlayerStateChange(event) {
     }
 }
 
+// --- LOCALSTORAGE & HELPERS ---
+const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
+const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM ELEMENTS ---
     const timerDisplay = document.getElementById('timer-display');
@@ -95,10 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         initSortable();
     }
-
-    // --- LOCALSTORAGE & HELPERS ---
-    const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
-    const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
     // --- THEME ---
     function loadTheme() {
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- FEEDBACK ---
-    const FIREBASE_URL = 'https://pomodoro-feedback-default-rtdb.firebaseio.com/'; // <-- AQUÍ VA TU URL DE FIREBASE
+    const FIREBASE_URL = 'https://pomodoro-feedback-default-rtdb.firebaseio.com'; // <-- AQUÍ VA TU URL DE FIREBASE
 
     async function submitFeedback(e) {
         e.preventDefault();
