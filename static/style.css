@@ -1,3 +1,6 @@
+/* static/style.css */
+
+/* Estilos generales y variables de color */
 :root {
     --primary-color: #3b82f6; /* Azul */
     --background-color: #f8f9fa; /* Gris muy claro */
@@ -271,6 +274,7 @@ button {
 #task-form {
     display: flex;
     gap: 0.5rem;
+    margin-top: 1.5rem;
 }
 
 #task-input {
@@ -315,7 +319,7 @@ button {
     border-bottom: 2px solid var(--border-color);
 }
 
-.task-list-column {
+#task-board .task-list-column { /* Added #task-board for specificity */
     min-height: 150px;
     border-radius: 8px;
     padding: 0.5rem;
@@ -372,6 +376,16 @@ button {
     border: 1px dashed var(--primary-color);
 }
 
+.task-indicators {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.indicator {
+    font-size: 0.8rem;
+    color: var(--text-secondary-color);
+}
+
 /* Feedback Section */
 #feedback-form .form-group {
     margin-bottom: 1.5rem;
@@ -408,6 +422,8 @@ button {
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-end;
+    gap: 0.25rem;
+    margin-top: 0.5rem; /* Added margin-top */
 }
 
 .star-rating input[type="radio"] {
@@ -415,7 +431,7 @@ button {
 }
 
 .star-rating label {
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--border-color);
     cursor: pointer;
     transition: color 0.2s;
@@ -427,8 +443,19 @@ button {
     color: #ffc107;
 }
 
+.feedback-form-card { /* New style for the feedback form container */
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    margin-bottom: 2rem;
+}
+
 .reviews-container {
     margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .reviews-container h3 {
@@ -442,7 +469,6 @@ button {
     background-color: var(--background-color);
     padding: 1rem;
     border-radius: 8px;
-    margin-bottom: 1rem;
     border-left: 4px solid var(--primary-color);
 }
 
@@ -555,11 +581,12 @@ button {
 
 .save-btn {
     width: 100%;
-    padding: 0.8rem;
+    padding: 1rem 2rem; /* Increased padding */
     background-color: var(--primary-color);
     color: white;
     border: none;
-    margin-top: 1rem;
+    margin: 1rem auto; /* Centered */
+    display: block; /* Ensure it takes full width for centering */
 }
 
 /* Utility Classes */
@@ -567,7 +594,28 @@ button {
     display: none !important;
 }
 
-/* --- Desktop & Wide Screen Styles --- */
+/* --- Responsive Styles --- */
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .app-container {
+        max-width: 800px;
+    }
+
+    main {
+        padding: 1.5rem;
+    }
+
+    #timer-display {
+        font-size: 5.5rem;
+    }
+
+    #task-board {
+        grid-template-columns: repeat(2, 1fr); /* Dos columnas en tablet */
+    }
+}
+
+/* Large devices (desktops, 1024px and up) */
 @media (min-width: 1024px) {
     body {
         padding: 2rem;
@@ -578,23 +626,18 @@ button {
         height: calc(100vh - 4rem);
     }
 
-    main {
-        padding: 1.5rem;
-    }
-
     #timer-display {
         font-size: 6rem;
     }
 
     #task-board {
         grid-template-columns: repeat(3, 1fr); /* Tres columnas en escritorio */
-        flex-grow: 1;
-        height: 1px; /* Hack para que el flex-grow funcione bien en altura */
     }
 
     .task-list-column {
         height: 100%;
         overflow-y: auto;
+        flex-grow: 1;
     }
 
     #timer-section {

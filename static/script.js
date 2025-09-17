@@ -78,6 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const alarmSound = new Audio('/static/alarm.mp3');
 
+    const taskDetailsModal = document.getElementById('task-details-modal');
+    const closeTaskDetailsModalBtn = document.getElementById('close-task-details-modal-btn');
+    const taskDetailsForm = document.getElementById('task-details-form');
+
     // --- STATE ---
     let settings = {};
     let tasks = []; // Single array for all tasks
@@ -238,10 +242,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.className = 'task-card';
                 card.setAttribute('data-id', task.id);
                 card.innerHTML = `
-                    <span class="task-text">${task.text}</span>
+                    <span class="task-text" contenteditable="true">${task.text}</span>
+                    <div class="task-indicators"></div>
                     <button class="delete-btn" aria-label="Borrar tarea">&times;</button>
                 `;
                 column.appendChild(card);
+
+                const taskText = card.querySelector('.task-text');
+                taskText.addEventListener('blur', (e) => {
+                    updateTaskText(task.id, e.target.textContent);
+                });
+
+                const indicators = card.querySelector('.task-indicators');
+                if (task.description) {
+                    indicators.innerHTML += '<span class="indicator">&#9776;</span>';
+                }
+                if (task.dueDate) {
+                    indicators.innerHTML += '<span class="indicator">&#128197;</span>';
+                }
+                if (task.labels && task.labels.length > 0) {
+                    indicators.innerHTML += '<span class="indicator">&#127991;</span>';
+                }
             }
         });
         updateCurrentTaskDisplay();
@@ -251,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const text = taskInput.value.trim();
         if (text) {
-            tasks.push({ id: Date.now(), text, status: 'todo' });
+            tasks.push({ id: Date.now(), text, status: 'todo', description: '', dueDate: '', labels: [] });
             taskInput.value = '';
             saveTasks();
             renderTasks();
@@ -262,6 +283,41 @@ document.addEventListener('DOMContentLoaded', () => {
         tasks = tasks.filter(t => t.id !== id);
         saveTasks();
         renderTasks();
+    }
+
+    function updateTaskText(id, text) {
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            task.text = text;
+            saveTasks();
+        }
+    }
+
+    function openTaskDetailsModal(id) {
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            document.getElementById('task-details-id').value = task.id;
+            document.getElementById('task-details-text').value = task.text;
+            document.getElementById('task-details-description').value = task.description;
+            document.getElementById('task-details-due-date').value = task.dueDate;
+            document.getElementById('task-details-labels').value = task.labels.join(', ');
+            taskDetailsModal.classList.remove('hidden');
+        }
+    }
+
+    function saveTaskDetails(e) {
+        e.preventDefault();
+        const id = Number(document.getElementById('task-details-id').value);
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            task.text = document.getElementById('task-details-text').value;
+            task.description = document.getElementById('task-details-description').value;
+            task.dueDate = document.getElementById('task-details-due-date').value;
+            task.labels = document.getElementById('task-details-labels').value.split(',').map(l => l.trim()).filter(l => l);
+            saveTasks();
+            renderTasks();
+            taskDetailsModal.classList.add('hidden');
+        }
     }
 
     function initSortable() {
@@ -311,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- FEEDBACK ---
-    const FIREBASE_URL = 'https://pomodoro-feedback-default-rtdb.firebaseio.com'; // <-- AQUÍ VA TU URL DE FIREBASE
+    const FIREBASE_URL = 'https://xmenosmasprendas-3b0ad-default-rtdb.firebaseio.com/'; // <-- AQUÍ VA TU URL DE FIREBASE
 
     async function submitFeedback(e) {
         e.preventDefault();
@@ -487,6 +543,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = e.target.closest('.task-card');
                 const id = Number(card.dataset.id);
                 deleteTask(id);
+            } else if (e.target.closest('.task-card')) {
+                const card = e.target.closest('.task-card');
+                const id = Number(card.dataset.id);
+                openTaskDetailsModal(id);
             }
         });
 
@@ -494,6 +554,10 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModalBtn.addEventListener('click', closeSettingsModal);
         settingsModal.addEventListener('click', (e) => e.target === settingsModal && closeSettingsModal());
         settingsForm.addEventListener('submit', saveSettings);
+
+        taskDetailsForm.addEventListener('submit', saveTaskDetails);
+        closeTaskDetailsModalBtn.addEventListener('click', () => taskDetailsModal.classList.add('hidden'));
+        taskDetailsModal.addEventListener('click', (e) => e.target === taskDetailsModal && taskDetailsModal.classList.add('hidden'));
 
         feedbackForm.addEventListener('submit', submitFeedback);
 

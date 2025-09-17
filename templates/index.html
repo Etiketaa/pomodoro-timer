@@ -45,13 +45,13 @@
         </header>
 
         <main>
-            <div class="tabs">
-                <button class="tab-link active" data-tab="timer-section">Timer</button>
-                <button class="tab-link" data-tab="stats-section">Estadísticas</button>
-                <button class="tab-link" data-tab="feedback-section">Feedback</button>
+            <div class="tabs" role="tablist">
+                <button class="tab-link active" data-tab="timer-section" role="tab" aria-controls="timer-section" aria-selected="true">Timer</button>
+                <button class="tab-link" data-tab="stats-section" role="tab" aria-controls="stats-section" aria-selected="false">Estadísticas</button>
+                <button class="tab-link" data-tab="feedback-section" role="tab" aria-controls="feedback-section" aria-selected="false">Feedback</button>
             </div>
 
-            <div id="timer-section" class="tab-content active">
+            <div id="timer-section" class="tab-content active" role="tabpanel" aria-labelledby="timer-section">
                 <div class="timer-container">
                     <div id="pomodoro-animation-container">
                         <img src="/static/images/pomo-1.png" id="pomodoro-image" alt="Pomodoro Animation">
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <div id="stats-section" class="tab-content">
+            <div id="stats-section" class="tab-content" role="tabpanel" aria-labelledby="stats-section">
                 <h2>Estadísticas</h2>
                 <div class="stats-summary">
                     <div class="stat-box">
@@ -121,29 +121,31 @@
                 </div>
             </div>
 
-            <div id="feedback-section" class="tab-content">
+            <div id="feedback-section" class="tab-content" role="tabpanel" aria-labelledby="feedback-section">
                 <h2>Danos tu Opinión</h2>
-                <form id="feedback-form">
-                    <div class="form-group">
-                        <label for="feedback-name">Nombre</label>
-                        <input type="text" id="feedback-name" placeholder="Tu nombre (opcional)">
-                    </div>
-                    <div class="form-group">
-                        <label>Calificación</label>
-                        <div class="star-rating">
-                            <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">★</label>
-                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
-                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
-                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
-                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+                <div class="feedback-form-card">
+                    <form id="feedback-form">
+                        <div class="form-group">
+                            <label for="feedback-name">Nombre</label>
+                            <input type="text" id="feedback-name" placeholder="Tu nombre (opcional)">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="feedback-message">Mensaje</label>
-                        <textarea id="feedback-message" rows="4" placeholder="¿Qué te ha parecido la aplicación?" required></textarea>
-                    </div>
-                    <button type="submit" class="save-btn">Enviar Feedback</button>
-                </form>
+                        <div class="form-group">
+                            <label>Calificación</label>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">★</label>
+                                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
+                                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
+                                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
+                                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="feedback-message">Mensaje</label>
+                            <textarea id="feedback-message" rows="4" placeholder="¿Qué te ha parecido la aplicación?" required></textarea>
+                        </div>
+                        <button type="submit" class="save-btn">Enviar Feedback</button>
+                    </form>
+                </div>
                 <div class="reviews-container">
                     <h3>Reseñas de la Comunidad</h3>
                     <div id="reviews-list">
@@ -155,10 +157,10 @@
     </div>
 
     <!-- Modal de Configuración -->
-    <div id="settings-modal" class="modal-overlay hidden">
+    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Configuración</h2>
+                <h2 id="settings-modal-title">Configuración</h2>
                 <button id="close-modal-btn" class="icon-btn" aria-label="Cerrar">&times;</button>
             </div>
             <form id="settings-form">
@@ -180,6 +182,35 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Modal de Detalles de Tarea -->
+<div id="task-details-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="task-details-modal-title">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="task-details-modal-title">Detalles de la Tarea</h2>
+            <button id="close-task-details-modal-btn" class="icon-btn" aria-label="Cerrar">&times;</button>
+        </div>
+        <form id="task-details-form">
+            <input type="hidden" id="task-details-id">
+            <div class="form-group">
+                <label for="task-details-text">Tarea</label>
+                <input type="text" id="task-details-text">
+            </div>
+            <div class="form-group">
+                <label for="task-details-description">Descripción</label>
+                <textarea id="task-details-description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="task-details-due-date">Fecha de Vencimiento</label>
+                <input type="date" id="task-details-due-date">
+            </div>
+            <div class="form-group">
+                <label for="task-details-labels">Etiquetas</label>
+                <input type="text" id="task-details-labels" placeholder="Ej: importante, urgente">
+            </div>
+            <button type="submit" class="save-btn">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
