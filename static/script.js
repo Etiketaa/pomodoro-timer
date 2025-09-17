@@ -1,3 +1,5 @@
+const OPENWEATHER_API_KEY = 'YOUR_OPENWEATHER_API_KEY'; // ¡REEMPLAZA CON TU CLAVE API!
+
 let ytPlayer;
 function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('youtube-player', {
@@ -34,6 +36,68 @@ function onPlayerStateChange(event) {
         playIcon.classList.remove('hidden');
         pauseIcon.classList.add('hidden');
     }
+}
+
+// --- WEATHER WIDGET ---
+async function initWeather() {
+    if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === 'YOUR_OPENWEATHER_API_KEY') {
+        console.warn('OpenWeatherMap API key no configurada. El widget del clima no funcionará.');
+        return;
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            await getWeatherData(latitude, longitude);
+        }, (error) => {
+            console.error('Error obteniendo la ubicación:', error);
+            // Optionally, fetch weather for a default city if location is denied
+            // getWeatherData(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+        });
+    } else {
+        console.warn('Geolocalización no soportada por el navegador.');
+        // Optionally, fetch weather for a default city
+        // getWeatherData(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+    }
+}
+
+async function getWeatherData(latitude, longitude) {
+    const weatherWidget = document.getElementById('weather-widget');
+    const temperatureElement = weatherWidget.querySelector('.temperature');
+    const descriptionElement = weatherWidget.querySelector('.description');
+    const locationElement = weatherWidget.querySelector('.location');
+    const iconElement = weatherWidget.querySelector('.weather-icon');
+
+    temperatureElement.textContent = 'Cargando...';
+    descriptionElement.textContent = '';
+    locationElement.textContent = '';
+    iconElement.style.backgroundImage = '';
+
+    try {
+        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=es`);
+        if (!response.ok) throw new Error('No se pudo obtener los datos del clima.');
+        const data = await response.json();
+        displayWeather(data);
+    } catch (error) {
+        console.error('Error al obtener el clima:', error);
+        temperatureElement.textContent = 'Error';
+        descriptionElement.textContent = '';
+        locationElement.textContent = '';
+        iconElement.style.backgroundImage = '';
+    }
+}
+
+function displayWeather(data) {
+    const weatherWidget = document.getElementById('weather-widget');
+    const temperatureElement = weatherWidget.querySelector('.temperature');
+    const descriptionElement = weatherWidget.querySelector('.description');
+    const locationElement = weatherWidget.querySelector('.location');
+    const iconElement = weatherWidget.querySelector('.weather-icon');
+
+    temperatureElement.textContent = `${Math.round(data.main.temp)}°C`;
+    descriptionElement.textContent = data.weather[0].description;
+    locationElement.textContent = data.name;
+    iconElement.style.backgroundImage = `url(https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png)`;
 }
 
 // --- LOCALSTORAGE & HELPERS ---
@@ -105,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderStats();
         setupEventListeners();
         initSortable();
+        initWeather();
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {

@@ -594,6 +594,40 @@ button {
     display: none !important;
 }
 
+/* Weather Widget */
+.weather-widget {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 24px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.weather-widget .weather-icon {
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.weather-widget .temperature {
+    font-weight: 500;
+}
+
+.weather-widget .description {
+    text-transform: capitalize;
+    color: var(--text-secondary-color);
+}
+
+.weather-widget .location {
+    font-size: 0.8rem;
+    color: var(--text-secondary-color);
+}
+
 /* --- Responsive Styles --- */
 
 /* Small devices (tablets, 768px and up) */
