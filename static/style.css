@@ -74,6 +74,13 @@ body {
     margin-bottom: 0;
 }
 
+.task-columns-tablet-group,
+.misc-widgets-tablet-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* To maintain spacing between children */
+}
+
 /* Header dentro de grid-pomodoro-tasks */
 #grid-pomodoro-tasks header {
     display: flex;
@@ -952,6 +959,6 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
     /* Desactivar los grupos de tablet en escritorio */
     .task-columns-tablet-group,
     .misc-widgets-tablet-group {
-        display: none; /* Ocultar los grupos de tablet en escritorio */
+        display: contents; /* Make children participate in parent's grid */
     }
 }
