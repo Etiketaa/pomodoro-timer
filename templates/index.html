@@ -67,47 +67,51 @@
             </div>
         </div>
 
-        <div id="grid-todo-column" class="grid-area div2">
-            <div class="task-column" id="todo-column">
-                <h3>Por Hacer</h3>
-                <div class="task-list-column" data-status="todo"></div>
-            </div>
-        </div>
-
-        <div id="grid-inprogress-column" class="grid-area div3">
-            <div class="task-column" id="inprogress-column">
-                <h3>En Proceso</h3>
-                <div class="task-list-column" data-status="inProgress"></div>
-            </div>
-        </div>
-
-        <div id="grid-done-column" class="grid-area div4">
-            <div class="task-column" id="done-column">
-                <h3>Hecho</h3>
-                <div class="task-list-column" data-status="done"></div>
-            </div>
-        </div>
-
-        <div id="grid-radio" class="grid-area div5">
-            <div class="music-controls">
-                <button id="music-toggle-btn" class="icon-btn" aria-label="Música">
-                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-                </button>
-                <div class="volume-container">
-                    <input type="range" id="volume-slider" min="0" max="100" value="50" step="1">
+        <div class="task-columns-tablet-group">
+            <div id="grid-todo-column" class="grid-area div2">
+                <div class="task-column" id="todo-column">
+                    <h3>Por Hacer</h3>
+                    <div class="task-list-column" data-status="todo"></div>
                 </div>
             </div>
-            <p id="radio-status">Radio FM Aspen</p>
+
+            <div id="grid-inprogress-column" class="grid-area div3">
+                <div class="task-column" id="inprogress-column">
+                    <h3>En Proceso</h3>
+                    <div class="task-list-column" data-status="inProgress"></div>
+                </div>
+            </div>
+
+            <div id="grid-done-column" class="grid-area div4">
+                <div class="task-column" id="done-column">
+                    <h3>Hecho</h3>
+                    <div class="task-list-column" data-status="done"></div>
+                </div>
+            </div>
         </div>
 
-        <div id="grid-weather" class="grid-area div6">
-            <div id="weather-widget" class="weather-widget">
-                <div class="weather-icon"></div>
-                <div class="weather-info">
-                    <p class="temperature"></p>
-                    <p class="description"></p>
-                    <p class="location"></p>
+        <div class="misc-widgets-tablet-group">
+            <div id="grid-radio" class="grid-area div5">
+                <div class="music-controls">
+                    <button id="music-toggle-btn" class="icon-btn" aria-label="Música">
+                        <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    </button>
+                    <div class="volume-container">
+                        <input type="range" id="volume-slider" min="0" max="100" value="50" step="1">
+                    </div>
+                </div>
+                <p id="radio-status">Radio FM Aspen</p>
+            </div>
+
+            <div id="grid-weather" class="grid-area div6">
+                <div id="weather-widget" class="weather-widget">
+                    <div class="weather-icon"></div>
+                    <div class="weather-info">
+                        <p class="temperature"></p>
+                        <p class="description"></p>
+                        <p class="location"></p>
+                    </div>
                 </div>
             </div>
         </div>

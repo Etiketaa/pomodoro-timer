@@ -44,12 +44,9 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* Ocultar el reproductor de audio de YouTube que ya no se usa */
 #youtube-player {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
+    display: none;
 }
 
 .app-container {
@@ -61,70 +58,34 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 1rem; /* Padding general para el contenedor principal */
 }
 
-header {
+/* Estilos para las áreas del grid en móvil (apiladas por defecto) */
+.grid-area {
+    background-color: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 1rem;
+    margin-bottom: 1rem; /* Espacio entre secciones apiladas */
+}
+
+.grid-area:last-child {
+    margin-bottom: 0;
+}
+
+/* Header dentro de grid-pomodoro-tasks */
+#grid-pomodoro-tasks header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0; /* Ya hay padding en .grid-area */
+    border-bottom: none;
+    margin-bottom: 1rem;
 }
 
-header .logo h1 {
+#grid-pomodoro-tasks header .logo h1 {
     font-size: 1.25rem;
-}
-
-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.music-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 4px;
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
-}
-
-.volume-container {
-    width: 0;
-    overflow: hidden;
-    transition: width 0.3s ease-in-out;
-}
-
-.music-controls:hover .volume-container, .volume-container:hover {
-    width: 80px;
-}
-
-#volume-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 4px;
-    background: var(--border-color);
-    outline: none;
-    border-radius: 2px;
-    cursor: pointer;
-}
-
-#volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--primary-color);
-    border-radius: 50%;
-}
-
-#volume-slider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: var(--primary-color);
-    border-radius: 50%;
 }
 
 .icon-btn {
@@ -146,67 +107,14 @@ nav {
     display: block;
 }
 
-main {
-    padding: 1rem;
-    flex-grow: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 1rem;
-}
-
-.tab-link {
-    padding: 0.75rem 1rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-family: var(--font-primary);
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-secondary-color);
-    position: relative;
-    transition: color 0.2s;
-}
-
-.tab-link:hover {
-    color: var(--text-color);
-}
-
-.tab-link.active {
-    color: var(--primary-color);
-}
-
-.tab-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: var(--primary-color);
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
 .timer-container {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 #pomodoro-animation-container {
     margin: 0 auto 1rem;
-    max-width: 120px;
+    max-width: 100px;
 }
 
 #pomodoro-image {
@@ -216,29 +124,29 @@ main {
 }
 
 #mode-display {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 500;
     color: var(--text-secondary-color);
     margin-bottom: 0.5rem;
 }
 
 #timer-display {
-    font-size: 4.5rem; /* Tamaño para móvil */
+    font-size: 4rem; /* Tamaño para móvil */
     font-weight: 700;
     line-height: 1;
 }
 
 .timer-controls {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 button {
     font-family: var(--font-primary);
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 500;
     border-radius: 8px;
     cursor: pointer;
@@ -249,7 +157,7 @@ button {
     background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.2rem;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
@@ -262,7 +170,7 @@ button {
     background-color: transparent;
     color: var(--text-secondary-color);
     border: 1px solid var(--border-color);
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 1rem;
 }
 
 .secondary-btn:hover {
@@ -279,10 +187,10 @@ button {
 
 #task-input {
     flex-grow: 1;
-    padding: 0.75rem;
+    padding: 0.6rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-family: var(--font-primary);
     background-color: var(--background-color);
     color: var(--text-color);
@@ -292,35 +200,23 @@ button {
     background-color: var(--primary-color);
     color: white;
     border: none;
-    width: 44px;
-    height: 44px;
-    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
     line-height: 1;
 }
 
-/* Task Board */
-#task-board-container h2 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-}
-
-#task-board {
-    display: grid;
-    grid-template-columns: 1fr; /* Una columna por defecto para móvil */
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
+/* Task Board Columns */
 .task-column h3 {
     font-size: 1rem;
     font-weight: 500;
-    padding-bottom: 0.75rem;
-    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
     border-bottom: 2px solid var(--border-color);
 }
 
-#task-board .task-list-column { /* Added #task-board for specificity */
-    min-height: 150px;
+.task-list-column {
+    min-height: 100px;
     border-radius: 8px;
     padding: 0.5rem;
     background-color: rgba(128, 128, 128, 0.05);
@@ -328,9 +224,9 @@ button {
 
 .task-card {
     background-color: var(--surface-color);
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.8rem;
     border-radius: 6px;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.6rem;
     box-shadow: 0 1px 3px var(--shadow-color);
     cursor: grab;
     display: flex;
@@ -344,13 +240,14 @@ button {
 
 .task-card .task-text {
     flex-grow: 1;
+    font-size: 0.9rem;
 }
 
 .task-card .delete-btn {
     background: none;
     border: none;
     color: var(--text-secondary-color);
-    padding: 0.25rem;
+    padding: 0.2rem;
     border-radius: 4px;
     opacity: 0;
     transition: opacity 0.2s, background-color 0.2s;
@@ -378,134 +275,102 @@ button {
 
 .task-indicators {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.2rem;
 }
 
 .indicator {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--text-secondary-color);
 }
 
-/* Feedback Section */
-#feedback-form .form-group {
-    margin-bottom: 1.5rem;
-}
-
-#feedback-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-secondary-color);
-    font-weight: 500;
-}
-
-#feedback-form input[type="text"],
-#feedback-form textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: var(--font-primary);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-#feedback-form input[type="text"]:focus,
-#feedback-form textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.star-rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    gap: 0.25rem;
-    margin-top: 0.5rem; /* Added margin-top */
-}
-
-.star-rating input[type="radio"] {
-    display: none;
-}
-
-.star-rating label {
-    font-size: 1.5rem;
-    color: var(--border-color);
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.star-rating input[type="radio"]:checked ~ label,
-.star-rating label:hover,
-.star-rating label:hover ~ label {
-    color: #ffc107;
-}
-
-.feedback-form-card { /* New style for the feedback form container */
-    background-color: var(--surface-color);
-    padding: 1.5rem;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px var(--shadow-color);
-    margin-bottom: 2rem;
-}
-
-.reviews-container {
-    margin-top: 3rem;
+/* Radio and Weather Widgets */
+#grid-radio, #grid-weather {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-}
-
-.reviews-container h3 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.review-card {
-    background-color: var(--background-color);
-    padding: 1rem;
-    border-radius: 8px;
-    border-left: 4px solid var(--primary-color);
-}
-
-.review-card .review-header {
-    display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    text-align: center;
+    padding: 0.75rem; /* Más compacto */
+}
+
+#grid-radio .music-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
     margin-bottom: 0.5rem;
 }
 
-.review-card .review-name {
-    font-weight: 700;
+.volume-container {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
 }
 
-.review-card .review-rating {
-    color: #ffc107;
+.music-controls:hover .volume-container, .volume-container:hover {
+    width: 60px; /* Más pequeño para móvil */
 }
 
-.review-card .review-message {
+#volume-slider {
+    height: 3px;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    width: 12px;
+    height: 12px;
+}
+
+#volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+}
+
+#radio-status {
+    font-size: 0.85rem;
     color: var(--text-secondary-color);
+}
+
+#grid-weather .weather-widget {
+    display: flex;
+    flex-direction: column; /* Apilar elementos en móvil */
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+#grid-weather .weather-icon {
+    width: 24px;
+    height: 24px;
+}
+
+#grid-weather .temperature {
+    font-size: 1.1rem;
+}
+
+#grid-weather .description, #grid-weather .location {
+    font-size: 0.8rem;
 }
 
 #current-task-display {
     text-align: center;
-    padding: 1rem;
+    padding: 0.75rem;
     background-color: var(--background-color);
     border-radius: 8px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 #current-task-display p {
     color: var(--text-secondary-color);
+    font-size: 0.9rem;
 }
 
 #current-task-display span {
     font-weight: 500;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 /* Modal */
@@ -526,10 +391,10 @@ button {
 
 .modal-content {
     background-color: var(--surface-color);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 16px;
     width: 90%;
-    max-width: 400px;
+    max-width: 500px; /* Aumentar un poco el tamaño máximo para modales */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transform: scale(1);
     transition: transform 0.3s ease;
@@ -548,45 +413,57 @@ button {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .modal-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
 }
 
-#close-modal-btn {
-    font-size: 2rem;
+#close-modal-btn, #close-stats-modal-btn, #close-feedback-modal-btn, #close-task-details-modal-btn {
+    font-size: 1.8rem;
     font-weight: 300;
     line-height: 1;
 }
 
-#settings-form .form-group {
+.form-group {
     margin-bottom: 1rem;
 }
 
-#settings-form label {
+.form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     color: var(--text-secondary-color);
+    font-weight: 500;
+    font-size: 0.9rem;
 }
 
-#settings-form input {
+input[type="text"], input[type="number"], input[type="date"], textarea {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.6rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-family: var(--font-primary);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .save-btn {
     width: 100%;
-    padding: 1rem 2rem; /* Increased padding */
+    padding: 0.8rem 1.5rem;
     background-color: var(--primary-color);
     color: white;
     border: none;
-    margin: 1rem auto; /* Centered */
-    display: block; /* Ensure it takes full width for centering */
+    margin-top: 1rem;
+    border-radius: 8px;
 }
 
 /* Utility Classes */
@@ -628,24 +505,332 @@ button {
     color: var(--text-secondary-color);
 }
 
+/* Feedback Section specific styles (now in modal) */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 1.5rem;
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffc107;
+}
+
+.feedback-form-card {
+    background-color: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    margin-bottom: 1.5rem;
+}
+
+.reviews-container {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.reviews-container h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.review-card {
+    background-color: var(--background-color);
+    padding: 0.8rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.review-card .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.review-card .review-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.review-card .review-rating {
+    color: #ffc107;
+    font-size: 0.9rem;
+}
+
+.review-card .review-message {
+    color: var(--text-secondary-color);
+    font-size: 0.85rem;
+}
+
+/* Stats Section specific styles (now in modal) */
+.stats-summary {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-box {
+    text-align: center;
+    background-color: var(--background-color);
+    padding: 0.8rem;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.stat-box h3 {
+    font-size: 1rem;
+    color: var(--text-secondary-color);
+    margin-bottom: 0.4rem;
+}
+
+.stat-box p {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.chart-container {
+    position: relative;
+    height: 200px; /* Altura fija para el gráfico en móvil */
+    width: 100%;
+}
+
+/* Ocultar el contenedor secundario que contenía las pestañas */
+.app-container-secondary {
+    display: none; 
+}
+
 /* --- Responsive Styles --- */
 
-/* Small devices (tablets, 768px and up) */
+/* Tablet devices (768px and up) */
 @media (min-width: 768px) {
     .app-container {
         max-width: 800px;
-    }
-
-    main {
         padding: 1.5rem;
     }
 
-    #timer-display {
-        font-size: 5.5rem;
+    .grid-area {
+        padding: 1.2rem;
     }
 
-    #task-board {
-        grid-template-columns: repeat(2, 1fr); /* Dos columnas en tablet */
+    #grid-pomodoro-tasks header {
+        margin-bottom: 1.5rem;
+    }
+
+    #timer-display {
+        font-size: 5rem;
+    }
+
+    .timer-controls {
+        gap: 1rem;
+    }
+
+    button {
+        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
+    }
+
+    #task-form input {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+
+    #task-form button {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5rem;
+    }
+
+    .task-column h3 {
+        font-size: 1.1rem;
+    }
+
+    .task-card {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .task-card .task-text {
+        font-size: 1rem;
+    }
+
+    .indicator {
+        font-size: 0.8rem;
+    }
+
+    .volume-container {
+        width: 80px; /* Volver al tamaño original en tablet */
+    }
+
+    #volume-slider {
+        height: 4px;
+    }
+    
+    #volume-slider::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
+    }
+    
+    #volume-slider::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+    }
+
+    #radio-status {
+        font-size: 0.95rem;
+    }
+
+    #grid-weather .temperature {
+        font-size: 1.2rem;
+    }
+
+    #grid-weather .description, #grid-weather .location {
+        font-size: 0.9rem;
+    }
+
+    .modal-content {
+        padding: 2rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+
+    #close-modal-btn, #close-stats-modal-btn, #close-feedback-modal-btn, #close-task-details-modal-btn {
+        font-size: 2rem;
+    }
+
+    .form-group label {
+        font-size: 1rem;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], textarea {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+
+    .save-btn {
+        padding: 1rem 2rem;
+    }
+
+    .feedback-form-card {
+        margin-bottom: 2rem;
+    }
+
+    .reviews-container {
+        gap: 1rem;
+    }
+
+    .reviews-container h3 {
+        font-size: 1.25rem;
+    }
+
+    .review-card {
+        padding: 1rem;
+    }
+
+    .review-card .review-name,
+    .review-card .review-rating {
+        font-size: 1rem;
+    }
+
+    .review-card .review-message {
+        font-size: 0.9rem;
+    }
+
+    .stat-box h3 {
+        font-size: 1.1rem;
+    }
+
+    .stat-box p {
+        font-size: 1.3rem;
+    }
+
+    .chart-container {
+        height: 250px; /* Aumentar altura del gráfico en tablet */
+    }
+
+    /* Layout para tablets: 2 columnas para tareas */
+    .app-container {
+        display: flex; /* Volver a flexbox para control manual */
+        flex-direction: column;
+        gap: 1.5rem; /* Espacio entre secciones principales */
+    }
+
+    #grid-pomodoro-tasks {
+        order: 1; /* Primero el pomodoro */
+    }
+
+    #grid-todo-column {
+        order: 2;
+    }
+
+    #grid-inprogress-column {
+        order: 3;
+    }
+
+    #grid-done-column {
+        order: 4;
+    }
+
+    #grid-radio {
+        order: 5;
+    }
+
+    #grid-weather {
+        order: 6;
+    }
+
+    /* Agrupar columnas de tareas en una fila para tablets */
+    .task-columns-tablet-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    /* Mover las columnas de tareas a este grupo */
+    #grid-todo-column, #grid-inprogress-column, #grid-done-column {
+        margin-bottom: 0; /* Eliminar margen inferior si están en un grid */
+    }
+
+    /* Ajuste para que las columnas de tareas se vean bien en 2 columnas */
+    #grid-todo-column, #grid-inprogress-column {
+        grid-column: span 1;
+    }
+
+    #grid-done-column {
+        grid-column: 1 / span 2; /* Ocupa ambas columnas en la segunda fila */
+    }
+
+    /* Agrupar radio y clima en una fila para tablets */
+    .misc-widgets-tablet-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    #grid-radio, #grid-weather {
+        margin-bottom: 0;
     }
 }
 
@@ -658,20 +843,21 @@ button {
     .app-container {
         max-width: 1400px; /* Aumentar el ancho máximo para acomodar el grid de 5 columnas */
         height: calc(100vh - 4rem);
-        display: grid;
+        display: grid; /* Activar el grid de 5 columnas */
         grid-template-columns: repeat(5, 1fr);
         grid-template-rows: repeat(5, 1fr);
         grid-column-gap: 1rem;
         grid-row-gap: 1rem;
         overflow: hidden; /* Para manejar el scroll interno de las áreas */
+        padding: 0; /* El padding ya lo manejan las grid-area */
     }
 
     .grid-area {
         background-color: var(--surface-color);
         border-radius: 16px;
         box-shadow: 0 4px 12px var(--shadow-color);
-        padding: 1rem;
-        overflow: auto; /* Permitir scroll si el contenido es muy grande */
+        padding: 1.5rem; /* Padding para las áreas del grid en escritorio */
+        margin-bottom: 0; /* Eliminar margen inferior en grid */
     }
 
     #grid-pomodoro-tasks {
@@ -760,6 +946,12 @@ button {
 
     /* Las pestañas y su contenido se gestionan fuera del grid principal */
     .app-container-secondary {
-        display: none; /* Ocultar las pestañas de estadísticas y feedback en este layout */
+        display: none; 
+    }
+
+    /* Desactivar los grupos de tablet en escritorio */
+    .task-columns-tablet-group,
+    .misc-widgets-tablet-group {
+        display: none; /* Ocultar los grupos de tablet en escritorio */
     }
 }
