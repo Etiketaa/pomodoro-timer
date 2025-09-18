@@ -1,42 +1,4 @@
-const OPENWEATHER_API_KEY = 'YOUR_OPENWEATHER_API_KEY'; // ¡REEMPLAZA CON TU CLAVE API!
-
-let ytPlayer;
-function onYouTubeIframeAPIReady() {
-    ytPlayer = new YT.Player('youtube-player', {
-        height: '0',
-        width: '0',
-        videoId: 'jfKfPfyJRdk', // Lofi Girl Video ID
-        playerVars: {
-            'autoplay': 0,
-            'controls': 0,
-            'loop': 1,
-            'playlist': 'jfKfPfyJRdk' // Required for loop to work
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-        }
-    });
-}
-
-function onPlayerReady(event) {
-    const volumeSlider = document.getElementById('volume-slider');
-    const initialVolume = getFromLS('pomodoroMusicVolume', 50);
-    volumeSlider.value = initialVolume;
-    event.target.setVolume(initialVolume);
-}
-
-function onPlayerStateChange(event) {
-    const playIcon = document.getElementById('play-icon');
-    const pauseIcon = document.getElementById('pause-icon');
-    if (event.data === YT.PlayerState.PLAYING) {
-        playIcon.classList.add('hidden');
-        pauseIcon.classList.remove('hidden');
-    } else {
-        playIcon.classList.remove('hidden');
-        pauseIcon.classList.add('hidden');
-    }
-}
+const OPENWEATHER_API_KEY = 'da3a47826e358e332366c7dea4460ae6'; // ¡TU CLAVE API DE OpenWeatherMap!
 
 // --- WEATHER WIDGET ---
 async function initWeather() {
@@ -75,7 +37,10 @@ async function getWeatherData(latitude, longitude) {
 
     try {
         const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=es`);
-        if (!response.ok) throw new Error('No se pudo obtener los datos del clima.');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`No se pudo obtener los datos del clima. Estado: ${response.status}, Mensaje: ${errorText}`);
+        }
         const data = await response.json();
         displayWeather(data);
     } catch (error) {
@@ -124,9 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicToggleBtn = document.getElementById('music-toggle-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
-
-    const tabs = document.querySelectorAll('.tab-link');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const statsBtn = document.getElementById('stats-btn');
+    const feedbackBtn = document.getElementById('feedback-btn');
 
     const pomodorosTodaySpan = document.getElementById('pomodoros-today');
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
@@ -141,10 +105,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
 
     const alarmSound = new Audio('/static/alarm.mp3');
+    const radioPlayer = document.getElementById('radio-player');
 
     const taskDetailsModal = document.getElementById('task-details-modal');
     const closeTaskDetailsModalBtn = document.getElementById('close-task-details-modal-btn');
     const taskDetailsForm = document.getElementById('task-details-form');
+
+    // New modal elements for Stats and Feedback
+    const statsModal = document.getElementById('stats-modal');
+    const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
+    const feedbackModal = document.getElementById('feedback-modal');
+    const closeFeedbackModalBtn = document.getElementById('close-feedback-modal-btn');
 
     // --- STATE ---
     let settings = {};
@@ -170,6 +141,22 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         initSortable();
         initWeather();
+
+        // Set initial volume for radio player
+        const initialVolume = getFromLS('pomodoroMusicVolume', 50);
+        radioPlayer.volume = initialVolume / 100;
+        volumeSlider.value = initialVolume;
+
+        // Update play/pause icons based on initial state
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        if (radioPlayer.paused) {
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+        } else {
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+        }
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
@@ -299,10 +286,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTasks() {
-        taskColumns.forEach(col => col.innerHTML = '');
+        // Update taskColumns reference to target the specific grid areas
+        const todoColumnElement = document.querySelector('#grid-todo-column .task-list-column');
+        const inProgressColumnElement = document.querySelector('#grid-inprogress-column .task-list-column');
+        const doneColumnElement = document.querySelector('#grid-done-column .task-list-column');
+
+        // Clear existing tasks
+        todoColumnElement.innerHTML = '';
+        inProgressColumnElement.innerHTML = '';
+        doneColumnElement.innerHTML = '';
+
         tasks.forEach(task => {
-            const column = document.querySelector(`.task-list-column[data-status='${task.status}']`);
-            if (column) {
+            let columnElement;
+            if (task.status === 'todo') columnElement = todoColumnElement;
+            else if (task.status === 'inProgress') columnElement = inProgressColumnElement;
+            else if (task.status === 'done') columnElement = doneColumnElement;
+
+            if (columnElement) {
                 const card = document.createElement('div');
                 card.className = 'task-card';
                 card.setAttribute('data-id', task.id);
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="task-indicators"></div>
                     <button class="delete-btn" aria-label="Borrar tarea">&times;</button>
                 `;
-                column.appendChild(card);
+                columnElement.appendChild(card);
 
                 const taskText = card.querySelector('.task-text');
                 taskText.addEventListener('blur', (e) => {
@@ -386,7 +386,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initSortable() {
-        taskColumns.forEach(column => {
+        // Update taskColumns reference for Sortable.js
+        const todoColumnElement = document.querySelector('#grid-todo-column .task-list-column');
+        const inProgressColumnElement = document.querySelector('#grid-inprogress-column .task-list-column');
+        const doneColumnElement = document.querySelector('#grid-done-column .task-list-column');
+
+        [todoColumnElement, inProgressColumnElement, doneColumnElement].forEach(column => {
             new Sortable(column, {
                 group: 'tasks',
                 animation: 150,
@@ -401,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Reorder tasks array based on DOM
                     const newOrderedTasks = [];
-                    taskColumns.forEach(col => {
+                    [todoColumnElement, inProgressColumnElement, doneColumnElement].forEach(col => {
                         const status = col.dataset.status;
                         col.querySelectorAll('.task-card').forEach(card => {
                             const id = card.dataset.id;
@@ -561,34 +566,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI & EVENT LISTENERS ---
     function toggleMusic() {
-        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
-        const playerState = ytPlayer.getPlayerState();
-        if (playerState === YT.PlayerState.PLAYING) {
-            ytPlayer.pauseVideo();
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        if (radioPlayer.paused) {
+            radioPlayer.play();
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
         } else {
-            ytPlayer.playVideo();
+            radioPlayer.pause();
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
         }
     }
 
     function setVolume(e) {
         const volume = e.target.value;
-        if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
-            ytPlayer.setVolume(volume);
-            saveToLS('pomodoroMusicVolume', volume);
-        }
+        radioPlayer.volume = volume / 100;
+        saveToLS('pomodoroMusicVolume', volume);
     }
 
     function openSettingsModal() { settingsModal.classList.remove('hidden'); }
     function closeSettingsModal() { settingsModal.classList.add('hidden'); }
 
-    function showTab(tabId) {
-        tabContents.forEach(content => content.classList.remove('active'));
-        tabs.forEach(tab => tab.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        if (tabId === 'stats-section') renderStats();
-        if (tabId === 'feedback-section') fetchReviews();
-    }
+    function openStatsModal() { statsModal.classList.remove('hidden'); renderStats(); }
+    function closeStatsModal() { statsModal.classList.add('hidden'); }
+
+    function openFeedbackModal() { feedbackModal.classList.remove('hidden'); fetchReviews(); }
+    function closeFeedbackModal() { feedbackModal.classList.add('hidden'); }
 
     function handleKeyboard(e) {
         if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
@@ -603,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
         skipBtn.addEventListener('click', () => switchMode());
 
         taskForm.addEventListener('submit', addTask);
-        document.getElementById('task-board').addEventListener('click', (e) => {
+        document.getElementById('grid-pomodoro-tasks').addEventListener('click', (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 const card = e.target.closest('.task-card');
                 const id = Number(card.dataset.id);
@@ -630,7 +634,14 @@ document.addEventListener('DOMContentLoaded', () => {
         volumeSlider.addEventListener('input', setVolume);
         themeToggleBtn.addEventListener('click', toggleTheme);
 
-        tabs.forEach(tab => tab.addEventListener('click', () => showTab(tab.dataset.tab)));
+        statsBtn.addEventListener('click', openStatsModal);
+        closeStatsModalBtn.addEventListener('click', closeStatsModal);
+        statsModal.addEventListener('click', (e) => e.target === statsModal && closeStatsModal());
+
+        feedbackBtn.addEventListener('click', openFeedbackModal);
+        closeFeedbackModalBtn.addEventListener('click', closeFeedbackModal);
+        feedbackModal.addEventListener('click', (e) => e.target === feedbackModal && closeFeedbackModal());
+
         document.addEventListener('keydown', handleKeyboard);
     }
 
