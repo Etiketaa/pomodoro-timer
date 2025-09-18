@@ -16,7 +16,7 @@ A simple Pomodoro Timer application built with Flask and JavaScript.
 1.  Clone the repository:
 
     ```
-    git clone https://github.com/your-username/pomodoro-app.git
+    git clone https://github.com/Etiketaa/pomodoro-app.git
     ```
 
 2.  Install the dependencies:
