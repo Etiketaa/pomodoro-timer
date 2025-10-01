@@ -37,10 +37,11 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column; /* Changed to column to stack top-music-player and app-container */
+    justify-content: flex-start; /* Align items to the start */
+    align-items: center; /* Center content horizontally */
     min-height: 100vh;
-    padding: 1rem;
+    padding: 0; /* Remove body padding as top-music-player and app-container will have their own */
     transition: background-color 0.3s, color 0.3s;
 }
 
@@ -48,6 +49,127 @@ body {
 #youtube-player {
     display: none;
 }
+
+/* New Top Music Player Container */
+#top-music-player-container {
+    width: 100%;
+    background-color: var(--surface-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 0.5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+#top-music-player-container .music-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Reduced gap */
+    padding: 0.4rem; /* Reduced padding */
+    border: 1px solid var(--border-color);
+    border-radius: 30px; /* More rounded */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    justify-content: center; /* Center controls */
+    max-width: 100%;
+    overflow: hidden; /* Hide overflow */
+}
+
+/* Grouping main controls */
+.main-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Adjustments for elements inside music-controls */
+.station-selector select {
+    padding: 0.4rem 0.6rem;
+    border: none; /* Remove border */
+    border-radius: 20px; /* Make it pill-shaped */
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    cursor: pointer;
+    min-width: 120px;
+    transition: background-color 0.2s;
+}
+
+.station-selector select:hover {
+    background-color: var(--border-color);
+}
+
+#custom-station-input-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-grow: 1;
+}
+
+#custom-station-input-container input {
+    flex-grow: 1;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+#custom-station-input-container button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+#custom-station-input-container button:hover {
+    background-color: #2563eb; /* Darker blue on hover */
+}
+
+.radio-status-display {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left; /* Align to the left */
+    padding: 0 0.75rem; /* Add some padding */
+    font-size: 0.85rem;
+    color: var(--text-secondary-color);
+    min-width: 100px; /* Minimum width */
+    max-width: 300px; /* Max width to prevent it from taking too much space */
+}
+
+/* Style for the play/pause button */
+#music-toggle-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#music-toggle-btn:hover {
+    background-color: #2563eb; /* Darker blue on hover */
+    transform: scale(1.05);
+}
+
+/* Volume slider container */
+.volume-container {
+    display: flex;
+    align-items: center;
+    width: 100px; /* Give it a fixed width */
+}
+
 
 .app-container {
     width: 100%;
@@ -201,6 +323,7 @@ button {
     font-family: var(--font-primary);
     background-color: var(--background-color);
     color: var(--text-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 #task-form button {
@@ -291,7 +414,8 @@ button {
 }
 
 /* Radio and Weather Widgets */
-#grid-radio, #grid-weather {
+/* Removed #grid-radio styles as it's moved */
+#grid-weather {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -300,24 +424,11 @@ button {
     padding: 0.75rem; /* Más compacto */
 }
 
-#grid-radio .music-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 4px;
-    border: 1px solid var(--border-color);
-    border-radius: 24px;
-    margin-bottom: 0.5rem;
-}
+/* Removed #grid-radio .music-controls styles as it's moved */
 
 .volume-container {
-    width: 0;
-    overflow: hidden;
-    transition: width 0.3s ease-in-out;
-}
-
-.music-controls:hover .volume-container, .volume-container:hover {
-    width: 60px; /* Más pequeño para móvil */
+    width: 80px; /* Fixed width for visibility */
+    flex-shrink: 0; /* Prevent it from shrinking */
 }
 
 #volume-slider {
@@ -334,10 +445,7 @@ button {
     height: 12px;
 }
 
-#radio-status {
-    font-size: 0.85rem;
-    color: var(--text-secondary-color);
-}
+/* Removed #radio-status styles as it's moved */
 
 #grid-weather .weather-widget {
     display: flex;
@@ -574,13 +682,9 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
     margin-bottom: 0.4rem;
 }
 
-.review-card .review-name {
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
+.review-card .review-name,
 .review-card .review-rating {
-    color: #ffc107;
+    font-weight: 700;
     font-size: 0.9rem;
 }
 
@@ -653,6 +757,7 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
     }
 
     button {
+        font-family: var(--font-primary);
         font-size: 1rem;
         padding: 0.75rem 1.5rem;
     }
@@ -705,6 +810,213 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
 
     #radio-status {
         font-size: 0.95rem;
+    }
+
+    #grid-weather .weather-widget {
+        display: flex;
+        flex-direction: column; /* Apilar elementos en móvil */
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    #grid-weather .weather-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    #grid-weather .temperature {
+        font-size: 1.2rem;
+    }
+
+    #grid-weather .description, #grid-weather .location {
+        font-size: 0.9rem;
+    }
+
+    .modal-content {
+        padding: 2rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+
+    #close-modal-btn, #close-stats-modal-btn, #close-feedback-modal-btn, #close-task-details-modal-btn {
+        font-size: 2rem;
+    }
+
+    .form-group label {
+        font-size: 1rem;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], textarea {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+
+    .save-btn {
+        padding: 1rem 2rem;
+    }
+
+    .feedback-form-card {
+        margin-bottom: 2rem;
+    }
+
+    .reviews-container {
+        gap: 1rem;
+    }
+
+    .reviews-container h3 {
+        font-size: 1.25rem;
+    }
+
+    .review-card {
+        padding: 1rem;
+    }
+
+    .review-card .review-name,
+    .review-card .review-rating {
+        font-size: 1rem;
+    }
+
+    .review-card .review-message {
+    font-size: 0.9rem;
+}
+
+/* Stats Section specific styles (now in modal) */
+.stats-summary {
+    display: flex;
+    justify-content: space-around;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-box {
+    text-align: center;
+    background-color: var(--background-color);
+    padding: 0.8rem;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.stat-box h3 {
+    font-size: 1rem;
+    color: var(--text-secondary-color);
+    margin-bottom: 0.4rem;
+}
+
+.stat-box p {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.chart-container {
+    position: relative;
+    height: 200px; /* Altura fija para el gráfico en móvil */
+    width: 100%;
+}
+
+/* Ocultar el contenedor secundario que contenía las pestañas */
+.app-container-secondary {
+    display: none; 
+}
+
+/* --- Responsive Styles --- */
+
+/* Tablet devices (768px and up) */
+@media (min-width: 768px) {
+    .app-container {
+        max-width: 800px;
+        padding: 1.5rem;
+    }
+
+    .grid-area {
+        padding: 1.2rem;
+    }
+
+    #grid-pomodoro-tasks header {
+        margin-bottom: 1.5rem;
+    }
+
+    #timer-display {
+        font-size: 5rem;
+    }
+
+    .timer-controls {
+        gap: 1rem;
+    }
+
+    button {
+        font-family: var(--font-primary);
+        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
+    }
+
+    #task-form input {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+
+    #task-form button {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5rem;
+    }
+
+    .task-column h3 {
+        font-size: 1.1rem;
+    }
+
+    .task-card {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .task-card .task-text {
+        font-size: 1rem;
+    }
+
+    .indicator {
+        font-size: 0.8rem;
+    }
+
+    .volume-container {
+        width: 80px; /* Volver al tamaño original en tablet */
+    }
+
+    #volume-slider {
+        height: 4px;
+    }
+    
+    #volume-slider::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px;
+    }
+    
+    #volume-slider::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+    }
+
+    #radio-status {
+        font-size: 0.95rem;
+    }
+
+    #grid-weather .weather-widget {
+        display: flex;
+        flex-direction: column; /* Apilar elementos en móvil */
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    #grid-weather .weather-icon {
+        width: 24px;
+        height: 24px;
     }
 
     #grid-weather .temperature {

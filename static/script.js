@@ -13,13 +13,9 @@ async function initWeather() {
             await getWeatherData(latitude, longitude);
         }, (error) => {
             console.error('Error obteniendo la ubicación:', error);
-            // Optionally, fetch weather for a default city if location is denied
-            // getWeatherData(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
         });
     } else {
         console.warn('Geolocalización no soportada por el navegador.');
-        // Optionally, fetch weather for a default city
-        // getWeatherData(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
     }
 }
 
@@ -46,9 +42,6 @@ async function getWeatherData(latitude, longitude) {
     } catch (error) {
         console.error('Error al obtener el clima:', error);
         temperatureElement.textContent = 'Error';
-        descriptionElement.textContent = '';
-        locationElement.textContent = '';
-        iconElement.style.backgroundImage = '';
     }
 }
 
@@ -76,51 +69,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const startPauseBtn = document.getElementById('start-pause-btn');
     const resetBtn = document.getElementById('reset-btn');
     const skipBtn = document.getElementById('skip-btn');
-
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
-
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
     const settingsForm = document.getElementById('settings-form');
-
-    const musicToggleBtn = document.getElementById('music-toggle-btn');
-    const volumeSlider = document.getElementById('volume-slider');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const statsBtn = document.getElementById('stats-btn');
     const feedbackBtn = document.getElementById('feedback-btn');
-
     const pomodorosTodaySpan = document.getElementById('pomodoros-today');
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
     const chartCanvas = document.getElementById('pomodoro-chart');
-
     const pomodoroImage = document.getElementById('pomodoro-image');
-
     const feedbackForm = document.getElementById('feedback-form');
     const reviewsList = document.getElementById('reviews-list');
-
     const currentTaskDisplay = document.getElementById('current-task-display');
     const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
-
     const alarmSound = new Audio('/static/alarm.mp3');
     const radioPlayer = document.getElementById('radio-player');
-
     const taskDetailsModal = document.getElementById('task-details-modal');
     const closeTaskDetailsModalBtn = document.getElementById('close-task-details-modal-btn');
     const taskDetailsForm = document.getElementById('task-details-form');
-
-    // New modal elements for Stats and Feedback
     const statsModal = document.getElementById('stats-modal');
     const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
     const feedbackModal = document.getElementById('feedback-modal');
     const closeFeedbackModalBtn = document.getElementById('close-feedback-modal-btn');
+    // New instructions modal elements
+    const instructionsBtn = document.getElementById('instructions-btn');
+    const instructionsModal = document.getElementById('instructions-modal');
+    const closeInstructionsModalBtn = document.getElementById('close-instructions-modal-btn');
+
 
     // --- STATE ---
     let settings = {};
-    let tasks = []; // Single array for all tasks
+    let tasks = [];
     let stats = {};
-
     let timerId = null;
     let mode = 'pomodoro';
     let remainingTime = 0;
@@ -137,36 +121,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resetTimer();
         renderTasks();
         renderStats();
+        setupMusicPlayer(); // Music player setup
         setupEventListeners();
         initSortable();
         initWeather();
 
-        // Set initial volume for radio player
-        const initialVolume = getFromLS('pomodoroMusicVolume', 50);
-        radioPlayer.volume = initialVolume / 100;
-        volumeSlider.value = initialVolume;
-
-        // Update play/pause icons based on initial state
-        const playIcon = document.getElementById('play-icon');
-        const pauseIcon = document.getElementById('pause-icon');
-        if (radioPlayer.paused) {
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
-        } else {
-            playIcon.classList.add('hidden');
-            pauseIcon.classList.remove('hidden');
-        }
-
-        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered! Scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('Service Worker registration failed: ', err);
-                    });
+                    .then(registration => console.log('Service Worker registered! Scope: ', registration.scope))
+                    .catch(err => console.log('Service Worker registration failed: ', err));
             });
         }
     }
@@ -222,15 +186,12 @@ document.addEventListener('DOMContentLoaded', () => {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
         if (mode === 'pomodoro') {
-            // Inicia la animación del tomate
-            pomodoroImage.src = '/static/images/pomo-2.png'; // Asegura que empieza en pomo-2
+            pomodoroImage.src = '/static/images/pomo-2.png';
             animationIntervalId = setInterval(() => {
-                if (pomodoroImage.src.includes('pomo-1.png')) {
-                    pomodoroImage.src = '/static/images/pomo-2.png';
-                } else {
-                    pomodoroImage.src = '/static/images/pomo-1.png';
-                }
-            }, 500); // Alterna cada 0.5 segundos
+                pomodoroImage.src = pomodoroImage.src.includes('pomo-1.png') 
+                    ? '/static/images/pomo-2.png' 
+                    : '/static/images/pomo-1.png';
+            }, 500);
         }
         updateCurrentTaskDisplay();
         timerId = setInterval(() => {
@@ -251,8 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         isPaused = true;
         startPauseBtn.textContent = 'INICIAR';
-        clearInterval(animationIntervalId); // Detiene la animación
-        pomodoroImage.src = '/static/images/pomo-1.png'; // Vuelve a la imagen inicial
+        clearInterval(animationIntervalId);
+        pomodoroImage.src = '/static/images/pomo-1.png';
         clearInterval(timerId);
     }
 
@@ -276,21 +237,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- TASKS (KANBAN BOARD) ---
-    function loadTasks() {
-        tasks = getFromLS('pomodoroTasks', []);
-    }
-
-    function saveTasks() {
-        saveToLS('pomodoroTasks', tasks);
-    }
+    function loadTasks() { tasks = getFromLS('pomodoroTasks', []); }
+    function saveTasks() { saveToLS('pomodoroTasks', tasks); }
 
     function renderTasks() {
-        // Update taskColumns reference to target the specific grid areas
         const todoColumnElement = document.querySelector('#grid-todo-column .task-list-column');
         const inProgressColumnElement = document.querySelector('#grid-inprogress-column .task-list-column');
         const doneColumnElement = document.querySelector('#grid-done-column .task-list-column');
 
-        // Clear existing tasks
         todoColumnElement.innerHTML = '';
         inProgressColumnElement.innerHTML = '';
         doneColumnElement.innerHTML = '';
@@ -312,21 +266,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 columnElement.appendChild(card);
 
-                const taskText = card.querySelector('.task-text');
-                taskText.addEventListener('blur', (e) => {
-                    updateTaskText(task.id, e.target.textContent);
-                });
-
+                card.querySelector('.task-text').addEventListener('blur', (e) => updateTaskText(task.id, e.target.textContent));
+                
                 const indicators = card.querySelector('.task-indicators');
-                if (task.description) {
-                    indicators.innerHTML += '<span class="indicator">&#9776;</span>';
-                }
-                if (task.dueDate) {
-                    indicators.innerHTML += '<span class="indicator">&#128197;</span>';
-                }
-                if (task.labels && task.labels.length > 0) {
-                    indicators.innerHTML += '<span class="indicator">&#127991;</span>';
-                }
+                if (task.description) indicators.innerHTML += '<span class="indicator">&#9776;</span>';
+                if (task.dueDate) indicators.innerHTML += '<span class="indicator">&#128197;</span>';
+                if (task.labels && task.labels.length > 0) indicators.innerHTML += '<span class="indicator">&#127991;</span>';
             }
         });
         updateCurrentTaskDisplay();
@@ -385,7 +330,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initSortable() {
-        // Update taskColumns reference for Sortable.js
         const todoColumnElement = document.querySelector('#grid-todo-column .task-list-column');
         const inProgressColumnElement = document.querySelector('#grid-inprogress-column .task-list-column');
         const doneColumnElement = document.querySelector('#grid-done-column .task-list-column');
@@ -399,14 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const taskId = evt.item.dataset.id;
                     const newStatus = evt.to.dataset.status;
                     const task = tasks.find(t => t.id == taskId);
-                    if (task) {
-                        task.status = newStatus;
-                    }
+                    if (task) task.status = newStatus;
                     
-                    // Reorder tasks array based on DOM
                     const newOrderedTasks = [];
                     [todoColumnElement, inProgressColumnElement, doneColumnElement].forEach(col => {
-                        const status = col.dataset.status;
                         col.querySelectorAll('.task-card').forEach(card => {
                             const id = card.dataset.id;
                             const foundTask = tasks.find(t => t.id == id);
@@ -416,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tasks = newOrderedTasks;
 
                     saveTasks();
-                    renderTasks(); // Re-render to ensure consistency
+                    renderTasks();
                 }
             });
         });
@@ -430,18 +370,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentTask) {
             currentTaskTextSpan.textContent = currentTask.text;
             currentTaskDisplay.classList.remove('hidden');
-        } else {
-            currentTaskDisplay.classList.add('hidden');
         }
     }
 
     // --- FEEDBACK ---
-    const FIREBASE_URL = 'https://xmenosmasprendas-3b0ad-default-rtdb.firebaseio.com/'; // <-- AQUÍ VA TU URL DE FIREBASE
+    const FIREBASE_URL = 'https://xmenosmasprendas-3b0ad-default-rtdb.firebaseio.com/';
 
     async function submitFeedback(e) {
         e.preventDefault();
         if (!FIREBASE_URL) {
-            alert('La funcionalidad de Feedback no está configurada. El desarrollador debe añadir la URL de Firebase.');
+            alert('La funcionalidad de Feedback no está configurada.');
             return;
         }
 
@@ -465,16 +403,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('No se pudo enviar el feedback.');
             
             feedbackForm.reset();
-            fetchReviews(); // Refresh reviews list
+            fetchReviews();
             alert('¡Gracias por tu feedback!');
         } catch (error) {
             console.error("Error enviando feedback:", error);
-            alert('Hubo un error al enviar tu feedback. Inténtalo de nuevo.');
+            alert('Hubo un error al enviar tu feedback.');
         }
     }
 
     async function fetchReviews() {
-        if (!FIREBASE_URL) return; // No hacer nada si la URL no está configurada
+        if (!FIREBASE_URL) return;
 
         reviewsList.innerHTML = '<p>Cargando reseñas...</p>';
         try {
@@ -492,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderReviews(reviews) {
         reviewsList.innerHTML = '';
         if (!reviews) {
-            reviewsList.innerHTML = '<p>Aún no hay reseñas. ¡Sé el primero!</p>'
+            reviewsList.innerHTML = '<p>Aún no hay reseñas. ¡Sé el primero!</p>';
             return;
         }
 
@@ -511,14 +449,122 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- STATS ---
-    function loadStats() {
-        stats = getFromLS('pomodoroStats', {});
+    // --- MUSIC PLAYER ---
+    const MUSIC_STATIONS = {
+        'aspen': { name: 'FM Aspen', url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/ASPEN.mp3' },
+        'lofi': { name: 'Lofi / Chillhop', url: 'https://stream.zeno.fm/umhxwwtke0hvv' }, // Updated Lo-fi URL
+        'synthwave': { name: 'Synthwave', url: 'https://stream.nightride.fm/nightride.m4a' },
+        'classical': { name: 'Clásica (Barroca)', url: 'http://wshu.streamguys.org/wshu-baroque-mp3' },
+        'custom': { name: 'URL Personalizada', url: '' }
+    };
+
+    const musicToggleBtn = document.getElementById('music-toggle-btn');
+    const volumeSlider = document.getElementById('volume-slider');
+    const stationSelect = document.getElementById('music-station-select');
+    const customStationInputContainer = document.getElementById('custom-station-input-container');
+    const customStationUrlInput = document.getElementById('custom-station-url');
+    const customStationBtn = document.getElementById('custom-station-btn');
+    const radioStatus = document.getElementById('radio-status');
+
+    function setupMusicPlayer() {
+        Object.keys(MUSIC_STATIONS).forEach(key => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = MUSIC_STATIONS[key].name;
+            stationSelect.appendChild(option);
+        });
+
+        let lastStation = getFromLS('pomodoroLastStation', { key: 'aspen', customUrl: '' });
+        stationSelect.value = lastStation.key;
+        
+        if (lastStation.key === 'custom' && lastStation.customUrl) {
+            MUSIC_STATIONS.custom.url = lastStation.customUrl;
+            customStationUrlInput.value = lastStation.customUrl;
+            radioPlayer.src = lastStation.customUrl;
+            radioStatus.textContent = 'Personalizada';
+        } else {
+            if (!MUSIC_STATIONS[lastStation.key]) lastStation.key = 'aspen';
+            radioPlayer.src = MUSIC_STATIONS[lastStation.key].url;
+            radioStatus.textContent = MUSIC_STATIONS[lastStation.key].name;
+        }
+        
+        customStationInputContainer.classList.toggle('hidden', lastStation.key !== 'custom');
+
+        const initialVolume = getFromLS('pomodoroMusicVolume', 50);
+        radioPlayer.volume = initialVolume / 100;
+        volumeSlider.value = initialVolume;
+        updatePlayPauseIcons();
+
+        stationSelect.addEventListener('change', handleStationChange);
+        customStationBtn.addEventListener('click', loadCustomStation);
+        musicToggleBtn.addEventListener('click', toggleMusic);
+        volumeSlider.addEventListener('input', setVolume);
+        radioPlayer.addEventListener('play', updatePlayPauseIcons);
+        radioPlayer.addEventListener('pause', updatePlayPauseIcons);
     }
 
-    function saveStats() {
-        saveToLS('pomodoroStats', stats);
+    function handleStationChange(e) {
+        const selectedKey = e.target.value;
+        const wasPaused = radioPlayer.paused;
+        customStationInputContainer.classList.toggle('hidden', selectedKey !== 'custom');
+        radioStatus.textContent = MUSIC_STATIONS[selectedKey].name;
+
+        if (selectedKey !== 'custom') {
+            radioPlayer.src = MUSIC_STATIONS[selectedKey].url;
+            saveToLS('pomodoroLastStation', { key: selectedKey, customUrl: '' });
+            if (!wasPaused) radioPlayer.play();
+        }
     }
+
+    function loadCustomStation() {
+        const url = customStationUrlInput.value.trim();
+        if (url) {
+            const wasPaused = radioPlayer.paused;
+            radioPlayer.src = url;
+            radioStatus.textContent = 'Personalizada';
+            saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url });
+            if (!wasPaused) radioPlayer.play();
+        }
+    }
+
+    function toggleMusic() {
+        if (!radioPlayer.src) {
+            alert("Por favor, selecciona una estación o introduce una URL personalizada.");
+            return;
+        }
+        if (radioPlayer.paused) {
+            radioPlayer.play().catch(e => {
+                console.error("Error al reproducir audio:", e);
+                alert("No se pudo reproducir el audio. Verifica la URL del stream o los permisos del navegador.");
+            });
+        } else {
+            radioPlayer.pause();
+        }
+    }
+    
+    function updatePlayPauseIcons() {
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        if (!playIcon || !pauseIcon) return;
+        
+        if (radioPlayer.paused) {
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+        } else {
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+        }
+    }
+
+    function setVolume(e) {
+        const volume = e.target.value;
+        radioPlayer.volume = volume / 100;
+        saveToLS('pomodoroMusicVolume', volume);
+    }
+
+    // --- STATS ---
+    function loadStats() { stats = getFromLS('pomodoroStats', {}); }
+    function saveStats() { saveToLS('pomodoroStats', stats); }
 
     function recordPomodoro() {
         const today = new Date().toISOString().slice(0, 10);
@@ -564,34 +610,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- UI & EVENT LISTENERS ---
-    function toggleMusic() {
-        const playIcon = document.getElementById('play-icon');
-        const pauseIcon = document.getElementById('pause-icon');
-        if (radioPlayer.paused) {
-            radioPlayer.play();
-            playIcon.classList.add('hidden');
-            pauseIcon.classList.remove('hidden');
-        } else {
-            radioPlayer.pause();
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
-        }
-    }
-
-    function setVolume(e) {
-        const volume = e.target.value;
-        radioPlayer.volume = volume / 100;
-        saveToLS('pomodoroMusicVolume', volume);
-    }
-
     function openSettingsModal() { settingsModal.classList.remove('hidden'); }
     function closeSettingsModal() { settingsModal.classList.add('hidden'); }
-
     function openStatsModal() { statsModal.classList.remove('hidden'); renderStats(); }
     function closeStatsModal() { statsModal.classList.add('hidden'); }
-
     function openFeedbackModal() { feedbackModal.classList.remove('hidden'); fetchReviews(); }
     function closeFeedbackModal() { feedbackModal.classList.add('hidden'); }
+    // New instructions modal functions
+    function openInstructionsModal() { instructionsModal.classList.remove('hidden'); }
+    function closeInstructionsModal() { instructionsModal.classList.add('hidden'); }
 
     function handleKeyboard(e) {
         if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
@@ -609,12 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('grid-pomodoro-tasks').addEventListener('click', (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 const card = e.target.closest('.task-card');
-                const id = Number(card.dataset.id);
-                deleteTask(id);
+                deleteTask(Number(card.dataset.id));
             } else if (e.target.closest('.task-card')) {
-                const card = e.target.closest('.task-card');
-                const id = Number(card.dataset.id);
-                openTaskDetailsModal(id);
+                openTaskDetailsModal(Number(e.target.closest('.task-card').dataset.id));
             }
         });
 
@@ -629,8 +653,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         feedbackForm.addEventListener('submit', submitFeedback);
 
-        musicToggleBtn.addEventListener('click', toggleMusic);
-        volumeSlider.addEventListener('input', setVolume);
         themeToggleBtn.addEventListener('click', toggleTheme);
 
         statsBtn.addEventListener('click', openStatsModal);
@@ -640,6 +662,11 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackBtn.addEventListener('click', openFeedbackModal);
         closeFeedbackModalBtn.addEventListener('click', closeFeedbackModal);
         feedbackModal.addEventListener('click', (e) => e.target === feedbackModal && closeFeedbackModal());
+
+        // New instructions modal event listeners
+        instructionsBtn.addEventListener('click', openInstructionsModal);
+        closeInstructionsModalBtn.addEventListener('click', closeInstructionsModal);
+        instructionsModal.addEventListener('click', (e) => e.target === instructionsModal && closeInstructionsModal());
 
         document.addEventListener('keydown', handleKeyboard);
     }
