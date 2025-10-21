@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- FEEDBACK ---
-    const FIREBASE_URL = 'https://xmenosmasprendas-3b0ad-default-rtdb.firebaseio.com/';
+    const FIREBASE_URL = 'https://pomodoro-feedback-default-rtdb.firebaseio.com';
 
     async function submitFeedback(e) {
         e.preventDefault();
