@@ -1274,3 +1274,22 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
         display: contents; /* Make children participate in parent's grid */
     }
 }
+
+/* Adjustments for smaller height screens like 1280x800 */
+@media (min-width: 1024px) and (max-height: 850px) {
+    body {
+        padding: 1rem;
+    }
+
+    .app-container {
+        height: calc(100vh - 2rem);
+    }
+
+    #timer-display {
+        font-size: 4.5rem;
+    }
+
+    #grid-pomodoro-tasks .timer-container {
+        flex-grow: 0.5; /* Adjust vertical growth */
+    }
+}
