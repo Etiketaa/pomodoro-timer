@@ -621,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeInstructionsModal() { instructionsModal.classList.add('hidden'); }
 
     function handleKeyboard(e) {
-        if (e.target.tagName === 'INPUT' || e.target.isContentEditable) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
         if (e.code === 'Space') { e.preventDefault(); isPaused ? startTimer() : pauseTimer(); }
         if (e.code === 'KeyR') resetTimer();
         if (e.code === 'KeyN') switchMode();
