@@ -1186,12 +1186,14 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
     }
 
     #grid-pomodoro-tasks header {
+        order: 1;
         border-bottom: none;
         padding: 0;
         margin-bottom: 1rem;
     }
 
     #grid-pomodoro-tasks .timer-container {
+        order: 4;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -1199,11 +1201,25 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
     }
 
     #grid-pomodoro-tasks #task-board-container {
-        margin-top: auto; /* Empuja el formulario de tareas hacia abajo */
+        order: 2;
+        margin-top: 1.5rem;
+    }
+
+    #grid-pomodoro-tasks #current-task-display {
+        order: 3;
+    }
+
+    #grid-weather {
+        grid-area: 1 / 4 / 2 / 5;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
     }
 
     #grid-todo-column {
-        grid-area: 1 / 4 / 2 / 6;
+        grid-area: 1 / 5 / 2 / 6;
     }
 
     #grid-inprogress-column {
@@ -1215,25 +1231,11 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
     }
 
     #grid-radio {
-        grid-area: 4 / 4 / 5 / 5;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
+        display: none; /* No longer in the grid */
     }
 
     #grid-radio .music-controls {
-        margin-bottom: 0.5rem;
-    }
-
-    #grid-weather {
-        grid-area: 4 / 5 / 5 / 6;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
+        display: none;
     }
 
     #grid-weather .weather-widget {
