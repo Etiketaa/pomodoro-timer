@@ -63,6 +63,8 @@ const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) |
 const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
 document.addEventListener('DOMContentLoaded', () => {
+    let deletionTimers = {}; // Global object to store setTimeout IDs
+
     // --- DOM ELEMENTS ---
     const timerDisplay = document.getElementById('timer-display');
     const modeDisplay = document.getElementById('mode-display');
@@ -81,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomodorosTodaySpan = document.getElementById('pomodoros-today');
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
     const chartCanvas = document.getElementById('pomodoro-chart');
-    const pomodoroImage = document.getElementById('pomodoro-image');
+    
     const feedbackForm = document.getElementById('feedback-form');
     const reviewsList = document.getElementById('reviews-list');
     const currentTaskDisplay = document.getElementById('current-task-display');
@@ -117,6 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTheme();
         loadSettings();
         loadTasks();
+        // Reschedule deletions for 'done' tasks on load
+        tasks.forEach(task => {
+            if (task.status === 'done' && task.deletionTime) {
+                scheduleTaskDeletion(task.id, task.deletionTime);
+            }
+        });
         loadStats();
         resetTimer();
         renderTasks();
@@ -185,14 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
-        if (mode === 'pomodoro') {
-            pomodoroImage.src = '/static/images/pomo-2.png';
-            animationIntervalId = setInterval(() => {
-                pomodoroImage.src = pomodoroImage.src.includes('pomo-1.png') 
-                    ? '/static/images/pomo-2.png' 
-                    : '/static/images/pomo-1.png';
-            }, 500);
-        }
+        
         updateCurrentTaskDisplay();
         timerId = setInterval(() => {
             remainingTime--;
@@ -212,15 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         isPaused = true;
         startPauseBtn.textContent = 'INICIAR';
-        clearInterval(animationIntervalId);
-        pomodoroImage.src = '/static/images/pomo-1.png';
+        
         clearInterval(timerId);
     }
 
     function resetTimer() {
         pauseTimer();
         remainingTime = settings[mode] * 60;
-        pomodoroImage.src = '/static/images/pomo-1.png';
         updateTimerDisplay();
     }
 
@@ -228,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseTimer();
         mode = nextMode || getNextMode();
         modeDisplay.textContent = { pomodoro: 'Pomodoro', shortBreak: 'Descanso Corto', longBreak: 'Descanso Largo' }[mode];
-        pomodoroImage.src = '/static/images/pomo-1.png';
         resetTimer();
     }
 
@@ -258,6 +256,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (columnElement) {
                 const card = document.createElement('div');
                 card.className = 'task-card';
+                if (task.status === 'done') {
+                    card.classList.add('task-done'); // Add class for strikethrough
+                    if (task.deletionTime) {
+                        scheduleTaskDeletion(task.id, task.deletionTime); // Reschedule deletion on render
+                    }
+                }
                 card.setAttribute('data-id', task.id);
                 card.innerHTML = `
                     <span class="task-text" contenteditable="true">${task.text}</span>
@@ -290,8 +294,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function deleteTask(id) {
         tasks = tasks.filter(t => t.id !== id);
+        // Clear timer if task was scheduled for deletion
+        if (deletionTimers[id]) {
+            clearTimeout(deletionTimers[id]);
+            delete deletionTimers[id];
+        }
         saveTasks();
         renderTasks();
+    }
+
+    function scheduleTaskDeletion(taskId, deletionTime) {
+        // Clear any existing timer for this task
+        if (deletionTimers[taskId]) {
+            clearTimeout(deletionTimers[taskId]);
+            delete deletionTimers[taskId];
+        }
+
+        const delay = deletionTime - Date.now();
+
+        if (delay > 0) {
+            deletionTimers[taskId] = setTimeout(() => {
+                deleteTask(taskId);
+                delete deletionTimers[taskId]; // Clean up after deletion
+            }, delay);
+        } else {
+            // If delay is 0 or negative, delete immediately (task should have been deleted)
+            deleteTask(taskId);
+        }
     }
 
     function updateTaskText(id, text) {
@@ -340,16 +369,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
                 onEnd: (evt) => {
-                    const taskId = evt.item.dataset.id;
+                    const taskId = Number(evt.item.dataset.id); // Ensure taskId is a number
                     const newStatus = evt.to.dataset.status;
-                    const task = tasks.find(t => t.id == taskId);
-                    if (task) task.status = newStatus;
+                    const task = tasks.find(t => t.id === taskId); // Use strict equality
+
+                    if (task) {
+                        task.status = newStatus;
+                        if (newStatus === 'done') {
+                            task.deletionTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+                            scheduleTaskDeletion(task.id, task.deletionTime);
+                        } else {
+                            delete task.deletionTime; // Remove deletion time if moved out of done
+                            if (deletionTimers[task.id]) { // Clear any pending timer
+                                clearTimeout(deletionTimers[task.id]);
+                                delete deletionTimers[task.id];
+                            }
+                        }
+                    }
                     
                     const newOrderedTasks = [];
                     [todoColumnElement, inProgressColumnElement, doneColumnElement].forEach(col => {
                         col.querySelectorAll('.task-card').forEach(card => {
-                            const id = card.dataset.id;
-                            const foundTask = tasks.find(t => t.id == id);
+                            const id = Number(card.dataset.id); // Ensure id is a number
+                            const foundTask = tasks.find(t => t.id === id); // Use strict equality
                             if(foundTask) newOrderedTasks.push(foundTask);
                         });
                     });
@@ -633,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
         skipBtn.addEventListener('click', () => switchMode());
 
         taskForm.addEventListener('submit', addTask);
-        document.getElementById('grid-pomodoro-tasks').addEventListener('click', (e) => {
+        document.querySelector('.app-container').addEventListener('click', (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 const card = e.target.closest('.task-card');
                 deleteTask(Number(card.dataset.id));
@@ -673,4 +715,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- START THE APP ---
     init();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    // --- NEW ACCORDION MENU LOGIC ---
+    const accordionToggle = document.getElementById('accordion-toggle');
+    const accordionMenu = document.getElementById('accordion-menu');
+
+    if (accordionToggle && accordionMenu) {
+        accordionToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the window click event from firing immediately
+            accordionMenu.classList.toggle('hidden');
+        });
+
+        // Close the menu if clicking outside of it
+        window.addEventListener('click', (e) => {
+            // Check if the menu is open and the click is not on the menu or the toggle button
+            if (!accordionMenu.classList.contains('hidden') && !accordionMenu.contains(e.target) && !accordionToggle.contains(e.target)) {
+                accordionMenu.classList.add('hidden');
+            }
+        });
+    }
 });
