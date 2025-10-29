@@ -6,16 +6,14 @@
       "use": "@vercel/python",
       "config": {
         "includeFiles": [
-          "../static/**",
-          "../templates/**",
+          "static/**",
+          "templates/**",
           "sw.js"
         ]
       }
     }
   ],
-  "rewrites": [
-    { "source": "/sw.js", "destination": "/sw.js" },
-    { "source": "/static/(.*)", "destination": "/static/$1" },
-    { "source": "/(.*)", "destination": "/api" }
+  "routes": [
+    { "src": "/(.*)", "dest": "/api" }
   ]
 }

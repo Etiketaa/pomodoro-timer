@@ -67,18 +67,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1.5rem;
+    padding: 0 1rem; /* Reducido para móviles */
     z-index: 1000;
 }
 
 .navbar-left h2 {
-    font-size: 1.2rem;
+    font-size: 1rem; /* Reducido para móviles */
     font-weight: 700;
     color: var(--primary-color);
 }
 
 .navbar-center .music-controls {
-    display: flex;
+    display: none; /* Oculto en móviles por defecto */
     align-items: center;
     gap: 0.5rem;
     border: 1px solid var(--border-color);
@@ -144,14 +144,14 @@ body {
 
 /* --- Contenido Principal --- */
 #main-content {
-    padding: 1.5rem;
+    padding: 1rem; /* Reducido para móviles */
     display: flex;
     justify-content: center;
 }
 
 .app-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 1200px; /* Ancho máximo para el contenedor */
     background-color: transparent; /* El fondo ahora está en el body */
     border-radius: 0;
     box-shadow: none;
@@ -180,7 +180,7 @@ body {
 
 #pomodoro-animation-container {
     margin: 0 auto 1rem;
-    max-width: 37%; /* Tamaño ajustado al 37% */
+    max-width: 80%; /* Más grande en móviles */
 }
 
 #pomodoro-video {
@@ -200,6 +200,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap; /* Para que los botones se ajusten en pantallas pequeñas */
 }
 
 /* --- Resto de los estilos (simplificado para brevedad) --- */
@@ -311,9 +312,51 @@ button {
     display: none !important;
 }
 
-/* --- Responsive y Flexbox Layout para Desktop --- */
+/* --- Responsive Media Queries --- */
 
-@media (min-width: 768px) {
+/* Small devices (phones, less than 600px) */
+@media (max-width: 599px) {
+    .navbar-left h2 {
+        font-size: 0.9rem;
+    }
+    .navbar-center {
+        display: none; /* Ocultar controles de música en el centro */
+    }
+    #main-content {
+        padding: 0.5rem;
+    }
+    .app-container {
+        gap: 0.5rem;
+    }
+    #timer-display {
+        font-size: 2rem;
+    }
+    .timer-controls {
+        gap: 0.5rem;
+    }
+    #start-pause-btn, .secondary-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    .task-column h3 {
+        font-size: 0.9rem;
+    }
+}
+
+/* Medium devices (tablets, 600px and up) */
+@media (min-width: 600px) {
+    #main-navbar {
+        padding: 0 1.5rem;
+    }
+    .navbar-left h2 {
+        font-size: 1.2rem;
+    }
+    .navbar-center .music-controls {
+        display: flex; /* Mostrar controles de música */
+    }
+    #main-content {
+        padding: 1.5rem;
+    }
     .app-container {
         max-width: 800px;
     }
@@ -323,25 +366,41 @@ button {
     .task-columns-tablet-group > .grid-area {
         flex: 1;
     }
+    #pomodoro-animation-container {
+        max-width: 50%;
+    }
 }
 
+/* Large devices (desktops, 1024px and up) */
 @media (min-width: 1024px) {
     .app-container {
         max-width: 1200px;
         flex-direction: row;
+        align-items: flex-start; /* Alinear items al inicio */
     }
     #grid-pomodoro-tasks {
-        flex: 2;
+        flex: 1.5; /* Más espacio para el pomodoro */
     }
     .task-columns-tablet-group {
+        flex: 2; /* Más espacio para las tareas */
+        flex-direction: row;
+    }
+    .misc-widgets-tablet-group {
         flex: 1;
         flex-direction: column;
     }
-    .misc-widgets-tablet-group { /* Added this rule */
-        flex: 1;
-        flex-direction: column;
+    #pomodoro-animation-container {
+        max-width: 37%;
     }
 }
+
+/* Extra large devices (large desktops, 1440px and up) */
+@media (min-width: 1440px) {
+    .app-container {
+        max-width: 1400px;
+    }
+}
+
 
 /* Modal Styles etc. */
 .modal-overlay {
@@ -350,19 +409,22 @@ button {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7); /* Más oscuro */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1001;
+    padding: 1rem;
 }
 
 .modal-content {
     background-color: var(--surface-color);
     padding: 1.5rem;
     border-radius: 16px;
-    width: 90%;
+    width: 100%;
     max-width: 500px;
+    max-height: 90vh; /* Altura máxima */
+    overflow-y: auto; /* Scroll si el contenido es muy largo */
 }
 
 /* (El resto de los estilos de modales, formularios, etc. se mantienen) */
@@ -593,3 +655,4 @@ button {
 .save-btn:hover {
     background-color: color-mix(in srgb, var(--primary-color) 80%, black);
 }
+/* No debugging styles in production */
