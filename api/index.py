@@ -1,6 +1,12 @@
 import os
+import sys
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
+
+# Add the api directory to sys.path so groq_client can be imported in Vercel
+api_dir = os.path.dirname(os.path.abspath(__file__))
+if api_dir not in sys.path:
+    sys.path.insert(0, api_dir)
 
 # Get the absolute path of the project root, which is one level up from the api directory
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
