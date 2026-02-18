@@ -1,0 +1,236 @@
+/* Tema Pastel Suave 🌸 */
+
+:root[data-theme="pastel"] {
+    /* Colores principales */
+    --primary-color: #FFB6C1;
+    /* Rosa suave */
+    --secondary-color: #87CEEB;
+    /* Azul cielo */
+    --accent-color: #98FB98;
+    /* Verde menta */
+    --warning-color: #FFFACD;
+    /* Amarillo pastel */
+    --success-color: #E6E6FA;
+    /* Lavanda */
+
+    /* Fondos */
+    --background-color: #FFF5F7;
+    /* Rosa muy claro */
+    --surface-color: #FFFFFF;
+    --card-background: linear-gradient(135deg, #FFE4E9, #E8F4F8);
+
+    /* Textos */
+    --text-color: #4A4A4A;
+    --text-secondary-color: #8B8B8B;
+
+    /* Bordes y sombras */
+    --border-color: #FFB6C1;
+    --shadow-color: rgba(255, 182, 193, 0.3);
+    --glow-color: rgba(255, 182, 193, 0.5);
+
+    /* Fuentes */
+    --font-primary: 'Inter', 'Segoe UI', sans-serif;
+    --font-display: 'Creepster', cursive;
+}
+
+body[data-theme="pastel"] {
+    background: linear-gradient(135deg, #FFF5F7 0%, #E8F4F8 100%);
+    color: var(--text-color);
+}
+
+/* Navbar pastel */
+[data-theme="pastel"] #main-navbar {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 4px 16px var(--shadow-color);
+}
+
+[data-theme="pastel"] .navbar-left h2 {
+    background: linear-gradient(90deg, #FFB6C1, #87CEEB, #98FB98);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        filter: hue-rotate(0deg);
+    }
+
+    50% {
+        filter: hue-rotate(20deg);
+    }
+}
+
+/* Grid areas pastel */
+[data-theme="pastel"] .grid-area {
+    background: linear-gradient(135deg, rgba(255, 228, 233, 0.8), rgba(232, 244, 248, 0.8));
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 8px 24px var(--shadow-color), 0 0 20px var(--glow-color);
+}
+
+[data-theme="pastel"] .grid-area:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--shadow-color), 0 0 30px var(--glow-color);
+}
+
+/* Botones pastel */
+[data-theme="pastel"] #start-pause-btn {
+    background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+    box-shadow: 0 4px 16px rgba(255, 105, 180, 0.4);
+}
+
+[data-theme="pastel"] #start-pause-btn:hover {
+    box-shadow: 0 6px 24px rgba(255, 105, 180, 0.6);
+    transform: translateY(-2px) scale(1.05);
+}
+
+[data-theme="pastel"] .secondary-btn {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.3), rgba(152, 251, 152, 0.3));
+    border: 2px solid var(--secondary-color);
+    color: var(--text-color);
+}
+
+[data-theme="pastel"] .secondary-btn:hover {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.5), rgba(152, 251, 152, 0.5));
+    border-color: var(--accent-color);
+}
+
+/* Tarjetas kanban pastel */
+[data-theme="pastel"] .task-card {
+    background: linear-gradient(135deg, #FFFFFF, #FFF0F5);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+[data-theme="pastel"] .task-card:hover {
+    transform: translateY(-4px) rotate(1deg);
+    box-shadow: 0 8px 24px var(--shadow-color), 0 0 20px var(--glow-color);
+    border-color: var(--secondary-color);
+}
+
+[data-theme="pastel"] .task-card::before {
+    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+}
+
+/* Columnas kanban pastel */
+[data-theme="pastel"] .task-list-column {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 240, 245, 0.6));
+    border: 2px dashed var(--primary-color);
+}
+
+[data-theme="pastel"] .task-column h3 {
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px var(--shadow-color);
+}
+
+/* Animación de corazones flotantes */
+@keyframes floatHearts {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+[data-theme="pastel"] .floating-hearts {
+    position: fixed;
+    bottom: -50px;
+    font-size: 2rem;
+    animation: floatHearts 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Timer display pastel */
+[data-theme="pastel"] #timer-display {
+    background: linear-gradient(135deg, #FFB6C1, #87CEEB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(255, 182, 193, 0.5));
+}
+
+/* Modo display pastel */
+[data-theme="pastel"] #mode-display {
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px var(--shadow-color);
+}
+
+/* Weather widget pastel */
+[data-theme="pastel"] .weather-widget {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 240, 245, 0.8));
+    border: 2px solid var(--primary-color);
+}
+
+/* Input pastel */
+[data-theme="pastel"] #task-input {
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--text-color);
+}
+
+[data-theme="pastel"] #task-input:focus {
+    border-color: var(--secondary-color);
+}
+
+/* Animación bounce para nuevas tareas */
+@keyframes bounceIn {
+    0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2) rotate(10deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+[data-theme="pastel"] .task-card.new-task {
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Brillos y partículas */
+@keyframes sparkle {
+
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+[data-theme="pastel"] .sparkle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, #FFB6C1, transparent);
+    border-radius: 50%;
+    animation: sparkle 1s ease-in-out infinite;
+    pointer-events: none;
+}

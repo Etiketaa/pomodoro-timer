@@ -2,18 +2,28 @@
 
 /* Estilos generales y variables de color */
 :root {
-    --primary-color: #f97316; /* Naranja Halloween */
-    --background-color: #1a1a1a; /* Negro oscuro */
-    --surface-color: #2a2a2a; /* Gris oscuro para superficies */
-    --text-color: #f0f0f0; /* Blanco grisáceo */
-    --text-secondary-color: #a0a0a0; /* Gris medio */
-    --border-color: #4a044e; /* Morado oscuro */
-    --shadow-color: rgba(0, 0, 0, 0.4); /* Sombra más oscura */
+    --primary-color: #f97316;
+    /* Naranja Halloween */
+    --background-color: #1a1a1a;
+    /* Negro oscuro */
+    --surface-color: #2a2a2a;
+    /* Gris oscuro para superficies */
+    --text-color: #f0f0f0;
+    /* Blanco grisáceo */
+    --text-secondary-color: #a0a0a0;
+    /* Gris medio */
+    --border-color: #4a044e;
+    /* Morado oscuro */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    /* Sombra más oscura */
     --success-color: #198754;
     --danger-color: #dc3545;
-    --font-primary: 'Inter', sans-serif; /* Mantener Inter como fuente principal para el cuerpo */
-    --font-display: 'Creepster', cursive; /* Nueva fuente para títulos */
-    --navbar-height: 60px; /* Altura de la nueva barra de navegación */
+    --font-primary: 'Poppins', 'Inter', sans-serif;
+    /* Poppins como fuente principal */
+    --font-display: 'Poppins', sans-serif;
+    /* Poppins para títulos */
+    --navbar-height: 60px;
+    /* Altura de la nueva barra de navegación */
 }
 
 body.dark-mode {
@@ -40,50 +50,77 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
-    padding-top: var(--navbar-height); /* Espacio para la navbar fija */
+    padding-top: var(--navbar-height);
+    /* Espacio para la navbar fija */
 }
 
-/* Halloween Font for Titles */
+/* Poppins for Titles */
 .navbar-left h2,
 .task-column h3,
 #timer-display {
     font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
-/* Adjust font size for timer display to match Creepster */
+/* Timer display size */
 #timer-display {
-    font-size: 3rem; /* Slightly larger for Creepster */
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -2px;
 }
 
-/* --- Nueva Barra de Navegación --- */
+/* --- Nueva Barra de Navegación con Glassmorphism --- */
 #main-navbar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: var(--navbar-height);
-    background-color: var(--surface-color);
-    box-shadow: 0 2px 8px var(--shadow-color);
+    background: rgba(42, 42, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(249, 115, 22, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1rem; /* Reducido para móviles */
+    padding: 0 1rem;
     z-index: 1000;
+    transition: all 0.3s ease;
 }
 
 .navbar-left h2 {
-    font-size: 1rem; /* Reducido para móviles */
+    font-size: 1rem;
     font-weight: 700;
     color: var(--primary-color);
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.navbar-left h2:hover {
+    text-shadow: 0 0 30px rgba(249, 115, 22, 0.8);
+    transform: scale(1.02);
 }
 
 .navbar-center .music-controls {
-    display: none; /* Oculto en móviles por defecto */
+    display: none;
     align-items: center;
     gap: 0.5rem;
-    border: 1px solid var(--border-color);
+    background: rgba(26, 26, 26, 0.6);
+    border: 1px solid rgba(249, 115, 22, 0.3);
     border-radius: 30px;
     padding: 0.4rem 0.8rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.navbar-center .music-controls:hover {
+    border-color: rgba(249, 115, 22, 0.5);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
 }
 
 #music-station-select {
@@ -92,12 +129,15 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 0.4rem 0.8rem;
-    appearance: none; /* Remove default browser styling */
+    appearance: none;
+    /* Remove default browser styling */
     cursor: pointer;
     font-family: var(--font-primary);
     font-size: 0.9rem;
-    line-height: 1.5; /* Adjust line-height for better vertical alignment */
-    min-width: 120px; /* Ensure it has a reasonable width */
+    line-height: 1.5;
+    /* Adjust line-height for better vertical alignment */
+    min-width: 120px;
+    /* Ensure it has a reasonable width */
 }
 
 #music-station-select:focus {
@@ -144,55 +184,87 @@ body {
 
 /* --- Contenido Principal --- */
 #main-content {
-    padding: 1rem; /* Reducido para móviles */
+    padding: 1.5rem 1rem;
     display: flex;
     justify-content: center;
+    min-height: calc(100vh - var(--navbar-height));
 }
 
 .app-container {
     width: 100%;
-    max-width: 1200px; /* Ancho máximo para el contenedor */
-    background-color: transparent; /* El fondo ahora está en el body */
+    max-width: 1400px;
+    background-color: transparent;
     border-radius: 0;
     box-shadow: none;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
 /* Ocultar elementos antiguos */
-#top-music-player-container, 
+#top-music-player-container,
 #grid-pomodoro-tasks header {
     display: none;
 }
 
-/* Estilos para las áreas */
+/* Estilos para las áreas con Glassmorphism */
 .grid-area {
-    background-color: var(--surface-color);
-    border-radius: 12px;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    padding: 1rem;
+    background: linear-gradient(135deg, rgba(42, 42, 42, 0.7), rgba(26, 26, 26, 0.85));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(74, 4, 78, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.grid-area:hover {
+    border-color: rgba(249, 115, 22, 0.3);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .timer-container {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #pomodoro-animation-container {
-    margin: 0 auto 1rem;
-    max-width: 80%; /* Más grande en móviles */
+    margin: 0 auto 1.25rem;
+    width: 100%;
+    max-width: 320px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 #pomodoro-video {
     width: 100%;
     height: auto;
+    display: block;
+}
+
+/* Mode label */
+#mode-display {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    opacity: 0.8;
+    margin-bottom: 0.25rem;
 }
 
 #timer-display {
-    font-size: 2.5rem; /* Tamaño de fuente reducido */
-    font-weight: 700;
+    font-size: 4rem;
+    font-weight: 800;
     line-height: 1;
-    margin: 1rem 0;
+    margin: 0.5rem 0 1rem;
+    letter-spacing: -3px;
+    color: var(--text-color);
+    text-shadow: 0 0 40px rgba(249, 115, 22, 0.2);
 }
 
 .timer-controls {
@@ -200,7 +272,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 0.75rem;
-    flex-wrap: wrap; /* Para que los botones se ajusten en pantallas pequeñas */
+    flex-wrap: wrap;
 }
 
 /* --- Resto de los estilos (simplificado para brevedad) --- */
@@ -226,21 +298,64 @@ button {
     font-weight: 500;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 #start-pause-btn {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), #ea580c);
     color: white;
     border: none;
-    padding: 0.6rem 1.2rem;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+#start-pause-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+}
+
+#start-pause-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 }
 
 .secondary-btn {
-    background-color: transparent;
-    color: var(--text-secondary-color);
-    border: 1px solid var(--border-color);
+    background: rgba(42, 42, 42, 0.6);
+    color: var(--text-color);
+    border: 1px solid rgba(74, 4, 78, 0.4);
     padding: 0.6rem 1rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.secondary-btn:hover {
+    background: rgba(42, 42, 42, 0.8);
+    border-color: rgba(249, 115, 22, 0.5);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
 }
 
 #task-form {
@@ -279,7 +394,8 @@ button {
 }
 
 #task-form button:hover {
-    background-color: rgba(59, 130, 246, 0.1); /* Light blue background on hover */
+    background-color: rgba(59, 130, 246, 0.1);
+    /* Light blue background on hover */
 }
 
 .task-columns-tablet-group {
@@ -289,23 +405,152 @@ button {
 }
 
 .task-column h3 {
-    font-size: 1rem;
-    font-weight: 500;
-    padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem;
-    border-bottom: 2px solid var(--border-color);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .task-list-column {
-    min-height: 100px;
-    border-radius: 8px;
-    padding: 0.5rem;
-    background-color: rgba(128, 128, 128, 0.05);
+    min-height: 200px;
+    border-radius: 12px;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px dashed rgba(249, 115, 22, 0.15);
+    transition: all 0.3s ease;
+}
+
+.task-list-column:hover {
+    border-color: rgba(249, 115, 22, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(249, 115, 22, 0.1);
+}
+
+/* Estilos modernos para las tarjetas del Kanban */
+.task-card {
+    background: linear-gradient(135deg, rgba(42, 42, 42, 0.9), rgba(26, 26, 26, 0.95));
+    border: 1px solid rgba(74, 4, 78, 0.4);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    cursor: move;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.task-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--primary-color), rgba(249, 115, 22, 0.3));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(249, 115, 22, 0.5);
+    box-shadow: 0 6px 16px rgba(249, 115, 22, 0.2), 0 0 20px rgba(249, 115, 22, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.task-card:hover::before {
+    opacity: 1;
+}
+
+.task-card .task-text {
+    color: var(--text-color);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.task-card .task-text:focus {
+    color: var(--primary-color);
+}
+
+.task-card .task-indicators {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.task-card .indicator {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.task-card:hover .indicator {
+    opacity: 1;
+}
+
+.task-card .delete-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.task-card:hover .delete-btn {
+    opacity: 1;
+}
+
+.task-card .delete-btn:hover {
+    background: rgba(220, 53, 69, 0.4);
+    border-color: rgba(220, 53, 69, 0.6);
+    transform: scale(1.1);
+}
+
+.task-card.task-done {
+    opacity: 0.7;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.6), rgba(42, 42, 42, 0.7));
 }
 
 .task-card.task-done .task-text {
     text-decoration: line-through;
-    color: var(--text-secondary-color); /* Make it slightly faded */
+    color: var(--text-secondary-color);
+}
+
+.task-card.task-done::before {
+    background: linear-gradient(180deg, #198754, rgba(25, 135, 84, 0.3));
+    opacity: 0.5;
+}
+
+/* Animación de arrastre */
+.sortable-ghost {
+    opacity: 0.5;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.1));
+    border: 2px dashed var(--primary-color);
+    transform: rotate(2deg);
 }
 
 .hidden {
@@ -319,25 +564,34 @@ button {
     .navbar-left h2 {
         font-size: 0.9rem;
     }
+
     .navbar-center {
-        display: none; /* Ocultar controles de música en el centro */
+        display: none;
+        /* Ocultar controles de música en el centro */
     }
+
     #main-content {
         padding: 0.5rem;
     }
+
     .app-container {
         gap: 0.5rem;
     }
+
     #timer-display {
         font-size: 2rem;
     }
+
     .timer-controls {
         gap: 0.5rem;
     }
-    #start-pause-btn, .secondary-btn {
+
+    #start-pause-btn,
+    .secondary-btn {
         padding: 0.5rem 0.8rem;
         font-size: 0.8rem;
     }
+
     .task-column h3 {
         font-size: 0.9rem;
     }
@@ -348,24 +602,32 @@ button {
     #main-navbar {
         padding: 0 1.5rem;
     }
+
     .navbar-left h2 {
         font-size: 1.2rem;
     }
+
     .navbar-center .music-controls {
-        display: flex; /* Mostrar controles de música */
+        display: flex;
+        /* Mostrar controles de música */
     }
+
     #main-content {
         padding: 1.5rem;
     }
+
     .app-container {
         max-width: 800px;
     }
+
     .task-columns-tablet-group {
         flex-direction: row;
     }
-    .task-columns-tablet-group > .grid-area {
+
+    .task-columns-tablet-group>.grid-area {
         flex: 1;
     }
+
     #pomodoro-animation-container {
         max-width: 50%;
     }
@@ -373,24 +635,48 @@ button {
 
 /* Large devices (desktops, 1024px and up) */
 @media (min-width: 1024px) {
+    #main-content {
+        padding: 1.5rem 2rem;
+    }
+
     .app-container {
-        max-width: 1200px;
+        max-width: 1400px;
         flex-direction: row;
-        align-items: flex-start; /* Alinear items al inicio */
+        align-items: flex-start;
+        gap: 1.5rem;
     }
+
+    /* Timer panel: fixed width, compact */
     #grid-pomodoro-tasks {
-        flex: 1.5; /* Más espacio para el pomodoro */
+        flex: 0 0 320px;
+        position: sticky;
+        top: calc(var(--navbar-height) + 1.5rem);
     }
+
+    /* Kanban: takes remaining space */
     .task-columns-tablet-group {
-        flex: 2; /* Más espacio para las tareas */
-        flex-direction: row;
-    }
-    .misc-widgets-tablet-group {
         flex: 1;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .task-columns-tablet-group>.grid-area {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Widgets: small column on the right */
+    .misc-widgets-tablet-group {
+        flex: 0 0 220px;
         flex-direction: column;
     }
+
     #pomodoro-animation-container {
-        max-width: 37%;
+        max-width: 100%;
+    }
+
+    #timer-display {
+        font-size: 4.5rem;
     }
 }
 
@@ -409,7 +695,8 @@ button {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Más oscuro */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Más oscuro */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -423,8 +710,10 @@ button {
     border-radius: 16px;
     width: 100%;
     max-width: 500px;
-    max-height: 90vh; /* Altura máxima */
-    overflow-y: auto; /* Scroll si el contenido es muy largo */
+    max-height: 90vh;
+    /* Altura máxima */
+    overflow-y: auto;
+    /* Scroll si el contenido es muy largo */
 }
 
 /* (El resto de los estilos de modales, formularios, etc. se mantienen) */
@@ -452,17 +741,20 @@ button {
 }
 
 .modal-body h3 {
-    font-family: var(--font-primary); /* Use primary font for subheadings */
+    font-family: var(--font-primary);
+    /* Use primary font for subheadings */
     font-size: 1.1rem;
     color: var(--text-color);
     margin-top: 1rem;
     margin-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(var(--border-color), 0.5); /* Lighter border */
+    border-bottom: 1px solid rgba(var(--border-color), 0.5);
+    /* Lighter border */
     padding-bottom: 0.3rem;
 }
 
 .modal-body ul {
-    list-style: none; /* Remove default bullet points */
+    list-style: none;
+    /* Remove default bullet points */
     padding-left: 0;
     margin-bottom: 1rem;
 }
@@ -475,9 +767,12 @@ button {
 }
 
 .modal-body li svg {
-    color: var(--primary-color); /* Color icons with primary color */
-    flex-shrink: 0; /* Prevent icons from shrinking */
-    margin-top: 2px; /* Adjust vertical alignment */
+    color: var(--primary-color);
+    /* Color icons with primary color */
+    flex-shrink: 0;
+    /* Prevent icons from shrinking */
+    margin-top: 2px;
+    /* Adjust vertical alignment */
 }
 
 /* Stats Modal Specifics */
@@ -490,7 +785,8 @@ button {
 }
 
 .stat-box {
-    background-color: var(--background-color); /* Slightly darker background for stat boxes */
+    background-color: var(--background-color);
+    /* Slightly darker background for stat boxes */
     padding: 1rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -513,7 +809,8 @@ button {
 }
 
 .stat-box span {
-    font-family: var(--font-display); /* Use display font for numbers */
+    font-family: var(--font-display);
+    font-weight: 700;
 }
 
 .chart-container {
@@ -577,7 +874,8 @@ button {
 .star-rating {
     display: inline-block;
     font-size: 1.5rem;
-    color: var(--text-secondary-color); /* Default star color */
+    color: var(--text-secondary-color);
+    /* Default star color */
 }
 
 .star-rating input[type="radio"] {
@@ -591,9 +889,10 @@ button {
 }
 
 .star-rating label:hover,
-.star-rating label:hover ~ label,
-.star-rating input[type="radio"]:checked ~ label {
-    color: var(--primary-color); /* Filled star color */
+.star-rating label:hover~label,
+.star-rating input[type="radio"]:checked~label {
+    color: var(--primary-color);
+    /* Filled star color */
 }
 
 .reviews-container {
@@ -630,7 +929,8 @@ button {
 }
 
 .review-rating {
-    color: var(--primary-color); /* Filled stars in reviews */
+    color: var(--primary-color);
+    /* Filled stars in reviews */
 }
 
 .review-message {
@@ -655,4 +955,5 @@ button {
 .save-btn:hover {
     background-color: color-mix(in srgb, var(--primary-color) 80%, black);
 }
+
 /* No debugging styles in production */

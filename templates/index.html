@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pomodoro Timer</title>
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/additional-styles.css">
+    <link rel="stylesheet" href="/static/chatbot-styles.css">
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#3b82f6">
-    
+
 </head>
+
 <body>
     <!-- 1. Nueva Barra de Navegación Fija -->
     <nav id="main-navbar">
@@ -25,8 +30,17 @@
             <!-- El reproductor de música se mueve aquí -->
             <div class="music-controls">
                 <button id="music-toggle-btn" class="icon-btn" aria-label="Música">
-                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="hidden">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
                 </button>
                 <div class="station-selector">
                     <select id="music-station-select"></select>
@@ -38,43 +52,95 @@
                     <input type="range" id="volume-slider" min="0" max="100" value="50" step="1">
                 </div>
                 <div id="custom-station-input-container" class="hidden">
-                     <input type="text" id="custom-station-url" placeholder="Pega la URL del stream aquí...">
-                     <button id="custom-station-btn">Cargar</button>
+                    <input type="text" id="custom-station-url" placeholder="Ej: https://stream.zeno.fm/tu-stream-aqui"
+                        title="Pega aquí la URL de tu stream favorito (MP3, M4A, AAC). Presiona Enter o haz clic en Cargar.">
+                    <button id="custom-station-btn" title="Cargar stream personalizado">Cargar</button>
                 </div>
             </div>
         </div>
         <div class="navbar-right">
             <!-- Nuevo menú desplegable -->
             <button id="accordion-toggle" class="icon-btn" aria-label="Abrir menú">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
             </button>
             <div id="accordion-menu" class="hidden">
                 <button id="settings-btn" class="icon-btn" aria-label="Configuración">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
                     <span>Configuración</span>
                 </button>
                 <button id="theme-toggle-btn" class="icon-btn" aria-label="Cambiar tema">
-                    <svg id="theme-sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                    <svg id="theme-moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg id="theme-sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg id="theme-moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="hidden">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
                     <span>Tema</span>
                 </button>
                 <button id="stats-btn" class="icon-btn" aria-label="Estadísticas">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8.3L12 15l-3.3-3.3L3 18"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18.7 8.3L12 15l-3.3-3.3L3 18"></path>
+                    </svg>
                     <span>Estadísticas</span>
                 </button>
                 <button id="feedback-btn" class="icon-btn" aria-label="Feedback">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                        </path>
+                    </svg>
                     <span>Feedback</span>
                 </button>
                 <button id="instructions-btn" class="icon-btn" aria-label="Instrucciones">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
                     <span>Instrucciones</span>
                 </button>
+                <a href="/gallery" class="icon-btn" aria-label="Galería">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span>Galería Lofi</span>
+                </a>
             </div>
         </div>
     </nav>
 
-    <audio id="radio-player" src="https://playerservices.streamtheworld.com/api/livestream-redirect/ASPEN.mp3" preload="auto"></audio>
+    <audio id="radio-player" src="https://playerservices.streamtheworld.com/api/livestream-redirect/ASPEN.mp3"
+        preload="auto"></audio>
 
     <!-- 2. Contenido Principal -->
     <main id="main-content">
@@ -82,8 +148,49 @@
             <!-- El header original se elimina de aquí -->
             <div id="grid-pomodoro-tasks" class="grid-area div2">
                 <div class="timer-container">
-                    <div id="pomodoro-animation-container">
-                        <video src="/static/videos/halloween.mp4" autoplay loop muted playsinline id="pomodoro-video"></video>
+                    <div id="pomodoro-animation-container" class="slideshow-container">
+                        <div class="slideshow-image active"
+                            style="background-image: url('/static/images/gallery/great_wave_lofi_1770988101789.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/koi_pond_lofi_1770988120103.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/cherry_blossom_lofi_1770988136385.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/mount_fuji_sunset_1770988154776.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/great_wave_lofi_1770988179625.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/koi_fish_pond_1770988195703.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/cherry_blossom_tree_1770988213915.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/japanese_garden_zen_1770988231132.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/mount_fuji_sunset_1770988246983.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/japanese_tea_house_1770988265420.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/great_wave_lofi_1770988303496.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/koi_pond_lofi_1770988319674.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/cherry_blossom_lofi_1770988336596.png');">
+                        </div>
+                        <div class="slideshow-image"
+                            style="background-image: url('/static/images/gallery/bamboo_forest_lofi_1770988353142.png');">
+                        </div>
                     </div>
                     <p id="mode-display">Pomodoro</p>
                     <div id="timer-display">25:00</div>
@@ -146,7 +253,8 @@
     </main>
 
     <!-- Modals and other hidden elements -->
-    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="settings-modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="settings-modal-title">Configuración</h2>
@@ -170,7 +278,8 @@
         </div>
     </div>
 
-    <div id="task-details-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="task-details-modal-title">
+    <div id="task-details-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="task-details-modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="task-details-modal-title">Detalles de la Tarea</h2>
@@ -199,7 +308,8 @@
         </div>
     </div>
 
-    <div id="instructions-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="instructions-modal-title">
+    <div id="instructions-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="instructions-modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="instructions-modal-title">Instrucciones de Uso</h2>
@@ -211,7 +321,8 @@
         </div>
     </div>
 
-    <div id="stats-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="stats-modal-title">
+    <div id="stats-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="stats-modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="stats-modal-title">Estadísticas</h2>
@@ -221,7 +332,8 @@
         </div>
     </div>
 
-    <div id="feedback-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+    <div id="feedback-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+        aria-labelledby="feedback-modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="feedback-modal-title">Danos tu Opinión</h2>
@@ -235,10 +347,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/script.js"></script>
+    <script src="/static/theme-switcher.js"></script>
+    <script src="/static/slideshow.js"></script>
+    <script src="/static/chatbot.js"></script>
 </body>
 
 <!-- Modal de Instrucciones -->
-<div id="instructions-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="instructions-modal-title">
+<div id="instructions-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="instructions-modal-title">
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="instructions-modal-title">Instrucciones de Uso</h2>
@@ -248,9 +364,17 @@
             <h3>Temporizador Pomodoro</h3>
             <ul>
                 <li>Usa el temporizador para trabajar en bloques de tiempo (Pomodoros) y tomar descansos.</li>
-                <li>Configura la duración de los Pomodoros y descansos en el icono de ajustes (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>).</li>
+                <li>Configura la duración de los Pomodoros y descansos en el icono de ajustes (<svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>).</li>
                 <li>Usa los botones INICIAR, PAUSAR, REINICIAR y SALTAR para controlar el temporizador.</li>
-                <li>También puedes usar la barra espaciadora para iniciar/pausar, 'R' para reiniciar y 'N' para saltar.</li>
+                <li>También puedes usar la barra espaciadora para iniciar/pausar, 'R' para reiniciar y 'N' para saltar.
+                </li>
             </ul>
             <h3>Tablero Kanban</h3>
             <ul>
@@ -265,12 +389,24 @@
             </ul>
             <h3>Estadísticas y Feedback</h3>
             <ul>
-                <li>Consulta tus estadísticas de Pomodoros completados en el icono de gráfico (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18.7 8.3L12 15l-3.3-3.3L3 18"></path></svg>).</li>
-                <li>Deja tu opinión y lee las reseñas de otros usuarios en el icono de burbuja de diálogo (<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>).</li>
+                <li>Consulta tus estadísticas de Pomodoros completados en el icono de gráfico (<svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18.7 8.3L12 15l-3.3-3.3L3 18"></path>
+                    </svg>).</li>
+                <li>Deja tu opinión y lee las reseñas de otros usuarios en el icono de burbuja de diálogo (<svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
+                        </path>
+                    </svg>).</li>
             </ul>
         </div>
     </div>
 </div>
+
 </html>
 
 <!-- Modal de Estadísticas -->
@@ -294,21 +430,18 @@
             <canvas id="pomodoro-chart"></canvas>
         </div>
         <div class="ads-container" style="text-align: center; margin-top: 2rem;">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-4990281383359994"
-                 data-ad-slot="3730385380"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-4990281383359994"
+                data-ad-slot="3730385380" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
+                (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
         </div>
     </div>
 </div>
 
 <!-- Modal de Feedback -->
-<div id="feedback-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+<div id="feedback-modal" class="modal-overlay hidden" role="dialog" aria-modal="true"
+    aria-labelledby="feedback-modal-title">
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="feedback-modal-title">Danos tu Opinión</h2>
@@ -323,16 +456,22 @@
                 <div class="form-group">
                     <label>Calificación</label>
                     <div class="star-rating">
-                        <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">★</label>
-                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
-                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
-                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
-                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+                        <input type="radio" id="star5" name="rating" value="5" /><label for="star5"
+                            title="5 stars">★</label>
+                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4"
+                            title="4 stars">★</label>
+                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3"
+                            title="3 stars">★</label>
+                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2"
+                            title="2 stars">★</label>
+                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1"
+                            title="1 star">★</label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="feedback-message">Mensaje</label>
-                    <textarea id="feedback-message" rows="4" placeholder="¿Qué te ha parecido la aplicación?" required></textarea>
+                    <textarea id="feedback-message" rows="4" placeholder="¿Qué te ha parecido la aplicación?"
+                        required></textarea>
                 </div>
                 <button type="submit" class="save-btn">Enviar Feedback</button>
             </form>
@@ -343,5 +482,35 @@
                 <!-- Las reseñas se cargarán aquí -->
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Chatbot AI Assistant -->
+<div class="chatbox">
+    <button class="chatbox__button"></button>
+</div>
+
+<div class="chatbox-backdrop"></div>
+
+<div class="chatbox__support">
+    <div class="chatbox__header">
+        <div class="chatbox__image--header">
+            🤖
+        </div>
+        <div class="chatbox__content--header">
+            <h4 class="chatbox__heading--header">Asistente Pomodoro</h4>
+            <p class="chatbox__description--header">Tu ayudante de productividad</p>
+        </div>
+    </div>
+    <div class="chatbox__messages">
+        <!-- Messages will be inserted here by JavaScript -->
+    </div>
+    <div class="chatbox__footer">
+        <input type="text" placeholder="Escribe tu mensaje... 💬" />
+        <button class="send__button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+        </button>
     </div>
 </div>

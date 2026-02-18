@@ -1,0 +1,149 @@
+/* Tema Naturaleza 🌿 */
+
+:root[data-theme="nature"] {
+    /* Colores principales */
+    --primary-color: #228B22;
+    /* Verde bosque */
+    --secondary-color: #00CED1;
+    /* Azul agua */
+    --accent-color: #8B4513;
+    /* Marrón tierra */
+    --warning-color: #FFD700;
+    /* Amarillo sol */
+    --success-color: #90EE90;
+    /* Verde claro */
+
+    /* Fondos */
+    --background-color: #F0FFF0;
+    /* Verde menta muy claro */
+    --surface-color: #FFFFFF;
+    --card-background: linear-gradient(135deg, #E8F5E9, #E0F7FA);
+
+    /* Textos */
+    --text-color: #2E4A2E;
+    --text-secondary-color: #5F7F5F;
+
+    /* Bordes y sombras */
+    --border-color: #228B22;
+    --shadow-color: rgba(34, 139, 34, 0.2);
+    --glow-color: rgba(34, 139, 34, 0.4);
+}
+
+body[data-theme="nature"] {
+    background: linear-gradient(135deg, #F0FFF0 0%, #E0F7FA 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Navbar naturaleza */
+[data-theme="nature"] #main-navbar {
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 3px solid var(--primary-color);
+    box-shadow: 0 4px 12px rgba(34, 139, 34, 0.2);
+}
+
+[data-theme="nature"] .navbar-left h2 {
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(34, 139, 34, 0.3);
+}
+
+/* Grid areas naturaleza */
+[data-theme="nature"] .grid-area {
+    background: linear-gradient(135deg, rgba(232, 245, 233, 0.9), rgba(224, 247, 250, 0.9));
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 6px 20px var(--shadow-color);
+}
+
+/* Botones naturaleza */
+[data-theme="nature"] #start-pause-btn {
+    background: linear-gradient(135deg, #228B22, #32CD32);
+    box-shadow: 0 4px 16px rgba(34, 139, 34, 0.4);
+}
+
+[data-theme="nature"] .secondary-btn {
+    background: rgba(0, 206, 209, 0.2);
+    border: 2px solid var(--secondary-color);
+    color: var(--text-color);
+}
+
+/* Tarjetas kanban naturaleza */
+[data-theme="nature"] .task-card {
+    background: linear-gradient(135deg, #FFFFFF, #F0FFF0);
+    border: 2px solid var(--primary-color);
+    border-left: 4px solid var(--primary-color);
+}
+
+[data-theme="nature"] .task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(34, 139, 34, 0.3);
+}
+
+/* Animación de hojas cayendo */
+@keyframes fallingLeaves {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(360deg) translateX(100px);
+        opacity: 0;
+    }
+}
+
+[data-theme="nature"] .falling-leaf {
+    position: fixed;
+    top: -50px;
+    font-size: 2rem;
+    animation: fallingLeaves 10s ease-in infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Plantas creciendo */
+@keyframes growPlant {
+    0% {
+        transform: scaleY(0);
+        transform-origin: bottom;
+    }
+
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+[data-theme="nature"] .plant-grow {
+    animation: growPlant 1s ease-out;
+}
+
+/* Timer con efecto de sol */
+[data-theme="nature"] #timer-display {
+    color: var(--warning-color);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+/* Ondas de agua */
+@keyframes waterRipple {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+[data-theme="nature"] .water-ripple {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 3px solid var(--secondary-color);
+    border-radius: 50%;
+    animation: waterRipple 1.5s ease-out;
+}

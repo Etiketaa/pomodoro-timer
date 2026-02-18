@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomodorosTodaySpan = document.getElementById('pomodoros-today');
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
     const chartCanvas = document.getElementById('pomodoro-chart');
-    
+
     const feedbackForm = document.getElementById('feedback-form');
     const reviewsList = document.getElementById('reviews-list');
     const currentTaskDisplay = document.getElementById('current-task-display');
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         isPaused = false;
         startPauseBtn.textContent = 'PAUSAR';
-        
+
         updateCurrentTaskDisplay();
         timerId = setInterval(() => {
             remainingTime--;
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseTimer() {
         isPaused = true;
         startPauseBtn.textContent = 'INICIAR';
-        
+
         clearInterval(timerId);
     }
 
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 columnElement.appendChild(card);
 
                 card.querySelector('.task-text').addEventListener('blur', (e) => updateTaskText(task.id, e.target.textContent));
-                
+
                 const indicators = card.querySelector('.task-indicators');
                 if (task.description) indicators.innerHTML += '<span class="indicator">&#9776;</span>';
                 if (task.dueDate) indicators.innerHTML += '<span class="indicator">&#128197;</span>';
@@ -386,13 +386,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     }
-                    
+
                     const newOrderedTasks = [];
                     [todoColumnElement, inProgressColumnElement, doneColumnElement].forEach(col => {
                         col.querySelectorAll('.task-card').forEach(card => {
                             const id = Number(card.dataset.id); // Ensure id is a number
                             const foundTask = tasks.find(t => t.id === id); // Use strict equality
-                            if(foundTask) newOrderedTasks.push(foundTask);
+                            if (foundTask) newOrderedTasks.push(foundTask);
                         });
                     });
                     tasks = newOrderedTasks;
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(feedbackData)
             });
             if (!response.ok) throw new Error('No se pudo enviar el feedback.');
-            
+
             feedbackForm.reset();
             fetchReviews();
             alert('¡Gracias por tu feedback!');
@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${FIREBASE_URL}/feedback.json`);
             if (!response.ok) throw new Error('No se pudieron cargar las reseñas.');
-            
+
             const data = await response.json();
             renderReviews(data);
         } catch (error) {
@@ -493,11 +493,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- MUSIC PLAYER ---
     const MUSIC_STATIONS = {
-        'aspen': { name: 'FM Aspen', url: 'https://playerservices.streamtheworld.com/api/livestream-redirect/ASPEN.mp3' },
-        'lofi': { name: 'Lofi / Chillhop', url: 'https://stream.zeno.fm/umhxwwtke0hvv' }, // Updated Lo-fi URL
-        'synthwave': { name: 'Synthwave', url: 'https://stream.nightride.fm/nightride.m4a' },
-        'classical': { name: 'Clásica (Barroca)', url: 'http://wshu.streamguys.org/wshu-baroque-mp3' },
-        'custom': { name: 'URL Personalizada', url: '' }
+        'lofi1': { name: 'Lofi Girl Radio', url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
+        'lofi2': { name: 'ChilledCow Lofi', url: 'https://stream.zeno.fm/f3wvbbqmdg8uv' },
+        'chillhop': { name: 'Chillhop Radio', url: 'https://stream.zeno.fm/fyn8eh3h5f8uv' },
+        'jazzhop': { name: 'Jazz Hop Café', url: 'https://stream.zeno.fm/0r0xa792kwzuv' },
+        'ambient': { name: 'Ambient Sleeping Pill', url: 'https://radio.stereoscenic.com/asp-s' },
+        'study': { name: 'Study Music 24/7', url: 'https://stream.zeno.fm/8m1kk0b8k48uv' },
+        'piano': { name: 'Piano Relaxante', url: 'https://stream.zeno.fm/ey679v5u438uv' },
+        'nature': { name: 'Nature Sounds', url: 'https://stream.zeno.fm/6jz6qw3cm5zuv' },
+        'synthwave': { name: 'Synthwave Radio', url: 'https://stream.nightride.fm/nightride.m4a' },
+        'classical': { name: 'Música Clásica', url: 'https://stream.zeno.fm/f3wvbbqmdg8uv' },
+        'custom': { name: '🎵 URL Personalizada', url: '' }
     };
 
     const musicToggleBtn = document.getElementById('music-toggle-btn');
@@ -516,20 +522,20 @@ document.addEventListener('DOMContentLoaded', () => {
             stationSelect.appendChild(option);
         });
 
-        let lastStation = getFromLS('pomodoroLastStation', { key: 'aspen', customUrl: '' });
+        let lastStation = getFromLS('pomodoroLastStation', { key: 'lofi1', customUrl: '' });
         stationSelect.value = lastStation.key;
-        
+
         if (lastStation.key === 'custom' && lastStation.customUrl) {
             MUSIC_STATIONS.custom.url = lastStation.customUrl;
             customStationUrlInput.value = lastStation.customUrl;
             radioPlayer.src = lastStation.customUrl;
-            radioStatus.textContent = 'Personalizada';
+            radioStatus.textContent = '🎵 Personalizada';
         } else {
-            if (!MUSIC_STATIONS[lastStation.key]) lastStation.key = 'aspen';
+            if (!MUSIC_STATIONS[lastStation.key]) lastStation.key = 'lofi1';
             radioPlayer.src = MUSIC_STATIONS[lastStation.key].url;
             radioStatus.textContent = MUSIC_STATIONS[lastStation.key].name;
         }
-        
+
         customStationInputContainer.classList.toggle('hidden', lastStation.key !== 'custom');
 
         const initialVolume = getFromLS('pomodoroMusicVolume', 50);
@@ -539,10 +545,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         stationSelect.addEventListener('change', handleStationChange);
         customStationBtn.addEventListener('click', loadCustomStation);
+        customStationUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loadCustomStation();
+            }
+        });
         musicToggleBtn.addEventListener('click', toggleMusic);
         volumeSlider.addEventListener('input', setVolume);
         radioPlayer.addEventListener('play', updatePlayPauseIcons);
         radioPlayer.addEventListener('pause', updatePlayPauseIcons);
+
+        // Add error handling for stream loading
+        radioPlayer.addEventListener('error', (e) => {
+            console.error('Error al cargar el stream de audio:', e);
+            radioStatus.textContent = '❌ Error al cargar';
+            setTimeout(() => {
+                radioStatus.textContent = MUSIC_STATIONS[stationSelect.value]?.name || 'Selecciona una estación';
+            }, 3000);
+        });
     }
 
     function handleStationChange(e) {
@@ -560,13 +581,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadCustomStation() {
         const url = customStationUrlInput.value.trim();
-        if (url) {
-            const wasPaused = radioPlayer.paused;
-            radioPlayer.src = url;
-            radioStatus.textContent = 'Personalizada';
-            saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url });
-            if (!wasPaused) radioPlayer.play();
+        if (!url) {
+            alert('Por favor, ingresa una URL válida para el stream de audio.');
+            return;
         }
+
+        // Basic URL validation
+        try {
+            new URL(url);
+        } catch (e) {
+            alert('La URL ingresada no es válida. Asegúrate de incluir http:// o https://');
+            return;
+        }
+
+        const wasPaused = radioPlayer.paused;
+        radioPlayer.src = url;
+        MUSIC_STATIONS.custom.url = url;
+        radioStatus.textContent = '🎵 Personalizada';
+        saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url });
+
+        // Try to play and handle errors
+        if (!wasPaused) {
+            radioPlayer.play().catch(e => {
+                console.error('Error al cargar stream personalizado:', e);
+                alert('No se pudo cargar el stream. Verifica que la URL sea correcta y que el servidor permita streaming.');
+            });
+        }
+
+        // Show success message
+        const originalText = customStationBtn.textContent;
+        customStationBtn.textContent = '✓ Cargado';
+        customStationBtn.style.backgroundColor = '#10b981';
+        setTimeout(() => {
+            customStationBtn.textContent = originalText;
+            customStationBtn.style.backgroundColor = '';
+        }, 2000);
     }
 
     function toggleMusic() {
@@ -583,12 +632,12 @@ document.addEventListener('DOMContentLoaded', () => {
             radioPlayer.pause();
         }
     }
-    
+
     function updatePlayPauseIcons() {
         const playIcon = document.getElementById('play-icon');
         const pauseIcon = document.getElementById('pause-icon');
         if (!playIcon || !pauseIcon) return;
-        
+
         if (radioPlayer.paused) {
             playIcon.classList.remove('hidden');
             pauseIcon.classList.add('hidden');
