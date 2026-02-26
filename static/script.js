@@ -195,15 +195,31 @@ document.addEventListener('DOMContentLoaded', () => {
         startPauseBtn.textContent = 'PAUSAR';
 
         updateCurrentTaskDisplay();
+        const totalTime = settings[mode] * 60;
         timerId = setInterval(() => {
             remainingTime--;
             updateTimerDisplay();
+            // Update circular progress
+            if (window.PomodoroV2) {
+                window.PomodoroV2.updateProgress(remainingTime, totalTime);
+            }
             if (remainingTime <= 0) {
                 clearInterval(timerId);
                 alarmSound.play();
                 if (mode === 'pomodoro') {
                     recordPomodoro();
                     pomodorosInCycle++;
+                    // Update session dots
+                    if (window.PomodoroV2) {
+                        window.PomodoroV2.updateSessionDots(pomodorosInCycle);
+                    }
+                    if (window.Toast) {
+                        Toast.show('¡Pomodoro completado! Tomá un descanso 🎉', 'success');
+                    }
+                } else {
+                    if (window.Toast) {
+                        Toast.show('Descanso terminado. ¡A trabajar! 💪', 'info');
+                    }
                 }
                 switchMode();
             }
@@ -227,6 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseTimer();
         mode = nextMode || getNextMode();
         modeDisplay.textContent = { pomodoro: 'Pomodoro', shortBreak: 'Descanso Corto', longBreak: 'Descanso Largo' }[mode];
+        // Update circular progress color
+        if (window.PomodoroV2) {
+            window.PomodoroV2.setMode(mode);
+            window.PomodoroV2.updateProgress(0, 1); // Reset to 0%
+        }
         resetTimer();
     }
 
@@ -430,7 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = document.getElementById('feedback-message').value;
 
         if (!rating || !message) {
-            alert('Por favor, deja una calificación y un mensaje.');
+            if (window.Toast) Toast.show('Por favor, deja una calificación y un mensaje.', 'warning');
+            else alert('Por favor, deja una calificación y un mensaje.');
             return;
         }
 
@@ -446,10 +468,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             feedbackForm.reset();
             fetchReviews();
-            alert('¡Gracias por tu feedback!');
+            if (window.Toast) Toast.show('¡Gracias por tu feedback! 💬', 'success');
+            else alert('¡Gracias por tu feedback!');
         } catch (error) {
             console.error("Error enviando feedback:", error);
-            alert('Hubo un error al enviar tu feedback.');
+            if (window.Toast) Toast.show('Error al enviar feedback', 'error');
+            else alert('Hubo un error al enviar tu feedback.');
         }
     }
 
@@ -582,7 +606,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadCustomStation() {
         const url = customStationUrlInput.value.trim();
         if (!url) {
-            alert('Por favor, ingresa una URL válida para el stream de audio.');
+            if (window.Toast) Toast.show('Ingresa una URL válida para el stream', 'warning');
+            else alert('Por favor, ingresa una URL válida para el stream de audio.');
             return;
         }
 
@@ -590,7 +615,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             new URL(url);
         } catch (e) {
-            alert('La URL ingresada no es válida. Asegúrate de incluir http:// o https://');
+            if (window.Toast) Toast.show('URL no válida. Incluí http:// o https://', 'error');
+            else alert('La URL ingresada no es válida. Asegúrate de incluir http:// o https://');
             return;
         }
 
