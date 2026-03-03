@@ -113,6 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let pomodorosInCycle = 0;
     let isPaused = true;
     let animationIntervalId = null;
+    let dailyGoal = null;
+    let ambientMixer = null;
+    let userProfile = null;
 
     // --- INITIALIZATION ---
     function init() {
@@ -133,6 +136,51 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         initSortable();
         initWeather();
+
+        // Initialize Daily Goal
+        if (window.DailyGoal) {
+            dailyGoal = new DailyGoal();
+        }
+
+        // Wire up export button
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        if (exportCsvBtn && window.DataExport) {
+            exportCsvBtn.addEventListener('click', () => DataExport.exportCSV());
+        }
+
+        // Initialize Ambient Sound Mixer
+        if (window.AmbientSoundMixer) {
+            ambientMixer = new AmbientSoundMixer();
+        }
+
+        // Set initial mode class
+        document.body.classList.add('mode-pomodoro');
+
+        // Initialize User Profile
+        if (window.UserProfile) {
+            userProfile = new UserProfile();
+        }
+
+        // Initialize Workspace Customizer
+        if (window.WorkspaceCustomizer) {
+            new WorkspaceCustomizer();
+        }
+
+        // Update companions widget from chat contacts
+        updateCompanionsWidget();
+
+        // Wire up profile modal
+        const profileBtn = document.getElementById('profile-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const closeProfileModal = document.getElementById('close-profile-modal');
+
+        profileBtn?.addEventListener('click', () => {
+            if (userProfile) userProfile.renderProfileModal('profile-content');
+            profileModal?.classList.remove('hidden');
+            document.getElementById('user-menu')?.classList.add('hidden');
+        });
+        closeProfileModal?.addEventListener('click', () => profileModal?.classList.add('hidden'));
+        profileModal?.addEventListener('click', (e) => { if (e.target === profileModal) profileModal.classList.add('hidden'); });
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -206,9 +254,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (remainingTime <= 0) {
                 clearInterval(timerId);
                 alarmSound.play();
+                // Pause ambient sounds during alarm
+                if (ambientMixer) ambientMixer.pauseAll();
                 if (mode === 'pomodoro') {
                     recordPomodoro();
                     pomodorosInCycle++;
+                    // Update daily goal
+                    if (dailyGoal) {
+                        dailyGoal.recordPomodoro();
+                    }
+                    // Add XP to user profile
+                    if (userProfile) {
+                        const result = userProfile.addXP(25);
+                        Toast.show(`+25 XP ✨ (Total: ${result.newTotal})`, 'info', 2000);
+                    }
                     // Update session dots
                     if (window.PomodoroV2) {
                         window.PomodoroV2.updateSessionDots(pomodorosInCycle);
@@ -243,6 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
         pauseTimer();
         mode = nextMode || getNextMode();
         modeDisplay.textContent = { pomodoro: 'Pomodoro', shortBreak: 'Descanso Corto', longBreak: 'Descanso Largo' }[mode];
+
+        // Update mode transition class
+        document.body.classList.remove('mode-pomodoro', 'mode-shortBreak', 'mode-longBreak');
+        document.body.classList.add('mode-' + mode);
+
+        // Resume ambient sounds
+        if (ambientMixer) ambientMixer.resumeAll();
         // Update circular progress color
         if (window.PomodoroV2) {
             window.PomodoroV2.setMode(mode);
@@ -620,21 +686,90 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Clear any existing embed
+        const embedContainer = document.getElementById('music-embed-container');
+        if (embedContainer) embedContainer.innerHTML = '';
+
+        // Check if it's a Spotify URL
+        const spotifyMatch = url.match(/open\.spotify\.com\/(playlist|track|album|artist)\/([a-zA-Z0-9]+)/);
+        if (spotifyMatch) {
+            const [, type, id] = spotifyMatch;
+            radioPlayer.pause();
+            radioPlayer.src = '';
+            if (embedContainer) {
+                embedContainer.innerHTML = `
+                    <iframe src="https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0" 
+                        width="100%" height="152" frameborder="0" allowfullscreen 
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                        loading="lazy" class="music-embed-iframe"></iframe>
+                `;
+                embedContainer.classList.remove('hidden');
+            }
+            radioStatus.textContent = '🎵 Spotify';
+            MUSIC_STATIONS.custom.url = url;
+            saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url, embedType: 'spotify' });
+            if (window.Toast) Toast.show('Spotify playlist cargada 🎧', 'success');
+
+            _showLoadSuccess();
+            return;
+        }
+
+        // Check if it's a YouTube URL
+        const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|playlist\?list=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+        if (youtubeMatch) {
+            const videoId = youtubeMatch[1];
+            const isPlaylist = url.includes('playlist?list=');
+            radioPlayer.pause();
+            radioPlayer.src = '';
+
+            let embedUrl;
+            if (isPlaylist) {
+                embedUrl = `https://www.youtube.com/embed/videoseries?list=${videoId}&autoplay=1`;
+            } else {
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            }
+
+            if (embedContainer) {
+                embedContainer.innerHTML = `
+                    <iframe src="${embedUrl}" width="100%" height="152" frameborder="0" 
+                        allow="autoplay; encrypted-media" allowfullscreen 
+                        class="music-embed-iframe"></iframe>
+                `;
+                embedContainer.classList.remove('hidden');
+            }
+            radioStatus.textContent = '▶️ YouTube';
+            MUSIC_STATIONS.custom.url = url;
+            saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url, embedType: 'youtube' });
+            if (window.Toast) Toast.show('YouTube cargado ▶️', 'success');
+
+            _showLoadSuccess();
+            return;
+        }
+
+        // Regular audio stream
+        if (embedContainer) {
+            embedContainer.classList.add('hidden');
+            embedContainer.innerHTML = '';
+        }
+
         const wasPaused = radioPlayer.paused;
         radioPlayer.src = url;
         MUSIC_STATIONS.custom.url = url;
         radioStatus.textContent = '🎵 Personalizada';
-        saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url });
+        saveToLS('pomodoroLastStation', { key: 'custom', customUrl: url, embedType: 'stream' });
 
         // Try to play and handle errors
         if (!wasPaused) {
             radioPlayer.play().catch(e => {
                 console.error('Error al cargar stream personalizado:', e);
-                alert('No se pudo cargar el stream. Verifica que la URL sea correcta y que el servidor permita streaming.');
+                if (window.Toast) Toast.show('Error al cargar el stream. Verificá la URL.', 'error');
             });
         }
 
-        // Show success message
+        _showLoadSuccess();
+    }
+
+    function _showLoadSuccess() {
         const originalText = customStationBtn.textContent;
         customStationBtn.textContent = '✓ Cargado';
         customStationBtn.style.backgroundColor = '#10b981';
@@ -729,7 +864,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI & EVENT LISTENERS ---
     function openSettingsModal() { settingsModal.classList.remove('hidden'); }
     function closeSettingsModal() { settingsModal.classList.add('hidden'); }
-    function openStatsModal() { statsModal.classList.remove('hidden'); renderStats(); }
+    function openStatsModal() {
+        statsModal.classList.remove('hidden');
+        renderStats();
+        // Render history
+        if (window.DataExport) {
+            DataExport.renderHistory('history-container');
+        }
+    }
     function closeStatsModal() { statsModal.classList.add('hidden'); }
     function openFeedbackModal() { feedbackModal.classList.remove('hidden'); fetchReviews(); }
     function closeFeedbackModal() { feedbackModal.classList.add('hidden'); }
@@ -788,6 +930,40 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', handleKeyboard);
     }
 
+    // --- COMPANIONS WIDGET ---
+    function updateCompanionsWidget() {
+        const list = document.getElementById('companions-list');
+        const countEl = document.getElementById('companions-count');
+        if (!list || !countEl) return;
+
+        // Read contacts from chat localStorage (same key as user-chat.js)
+        let contacts = [];
+        try {
+            contacts = JSON.parse(localStorage.getItem('pomodoroChat_contacts')) || [];
+        } catch { contacts = []; }
+
+        if (contacts.length === 0) {
+            list.innerHTML = '<p class="companions-empty">Agregá compañeros desde el chat 💬</p>';
+            countEl.textContent = '0 online';
+            return;
+        }
+
+        // Render companion chips
+        list.innerHTML = contacts.map(c => `
+            <div class="companion-chip" title="ID: ${c.uid || ''}">
+                <span class="companion-status online"></span>
+                <span>${c.name || c.uid?.slice(0, 6) || 'Compañero'}</span>
+            </div>
+        `).join('');
+
+        countEl.textContent = `${contacts.length} compañero${contacts.length !== 1 ? 's' : ''}`;
+    }
+
+    // Listen for chat contact changes
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'pomodoroChat_contacts') updateCompanionsWidget();
+    });
+
     // --- START THE APP ---
     init();
 });
@@ -811,4 +987,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+});
+
+// --- PWA INSTALL PROMPT ---
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+
+    // Check if user previously dismissed
+    if (localStorage.getItem('pwaInstallDismissed')) return;
+
+    // Show install banner
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) {
+        setTimeout(() => banner.classList.remove('hidden'), 3000); // Show after 3s
+    }
+});
+
+document.getElementById('pwa-install-btn')?.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') {
+        if (window.Toast) Toast.show('¡App instalada! 📱', 'success');
+    }
+    deferredInstallPrompt = null;
+    document.getElementById('pwa-install-banner')?.classList.add('hidden');
+});
+
+document.getElementById('pwa-dismiss-btn')?.addEventListener('click', () => {
+    document.getElementById('pwa-install-banner')?.classList.add('hidden');
+    localStorage.setItem('pwaInstallDismissed', 'true');
+});
+
+window.addEventListener('appinstalled', () => {
+    document.getElementById('pwa-install-banner')?.classList.add('hidden');
+    deferredInstallPrompt = null;
+    if (window.Toast) Toast.show('¡App instalada exitosamente! 🎉', 'success');
 });

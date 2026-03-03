@@ -6,11 +6,13 @@
 
 import { AuthManager, AuthModalController } from './auth.js';
 import { CloudSync } from './cloud-sync.js';
+import { UserChat } from './user-chat.js';
 
 // Initialize Auth and Cloud Sync
 const authManager = new AuthManager();
 const authModal = new AuthModalController(authManager);
 const cloudSync = new CloudSync(authManager);
+const userChat = new UserChat();
 
 // Initialize Circular Progress
 let circularProgress = null;
@@ -35,19 +37,23 @@ function updateSessionDots(pomodorosInCycle) {
 }
 
 // Listen for auth state changes to sync data
+let hasSynced = false;
 authManager.onAuthChange(async (user) => {
-    if (user) {
+    if (user && !hasSynced) {
+        hasSynced = true;
         // Pull data from cloud on login
         const pulled = await cloudSync.syncFromCloud();
         if (pulled) {
             Toast.show('Datos sincronizados desde la nube ☁️', 'success');
-            // Reload the app state
-            window.location.reload();
+            // Dispatch event so script.js can refresh its state without full reload
+            window.dispatchEvent(new CustomEvent('pomodoroDataSynced'));
         } else {
             // First login: push local data to cloud
             await cloudSync.syncToCloud();
             Toast.show(`¡Bienvenido, ${user.displayName || user.email.split('@')[0]}! 🎉`, 'success');
         }
+    } else if (!user) {
+        hasSynced = false;
     }
 });
 
@@ -64,6 +70,7 @@ window.PomodoroV2 = {
     authManager,
     cloudSync,
     circularProgress,
+    userChat,
     updateSessionDots,
 
     /** Update circular progress based on timer state */

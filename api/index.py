@@ -29,14 +29,26 @@ except ImportError:
     print("Warning: Groq client not available. Install with: pip install groq python-dotenv")
 
 @app.route('/')
+def landing():
+    """Landing page route"""
+    return render_template('landing.html')
+
+@app.route('/app')
 def index():
-    """Main page route"""
+    """Main application route"""
     return render_template('index.html')
 
 @app.route('/gallery')
 def gallery():
     """Gallery page route"""
     return render_template('gallery.html')
+
+@app.route('/sw.js')
+def service_worker():
+    """Serve service worker from root with correct MIME type"""
+    from flask import send_file
+    sw_path = os.path.join(project_root, 'sw.js')
+    return send_file(sw_path, mimetype='application/javascript')
 
 @app.route('/api/chat', methods=['POST'])
 def chat():

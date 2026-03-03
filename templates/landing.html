@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pomodoro Timer Lofi — Foco, Productividad y Comunidad</title>
+    <meta name="description"
+        content="Plataforma colaborativa de productividad con timer Pomodoro, música lofi, Kanban, chat en tiempo real y gamificación. Estudiá y trabajá con compañeros." />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #f97316;
+            --accent-glow: rgba(249, 115, 22, 0.25);
+            --text: #f5f5f5;
+            --muted: #8b8b8b;
+            --green: #10b981;
+            --purple: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* --- NAV --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 16px 0;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--accent-glow);
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 12px var(--accent-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(249, 115, 22, 0.1);
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-link {
+            font-size: 0.88rem;
+            color: var(--muted);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+        }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(249, 115, 22, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: rgba(249, 115, 22, 0.06);
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 24px;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            font-size: 1.05rem;
+            max-width: 600px;
+        }
+
+        /* --- HERO --- */
+        .hero {
+            padding: 160px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(249, 115, 22, 0.12), transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 32px;
+        }
+
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: logoPulse 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, #fff 30%, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 1.15rem;
+            max-width: 560px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* --- MOCKUP --- */
+        .mockup-wrapper {
+            margin-top: 60px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mockup-wrapper::before {
+            content: "";
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background: radial-gradient(ellipse, rgba(249, 115, 22, 0.08), transparent 60%);
+            z-index: -1;
+        }
+
+        .mockup-img {
+            width: 100%;
+            max-width: 900px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: transform 0.4s ease;
+        }
+
+        .mockup-img:hover {
+            transform: scale(1.01);
+        }
+
+        /* --- FEATURES GRID --- */
+        .features {
+            padding: 120px 0;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .features-header .section-subtitle {
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(249, 115, 22, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* --- SOCIAL SECTION --- */
+        .social {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .social::before {
+            content: "";
+            position: absolute;
+            right: -200px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent 70%);
+            z-index: -1;
+        }
+
+        .social-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .social-features {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .social-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .social-item-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .social-item-icon.orange {
+            background: rgba(249, 115, 22, 0.12);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .social-item-icon.purple {
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .social-item-icon.green {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .social-item h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .social-item p {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* Chat Preview Card */
+        .chat-preview {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .chat-preview-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-preview-messages {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .msg-theirs {
+            background: rgba(255, 255, 255, 0.06);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-mine {
+            background: var(--accent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-time {
+            font-size: 0.65rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .chat-preview-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-preview-footer input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .chat-preview-footer button {
+            width: 36px;
+            height: 36px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1rem;
+            cursor: default;
+        }
+
+        /* --- HOW IT WORKS --- */
+        .how {
+            padding: 120px 0;
+            text-align: center;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 50px;
+        }
+
+        .step-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            position: relative;
+        }
+
+        .step-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), rgba(249, 115, 22, 0.3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .step-card h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .step-card p {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        /* --- CTA --- */
+        .cta {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .cta-card {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(249, 115, 22, 0.15);
+            border-radius: 24px;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.08), transparent 70%);
+            z-index: 0;
+        }
+
+        .cta-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .cta p {
+            color: var(--muted);
+            margin-bottom: 32px;
+            font-size: 1.05rem;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .social-layout {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .nav-links .nav-link {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .section-title {
+                font-size: 1.7rem;
+            }
+        }
+
+        /* --- SCROLL ANIMATIONS --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Nav -->
+    <nav>
+        <div class="nav-inner">
+            <div class="logo">
+                <span class="logo-dot"></span>
+                Pomodoro Timer
+            </div>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#social" class="nav-link">Comunidad</a>
+                <a href="#how" class="nav-link">Cómo funciona</a>
+                <a href="/app" class="btn btn-primary">Ingresar →</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Plataforma colaborativa de productividad
+            </div>
+            <h1><span class="gradient">Productividad en equipo,<br>al ritmo de lofi.</span></h1>
+            <p>Combiná la técnica Pomodoro con música lofi, tablero Kanban, chat real-time y gamificación. Estudiá o
+                trabajá con compañeros en Flow.</p>
+            <div class="hero-actions">
+                <a href="/app" class="btn btn-primary">🚀 Empezar Gratis</a>
+                <a href="#features" class="btn btn-outline">Ver Features</a>
+            </div>
+
+            <div class="mockup-wrapper">
+                <img src="/static/images/app-preview.png" alt="Pomodoro Timer App Preview" class="mockup-img" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="features-header reveal">
+                <p class="section-label">Features</p>
+                <h2 class="section-title">Todo lo que necesitás para estar en Flow</h2>
+                <p class="section-subtitle">Una plataforma completa de productividad con herramientas sociales y
+                    gamificación.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <span class="feature-icon">🍅</span>
+                    <h3>Pomodoro Inteligente</h3>
+                    <p>Timer con progress ring, estadísticas y tracking automático de sesiones.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">📋</span>
+                    <h3>Kanban Board</h3>
+                    <p>Organizá tareas con drag-and-drop: Por Hacer, En Proceso y Hecho.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">🎵</span>
+                    <h3>Lofi Radio + Spotify</h3>
+                    <p>10+ estaciones de radio lofi, integración Spotify y YouTube.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">💬</span>
+                    <h3>Chat en Tiempo Real</h3>
+                    <p>Conectate con compañeros por ID único. Mensajes instantáneos con Firebase.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">🏆</span>
+                    <h3>XP y Logros</h3>
+                    <p>Sumá XP, subí de nivel, desbloqueá badges. 7 niveles y 9 logros.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">🎧</span>
+                    <h3>Sonidos Ambientales</h3>
+                    <p>Lluvia, café, bosque, océano. Mezclá sonidos para tu entorno ideal.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">🎯</span>
+                    <h3>Metas Diarias</h3>
+                    <p>Definí tu objetivo de pomodoros y medí tu progreso cada día.</p>
+                </div>
+                <div class="feature-card reveal">
+                    <span class="feature-icon">☁️</span>
+                    <h3>Cloud Sync</h3>
+                    <p>Tus datos sincronizados entre dispositivos con Google o email.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social -->
+    <section id="social" class="social">
+        <div class="container">
+            <div class="social-layout">
+                <div class="reveal">
+                    <p class="section-label">Comunidad</p>
+                    <h2 class="section-title">Estudiá y trabajá con compañeros</h2>
+                    <p class="section-subtitle" style="margin-bottom: 32px;">Cada usuario tiene un ID único para
+                        conectarse. Agregá compañeros y mantené la motivación en grupo.</p>
+
+                    <div class="social-features">
+                        <div class="social-item">
+                            <div class="social-item-icon orange">🆔</div>
+                            <div>
+                                <h4>ID Único Compartible</h4>
+                                <p>Cada usuario recibe un ID corto. Compartilo para que te agreguen al chat.</p>
+                            </div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-item-icon purple">💬</div>
+                            <div>
+                                <h4>Chat Real-Time</h4>
+                                <p>Mensajes instantáneos con burbujas estilo WhatsApp. Powered by Firebase.</p>
+                            </div>
+                        </div>
+                        <div class="social-item">
+                            <div class="social-item-icon green">👥</div>
+                            <div>
+                                <h4>Compañeros Activos</h4>
+                                <p>Mirá quién está online trabajando. Motivate con la presencia del equipo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Preview -->
+                <div class="chat-preview reveal">
+                    <div class="chat-preview-header">
+                        💬 <span>Chat — Sofía</span>
+                    </div>
+                    <div class="chat-preview-messages">
+                        <div class="msg msg-theirs">
+                            ¡Hola! ¿Arrancamos el pomodoro juntos? 🍅
+                            <div class="msg-time">14:02</div>
+                        </div>
+                        <div class="msg msg-mine">
+                            ¡Dale! Pongo el timer en 25 min 🎯
+                            <div class="msg-time">14:03</div>
+                        </div>
+                        <div class="msg msg-theirs">
+                            Perfecto, yo también. ¡Focus mode! 🔥
+                            <div class="msg-time">14:03</div>
+                        </div>
+                        <div class="msg msg-mine">
+                            Vamos que ya completé 3 hoy 💪
+                            <div class="msg-time">14:04</div>
+                        </div>
+                    </div>
+                    <div class="chat-preview-footer">
+                        <input type="text" placeholder="Escribe un mensaje..." disabled />
+                        <button disabled>➤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="how">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">Cómo funciona</p>
+                <h2 class="section-title">3 pasos para empezar</h2>
+            </div>
+            <div class="steps">
+                <div class="step-card reveal">
+                    <span class="step-number">01</span>
+                    <h3>Creá tu cuenta</h3>
+                    <p>Registrate con email o Google. Recibís tu ID único para conectar con compañeros.</p>
+                </div>
+                <div class="step-card reveal">
+                    <span class="step-number">02</span>
+                    <h3>Organizá y enfocá</h3>
+                    <p>Agregá tareas al Kanban, poné tu playlist lofi y arrancá el timer.</p>
+                </div>
+                <div class="step-card reveal">
+                    <span class="step-number">03</span>
+                    <h3>Crecé en equipo</h3>
+                    <p>Sumá XP, desbloqueá logros y motivate con compañeros en el chat.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-card reveal">
+                <h2>¿Listo para entrar en flow?</h2>
+                <p>Unite a la comunidad y empezá a ser más productivo hoy.</p>
+                <a href="/app" class="btn btn-primary">🚀 Ingresar a la Plataforma</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>© 2026 Pomodoro Timer Lofi — Flow. Focus. Progress.</p>
+            <p style="margin-top: 8px;"><a href="/app">Ir a la App</a></p>
+        </div>
+    </footer>
+
+    <!-- Scroll reveal -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

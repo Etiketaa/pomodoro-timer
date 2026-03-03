@@ -55,10 +55,11 @@
                     <input type="range" id="volume-slider" min="0" max="100" value="50" step="1">
                 </div>
                 <div id="custom-station-input-container" class="hidden">
-                    <input type="text" id="custom-station-url" placeholder="Ej: https://stream.zeno.fm/tu-stream-aqui"
-                        title="Pega aquí la URL de tu stream favorito (MP3, M4A, AAC). Presiona Enter o haz clic en Cargar.">
-                    <button id="custom-station-btn" title="Cargar stream personalizado">Cargar</button>
+                    <input type="text" id="custom-station-url" placeholder="URL de stream, Spotify o YouTube..."
+                        title="Pegá una URL de stream de audio, playlist de Spotify, o video de YouTube">
+                    <button id="custom-station-btn" title="Cargar">Cargar</button>
                 </div>
+                <div id="music-embed-container" class="music-embed-container hidden"></div>
             </div>
         </div>
         <div class="navbar-right">
@@ -84,6 +85,14 @@
                         <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                     </svg>
                     Sincronizar
+                </button>
+                <button id="profile-btn" class="user-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Mi Perfil
                 </button>
                 <button id="logout-btn" class="user-menu-item user-menu-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -179,6 +188,15 @@
     <audio id="radio-player" src="https://playerservices.streamtheworld.com/api/livestream-redirect/ASPEN.mp3"
         preload="auto"></audio>
 
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner" class="pwa-install-banner hidden">
+        <span>📱 Instalá la app para una mejor experiencia</span>
+        <div class="pwa-install-actions">
+            <button id="pwa-install-btn" class="pwa-install-btn">Instalar</button>
+            <button id="pwa-dismiss-btn" class="pwa-dismiss-btn" aria-label="Cerrar">&times;</button>
+        </div>
+    </div>
+
     <!-- 2. Contenido Principal -->
     <main id="main-content">
         <div class="app-container">
@@ -259,6 +277,20 @@
                         <span class="shortcut-key">Espacio</span> play/pausa
                         <span class="shortcut-key">R</span> reiniciar
                         <span class="shortcut-key">N</span> saltar
+                    </div>
+
+                    <!-- Daily Goal Widget -->
+                    <div id="daily-goal-widget" class="daily-goal-widget"></div>
+
+                    <!-- Active Companions Widget -->
+                    <div id="companions-widget" class="companions-widget">
+                        <div class="companions-header">
+                            <span class="companions-title">👥 Compañeros</span>
+                            <span class="companions-count" id="companions-count">0 online</span>
+                        </div>
+                        <div class="companions-list" id="companions-list">
+                            <p class="companions-empty">Agregá compañeros desde el chat 💬</p>
+                        </div>
                     </div>
                 </div>
 
@@ -428,6 +460,24 @@
             <div class="chart-container">
                 <canvas id="pomodoro-chart"></canvas>
             </div>
+
+            <!-- History Section -->
+            <div class="stats-section-divider"></div>
+            <h3 class="stats-section-title">📋 Historial</h3>
+            <div id="history-container"></div>
+
+            <!-- Export Button -->
+            <div class="stats-export-actions">
+                <button id="export-csv-btn" class="export-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Exportar CSV
+                </button>
+            </div>
         </div>
     </div>
 
@@ -549,6 +599,15 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="overlay hidden">
+        <div class="overlay-content profile-modal-content">
+            <button id="close-profile-modal" class="close-btn" aria-label="Cerrar">&times;</button>
+            <h2 class="overlay-title">👤 Mi Perfil</h2>
+            <div id="profile-content"></div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
@@ -557,6 +616,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/toast.js"></script>
     <script src="/static/circular-progress.js"></script>
+    <script src="/static/goals.js"></script>
+    <script src="/static/export.js"></script>
+    <script src="/static/ambient-sound.js"></script>
+    <script src="/static/user-profile.js"></script>
+    <script src="/static/workspace-customizer.js"></script>
     <script src="/static/script.js"></script>
     <script src="/static/theme-switcher.js"></script>
     <script src="/static/slideshow.js"></script>

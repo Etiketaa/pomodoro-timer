@@ -48,6 +48,7 @@ class AuthManager {
             if (!userSnap.exists()) {
                 await setDoc(userRef, {
                     displayName: user.displayName || user.email.split('@')[0],
+                    displayNameLower: (user.displayName || user.email.split('@')[0]).toLowerCase(),
                     email: user.email,
                     photoURL: user.photoURL || null,
                     createdAt: serverTimestamp(),
