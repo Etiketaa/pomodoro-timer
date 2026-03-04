@@ -334,6 +334,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inProgressColumnElement.innerHTML = '';
         doneColumnElement.innerHTML = '';
 
+        const statusOrder = ['todo', 'inProgress', 'done'];
+
         tasks.forEach(task => {
             let columnElement;
             if (task.status === 'todo') columnElement = todoColumnElement;
@@ -350,10 +352,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 card.setAttribute('data-id', task.id);
+
+                // Determine which move buttons to show
+                const currentIdx = statusOrder.indexOf(task.status);
+                const canMoveLeft = currentIdx > 0;
+                const canMoveRight = currentIdx < statusOrder.length - 1;
+
                 card.innerHTML = `
-                    <span class="task-text" contenteditable="true">${task.text}</span>
-                    <div class="task-indicators"></div>
-                    <button class="delete-btn" aria-label="Borrar tarea">&times;</button>
+                    <div class="task-card-top">
+                        <span class="task-text" contenteditable="true">${task.text}</span>
+                        <button class="delete-btn" aria-label="Borrar tarea">&times;</button>
+                    </div>
+                    <div class="task-card-bottom">
+                        <div class="task-indicators"></div>
+                        <div class="task-move-buttons">
+                            ${canMoveLeft ? `<button class="task-move-btn task-move-left" data-id="${task.id}" data-dir="left" title="Mover a ${statusOrder[currentIdx - 1] === 'todo' ? 'Por Hacer' : 'En Proceso'}">←</button>` : ''}
+                            ${canMoveRight ? `<button class="task-move-btn task-move-right" data-id="${task.id}" data-dir="right" title="Mover a ${statusOrder[currentIdx + 1] === 'inProgress' ? 'En Proceso' : 'Hecho'}">→</button>` : ''}
+                        </div>
+                    </div>
                 `;
                 columnElement.appendChild(card);
 
@@ -363,10 +379,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (task.description) indicators.innerHTML += '<span class="indicator">&#9776;</span>';
                 if (task.dueDate) indicators.innerHTML += '<span class="indicator">&#128197;</span>';
                 if (task.labels && task.labels.length > 0) indicators.innerHTML += '<span class="indicator">&#127991;</span>';
+
+                // Bind move buttons
+                card.querySelectorAll('.task-move-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const taskId = Number(btn.dataset.id);
+                        const direction = btn.dataset.dir;
+                        moveTask(taskId, direction);
+                    });
+                });
             }
         });
         updateCurrentTaskDisplay();
     }
+
+    function moveTask(taskId, direction) {
+        const statusOrder = ['todo', 'inProgress', 'done'];
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        const currentIdx = statusOrder.indexOf(task.status);
+        const newIdx = direction === 'right' ? currentIdx + 1 : currentIdx - 1;
+        if (newIdx < 0 || newIdx >= statusOrder.length) return;
+
+        task.status = statusOrder[newIdx];
+
+        // Handle done status auto-deletion
+        if (task.status === 'done') {
+            task.deletionTime = Date.now() + 10 * 60 * 1000;
+            scheduleTaskDeletion(task.id, task.deletionTime);
+        } else {
+            delete task.deletionTime;
+            if (deletionTimers[task.id]) {
+                clearTimeout(deletionTimers[task.id]);
+                delete deletionTimers[task.id];
+            }
+        }
+
+        saveTasks();
+        renderTasks();
+
+        // Show feedback
+        const statusNames = { todo: 'Por Hacer', inProgress: 'En Proceso', done: 'Hecho ✓' };
+        if (window.Toast) {
+            Toast.show(`Tarea movida a "${statusNames[task.status]}"`, 'info', 1500);
+        }
+    }
+
 
     function addTask(e) {
         e.preventDefault();

@@ -195,6 +195,22 @@ class UserProfile {
         return uid ? uid.substring(0, 8).toUpperCase() : null;
     }
 
+    async getFriendCode() {
+        const uid = this.getUserId();
+        if (!uid) return null;
+        try {
+            const { db, doc, getDoc } = await import('./firebase-config.js');
+            const userRef = doc(db, 'users', uid);
+            const snap = await getDoc(userRef);
+            if (snap.exists() && snap.data().friendCode) {
+                return snap.data().friendCode;
+            }
+        } catch (e) {
+            console.warn('Could not get friend code:', e);
+        }
+        return this.getShortId();
+    }
+
     /**
      * Render the profile modal content
      */
@@ -242,8 +258,15 @@ class UserProfile {
                     <div class="profile-level" style="color: ${level.color}">
                         ${level.name} • Nivel ${level.level}
                     </div>
-                    ${shortId ? `<div class="profile-user-id">ID: <span id="profile-uid" class="profile-uid-value">${shortId}</span> 
-                        <button id="copy-uid-btn" class="copy-uid-btn" title="Copiar ID">📋</button></div>` : ''}
+                    ${shortId ? `<div class="profile-friend-code">
+                        <span class="friend-code-label">Tu código de amigo:</span>
+                        <div class="friend-code-badge">
+                            <span id="profile-friend-code" class="friend-code-value">Cargando...</span>
+                            <button id="copy-friend-code-btn" class="copy-uid-btn" title="Copiar código">📋</button>
+                            <button id="share-friend-code-btn" class="copy-uid-btn" title="Compartir código">📤</button>
+                        </div>
+                        <span class="friend-code-hint">Compartí este código para que te agreguen</span>
+                    </div>` : ''}
                 </div>
             </div>
 
@@ -280,9 +303,52 @@ class UserProfile {
 
             <h4 class="profile-section-title">😊 Avatar</h4>
             <div class="avatar-selector">${avatarHtml}</div>
+
+            ${window.CryptoChat ? `<div class="profile-crypto-section">
+                <h4 class="profile-section-title">🔐 Encriptación E2E</h4>
+                <p class="profile-crypto-info">Tus mensajes están encriptados de extremo a extremo.</p>
+                <div class="profile-fingerprint">
+                    <span class="fingerprint-label">🗂️ Fingerprint de tu clave:</span>
+                    <code id="profile-key-fingerprint" class="fingerprint-value">Cargando...</code>
+                    <span class="fingerprint-hint">Compará este código con tu contacto para verificar identidad</span>
+                </div>
+                <div class="profile-crypto-actions">
+                    <button id="backup-key-btn" class="profile-backup-btn">💾 Backup de clave</button>
+                    <button id="rotate-key-btn" class="profile-rotate-btn">🔄 Rotar claves</button>
+                </div>
+            </div>` : ''}
         `;
 
         this._bindProfileEvents(container);
+
+        // Load friend code & fingerprint async
+        this.getFriendCode().then(code => {
+            const codeEl = container.querySelector('#profile-friend-code');
+            if (codeEl && code) codeEl.textContent = code;
+        });
+
+        // Load key fingerprint async
+        if (window.CryptoChat) {
+            this._loadKeyFingerprint(container);
+        }
+    }
+
+    async _loadKeyFingerprint(container) {
+        try {
+            const uid = this.getUserId();
+            if (!uid) return;
+            const { db, doc, getDoc } = await import('./firebase-config.js');
+            const userRef = doc(db, 'users', uid);
+            const snap = await getDoc(userRef);
+            if (snap.exists() && snap.data().publicKey) {
+                const cryptoChat = new CryptoChat();
+                const fingerprint = await cryptoChat.getKeyFingerprint(snap.data().publicKey);
+                const fpEl = container.querySelector('#profile-key-fingerprint');
+                if (fpEl && fingerprint) fpEl.textContent = fingerprint;
+            }
+        } catch (e) {
+            console.warn('Could not load fingerprint:', e);
+        }
     }
 
     _bindProfileEvents(container) {
@@ -305,13 +371,79 @@ class UserProfile {
             });
         });
 
-        // Copy UID
-        container.querySelector('#copy-uid-btn')?.addEventListener('click', () => {
+        // Copy friend code
+        container.querySelector('#copy-friend-code-btn')?.addEventListener('click', async () => {
+            const codeEl = container.querySelector('#profile-friend-code');
+            const code = codeEl?.textContent;
+            if (code && code !== 'Cargando...') {
+                await navigator.clipboard.writeText(code);
+                if (window.Toast) Toast.show('Código copiado al portapapeles 📋', 'success', 2000);
+            }
+        });
+
+        // Share friend code (Web Share API)
+        container.querySelector('#share-friend-code-btn')?.addEventListener('click', async () => {
+            const codeEl = container.querySelector('#profile-friend-code');
+            const code = codeEl?.textContent;
+            if (!code || code === 'Cargando...') return;
+
+            const shareText = `¡Agregame en Pomodoro Timer! Mi código de amigo es: ${code}`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Pomodoro Timer', text: shareText });
+                } catch (e) {
+                    if (e.name !== 'AbortError') console.warn('Share failed:', e);
+                }
+            } else {
+                await navigator.clipboard.writeText(code);
+                if (window.Toast) Toast.show('Código copiado 📋', 'success', 2000);
+            }
+        });
+
+        // Backup encryption key
+        container.querySelector('#backup-key-btn')?.addEventListener('click', async () => {
             const uid = this.getUserId();
-            if (uid) {
-                navigator.clipboard.writeText(uid).then(() => {
-                    if (window.Toast) Toast.show('ID copiado al portapapeles 📋', 'success', 2000);
-                });
+            if (uid && window.CryptoChat) {
+                try {
+                    const crypto = new CryptoChat();
+                    await crypto.exportKeyBackup(uid);
+                    if (window.Toast) Toast.show('Clave exportada — guardala en un lugar seguro 🔐', 'success', 4000);
+                } catch (e) {
+                    if (window.Toast) Toast.show('No se pudo exportar la clave', 'error');
+                }
+            }
+        });
+
+        // Rotate encryption keys
+        container.querySelector('#rotate-key-btn')?.addEventListener('click', async () => {
+            const uid = this.getUserId();
+            if (!uid || !window.CryptoChat) return;
+
+            const confirmed = confirm(
+                '⚠️ ¿Rotar tus claves de encriptación?\n\n' +
+                'Esto generará un nuevo par de claves. Los mensajes anteriores seguirán siendo legibles, ' +
+                'pero tus contactos necesitarán la nueva clave pública (se actualiza automáticamente).\n\n' +
+                '¿Continuar?'
+            );
+            if (!confirmed) return;
+
+            try {
+                const cryptoChat = new CryptoChat();
+                const newPublicKeyJwk = await cryptoChat.regenerateKeys(uid);
+
+                // Update Firestore with new public key
+                const { db, doc, setDoc } = await import('./firebase-config.js');
+                await setDoc(doc(db, 'users', uid), { publicKey: newPublicKeyJwk }, { merge: true });
+
+                // Refresh fingerprint
+                const fingerprint = await cryptoChat.getKeyFingerprint(newPublicKeyJwk);
+                const fpEl = container.querySelector('#profile-key-fingerprint');
+                if (fpEl && fingerprint) fpEl.textContent = fingerprint;
+
+                if (window.Toast) Toast.show('🔑 Claves rotadas exitosamente', 'success', 4000);
+            } catch (e) {
+                console.error('Key rotation failed:', e);
+                if (window.Toast) Toast.show('Error al rotar claves', 'error');
             }
         });
     }

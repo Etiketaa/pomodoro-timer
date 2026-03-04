@@ -502,9 +502,6 @@ button:hover::before {
 }
 
 .task-card .delete-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
     background: rgba(220, 53, 69, 0.2);
     color: #dc3545;
     border: 1px solid rgba(220, 53, 69, 0.3);
@@ -519,6 +516,8 @@ button:hover::before {
     cursor: pointer;
     opacity: 0;
     transition: all 0.3s ease;
+    flex-shrink: 0;
+    padding: 0;
 }
 
 .task-card:hover .delete-btn {
@@ -545,6 +544,76 @@ button:hover::before {
     background: linear-gradient(180deg, #198754, rgba(25, 135, 84, 0.3));
     opacity: 0.5;
 }
+
+/* Task Card Layout */
+.task-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.3rem;
+}
+
+.task-card-top .task-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.25rem;
+}
+
+/* Task Move Buttons (Kanban quick-move) */
+.task-move-buttons {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.task-move-btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: var(--text-secondary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.task-card:hover .task-move-btn {
+    opacity: 1;
+}
+
+.task-move-btn:hover {
+    background: rgba(249, 115, 22, 0.12);
+    border-color: rgba(249, 115, 22, 0.3);
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.task-move-right:hover {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #10b981;
+}
+
+/* On mobile, always show move buttons */
+@media (max-width: 599px) {
+    .task-move-btn {
+        opacity: 1;
+    }
+}
+
 
 /* Animación de arrastre */
 .sortable-ghost {

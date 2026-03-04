@@ -16,6 +16,10 @@ import {
     doc,
     setDoc,
     getDoc,
+    getDocs,
+    collection,
+    query,
+    where,
     serverTimestamp
 } from './firebase-config.js';
 
@@ -46,22 +50,86 @@ class AuthManager {
             const userRef = doc(db, 'users', user.uid);
             const userSnap = await getDoc(userRef);
             if (!userSnap.exists()) {
+                // Generate unique friend code POMO-XXXX
+                const friendCode = await this._generateUniqueFriendCode();
+
+                // Generate crypto keypair for E2E encryption
+                let publicKeyJwk = null;
+                if (window.CryptoChat) {
+                    try {
+                        const cryptoChat = new CryptoChat();
+                        const keyPair = await cryptoChat.generateKeyPair();
+                        publicKeyJwk = await cryptoChat.exportPublicKey(keyPair.publicKey);
+                        await cryptoChat.storePrivateKey(user.uid, keyPair.privateKey);
+                        console.log('🔐 E2E keypair generated and stored');
+                    } catch (e) {
+                        console.warn('Could not generate crypto keys:', e);
+                    }
+                }
+
+                const displayName = user.displayName || user.email.split('@')[0];
                 await setDoc(userRef, {
-                    displayName: user.displayName || user.email.split('@')[0],
-                    displayNameLower: (user.displayName || user.email.split('@')[0]).toLowerCase(),
+                    displayName: displayName,
+                    displayNameLower: displayName.toLowerCase(),
                     email: user.email,
                     photoURL: user.photoURL || null,
+                    friendCode: friendCode,
+                    publicKey: publicKeyJwk,
                     createdAt: serverTimestamp(),
                     lastLogin: serverTimestamp()
                 });
+
+                // Create friend code index for fast lookup
+                await setDoc(doc(db, 'friendCodes', friendCode), {
+                    uid: user.uid
+                });
+
                 // Migrate localStorage data on first login
                 await this._migrateLocalData(user.uid);
             } else {
                 await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
+
+                // If user exists but has no keypair, generate one
+                const userData = userSnap.data();
+                if (!userData.publicKey && window.CryptoChat) {
+                    try {
+                        const cryptoChat = new CryptoChat();
+                        const hasKey = await cryptoChat.hasPrivateKey(user.uid);
+                        if (!hasKey) {
+                            const keyPair = await cryptoChat.generateKeyPair();
+                            const publicKeyJwk = await cryptoChat.exportPublicKey(keyPair.publicKey);
+                            await cryptoChat.storePrivateKey(user.uid, keyPair.privateKey);
+                            await setDoc(userRef, { publicKey: publicKeyJwk }, { merge: true });
+                            console.log('🔐 E2E keypair generated for existing user');
+                        }
+                    } catch (e) {
+                        console.warn('Could not generate crypto keys:', e);
+                    }
+                }
+
+                // If user exists but has no friend code, generate one
+                if (!userData.friendCode) {
+                    const friendCode = await this._generateUniqueFriendCode();
+                    await setDoc(userRef, { friendCode: friendCode }, { merge: true });
+                    await setDoc(doc(db, 'friendCodes', friendCode), { uid: user.uid });
+                }
             }
         } catch (error) {
             console.error('Error ensuring user document:', error);
         }
+    }
+
+    async _generateUniqueFriendCode() {
+        let attempts = 0;
+        while (attempts < 20) {
+            const code = 'POMO-' + String(Math.floor(1000 + Math.random() * 9000));
+            const codeRef = doc(db, 'friendCodes', code);
+            const codeSnap = await getDoc(codeRef);
+            if (!codeSnap.exists()) return code;
+            attempts++;
+        }
+        // Fallback: use longer code
+        return 'POMO-' + String(Math.floor(10000 + Math.random() * 90000));
     }
 
     async _migrateLocalData(uid) {
