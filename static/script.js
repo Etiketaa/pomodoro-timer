@@ -180,15 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
             new WorkspaceCustomizer();
         }
 
-        // Initialize YouTube Streams
-        if (window.YouTubeStreams) {
-            window.youtubeStreams = new YouTubeStreams();
-            const ytBtn = document.getElementById('youtube-streams-btn');
-            if (ytBtn) {
-                ytBtn.addEventListener('click', () => window.youtubeStreams.togglePanel());
-            }
-        }
-
         // Initialize Break Screen
         if (window.BreakScreen) {
             window.breakScreen = new BreakScreen();
@@ -269,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- TIMER LOGIC ---
     function updateTimerDisplay() {
+        if (isNaN(remainingTime) || remainingTime < 0) remainingTime = 0;
         const minutes = Math.floor(remainingTime / 60).toString().padStart(2, '0');
         const seconds = (remainingTime % 60).toString().padStart(2, '0');
         timerDisplay.textContent = `${minutes}:${seconds}`;
@@ -280,7 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
         startPauseBtn.textContent = 'PAUSAR';
 
         updateCurrentTaskDisplay();
-        const totalTime = settings[mode] * 60;
+        const duration = settings[mode];
+        const totalTime = (typeof duration === 'number' ? duration : 25) * 60;
         timerId = setInterval(() => {
             remainingTime--;
             updateTimerDisplay();
@@ -340,7 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetTimer() {
         pauseTimer();
-        remainingTime = settings[mode] * 60;
+        const duration = settings[mode];
+        remainingTime = (typeof duration === 'number' ? duration : 25) * 60;
         updateTimerDisplay();
     }
 
@@ -694,6 +688,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'nature': { name: 'Nature Sounds', url: 'https://stream.zeno.fm/6jz6qw3cm5zuv' },
         'synthwave': { name: 'Synthwave Radio', url: 'https://stream.nightride.fm/nightride.m4a' },
         'classical': { name: 'Música Clásica', url: 'https://stream.zeno.fm/f3wvbbqmdg8uv' },
+        '---': { name: '──────────', url: '' },
+        'blender': { name: '🔴 BLENDER', url: '', type: 'youtube_live' },
+        'olga': { name: '🔴 OLGA', url: '', type: 'youtube_live' },
+        'gelatina': { name: '🔴 GELATINA', url: '', type: 'youtube_live' },
+        'luzu': { name: '🔴 LUZU TV', url: '', type: 'youtube_live' },
         'custom': { name: '🎵 URL Personalizada', url: '' }
     };
 
@@ -710,21 +709,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const option = document.createElement('option');
             option.value = key;
             option.textContent = MUSIC_STATIONS[key].name;
+            if (key === '---') option.disabled = true;
             stationSelect.appendChild(option);
         });
 
+        createLiveIndicator();
+
         let lastStation = getFromLS('pomodoroLastStation', { key: 'lofi1', customUrl: '' });
         stationSelect.value = lastStation.key;
+
+        const station = MUSIC_STATIONS[lastStation.key];
 
         if (lastStation.key === 'custom' && lastStation.customUrl) {
             MUSIC_STATIONS.custom.url = lastStation.customUrl;
             customStationUrlInput.value = lastStation.customUrl;
             radioPlayer.src = lastStation.customUrl;
             radioStatus.textContent = '🎵 Personalizada';
+        } else if (station && station.type === 'youtube_live') {
+            radioPlayer.src = '';
+            if (typeof loadYouTubeLive === 'function') {
+                loadYouTubeLive(lastStation.key);
+            }
+            radioStatus.textContent = station.name;
         } else {
-            if (!MUSIC_STATIONS[lastStation.key]) lastStation.key = 'lofi1';
-            radioPlayer.src = MUSIC_STATIONS[lastStation.key].url;
-            radioStatus.textContent = MUSIC_STATIONS[lastStation.key].name;
+            if (!station) lastStation.key = 'lofi1';
+            const defaultStation = MUSIC_STATIONS[lastStation.key];
+            if (defaultStation) {
+                radioPlayer.src = defaultStation.url;
+                radioStatus.textContent = defaultStation.name;
+            }
         }
 
         customStationInputContainer.classList.toggle('hidden', lastStation.key !== 'custom');
@@ -759,15 +772,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleStationChange(e) {
         const selectedKey = e.target.value;
+        const station = MUSIC_STATIONS[selectedKey];
+        if (!station) return;
+        if (selectedKey === '---') {
+            e.target.value = getFromLS('pomodoroLastStation', { key: 'lofi1' }).key;
+            return;
+        }
+
         const wasPaused = radioPlayer.paused;
         customStationInputContainer.classList.toggle('hidden', selectedKey !== 'custom');
-        radioStatus.textContent = MUSIC_STATIONS[selectedKey].name;
+        radioStatus.textContent = station.name;
 
-        if (selectedKey !== 'custom') {
-            radioPlayer.src = MUSIC_STATIONS[selectedKey].url;
+        if (selectedKey === 'custom') return;
+
+        if (station.type === 'youtube_live') {
+            radioPlayer.pause();
+            radioPlayer.src = '';
+            if (typeof loadYouTubeLive === 'function') {
+                loadYouTubeLive(selectedKey);
+            }
             saveToLS('pomodoroLastStation', { key: selectedKey, customUrl: '' });
-            if (!wasPaused) radioPlayer.play();
+            return;
         }
+
+        stopYouTubeLive();
+        radioPlayer.src = station.url;
+        saveToLS('pomodoroLastStation', { key: selectedKey, customUrl: '' });
+        if (!wasPaused) radioPlayer.play();
     }
 
     function loadCustomStation() {
@@ -881,14 +912,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function toggleMusic() {
+        const station = MUSIC_STATIONS[stationSelect.value];
+        if (station && station.type === 'youtube_live') return;
         if (!radioPlayer.src) {
-            alert("Por favor, selecciona una estación o introduce una URL personalizada.");
+            if (window.Toast) Toast.show('Seleccioná una estación o cargá una URL', 'warning');
+            else alert("Por favor, selecciona una estación o introduce una URL personalizada.");
             return;
         }
         if (radioPlayer.paused) {
             radioPlayer.play().catch(e => {
                 console.error("Error al reproducir audio:", e);
-                alert("No se pudo reproducir el audio. Verifica la URL del stream o los permisos del navegador.");
+                if (window.Toast) Toast.show('Error al reproducir audio', 'error');
+                else alert("No se pudo reproducir el audio. Verifica la URL del stream o los permisos del navegador.");
             });
         } else {
             radioPlayer.pause();
