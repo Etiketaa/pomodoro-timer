@@ -3,7 +3,7 @@ import sys
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 
-# Add the api directory to sys.path so groq_client can be imported in Vercel
+# Add the api directory to sys.path so modules can be imported in Vercel
 api_dir = os.path.dirname(os.path.abspath(__file__))
 if api_dir not in sys.path:
     sys.path.insert(0, api_dir)
@@ -17,8 +17,34 @@ app = Flask(
     template_folder=os.path.join(project_root, 'templates')
 )
 
+app.config['SECRET_KEY'] = os.getenv('JWT_SECRET', 'dev-secret')
+
 # Enable CORS for API routes
 CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Initialize authlib for Google OAuth
+from auth import oauth
+oauth.init_app(app)
+
+# Register auth blueprint
+from auth import auth_bp
+app.register_blueprint(auth_bp)
+
+# Register sync blueprint
+from sync import sync_bp
+app.register_blueprint(sync_bp)
+
+# Register chat blueprint
+from chat import chat_bp
+app.register_blueprint(chat_bp)
+
+# Register feedback blueprint
+from feedback import feedback_bp
+app.register_blueprint(feedback_bp)
+
+# Initialize Socket.IO
+from socketio_handler import init_socketio
+init_socketio(app)
 
 # Import Groq client
 try:
@@ -28,20 +54,24 @@ except ImportError:
     groq_available = False
     print("Warning: Groq client not available. Install with: pip install groq python-dotenv")
 
+
 @app.route('/')
 def landing():
     """Landing page route"""
     return render_template('landing.html')
+
 
 @app.route('/app')
 def index():
     """Main application route"""
     return render_template('index.html')
 
+
 @app.route('/gallery')
 def gallery():
     """Gallery page route"""
     return render_template('gallery.html')
+
 
 @app.route('/sw.js')
 def service_worker():
@@ -50,7 +80,8 @@ def service_worker():
     sw_path = os.path.join(project_root, 'sw.js')
     return send_file(sw_path, mimetype='application/javascript')
 
-@app.route('/api/chat', methods=['POST'])
+
+@app.route('/api/chatbot', methods=['POST'])
 def chat():
     """Chatbot API endpoint"""
     try:
@@ -85,6 +116,7 @@ def chat():
             'answer': '¡Hola! Soy tu asistente de productividad. Puedo ayudarte a organizar tareas, priorizarlas y darte consejos para concentrarte. ¿En qué te ayudo? 😊'
         }), 200
 
+
 @app.route('/<path:path>')
 def catch_all(path):
     """
@@ -93,7 +125,8 @@ def catch_all(path):
     """
     return render_template('index.html')
 
+
 # This block is not used by Vercel, but it's good for local development
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    from socketio_handler import socketio
+    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

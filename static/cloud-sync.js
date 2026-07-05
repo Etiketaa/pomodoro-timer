@@ -1,15 +1,25 @@
 /**
  * Cloud Sync Manager for Pomodoro Timer v2
- * Abstracts data persistence: uses Firestore when logged in, localStorage as fallback
+ * Uses REST API (PostgreSQL) instead of Firestore.
+ * localStorage is always the primary store; cloud is backup.
  */
 
-import {
-    db,
-    doc,
-    setDoc,
-    getDoc,
-    serverTimestamp
-} from './firebase-config.js';
+import { apiClient } from './api-client.js';
+
+// Map: cloud key → localStorage key
+const KEY_MAP = {
+    'settings': 'pomodoroSettings',
+    'tasks': 'pomodoroTasks',
+    'stats': 'pomodoroStats',
+    'musicPrefs': 'pomodoroLastStation',
+    'musicVolume': 'pomodoroMusicVolume',
+    'theme': 'pomodoroTheme',
+    'dailyGoal': 'pomodoroDailyGoal',
+    'favoriteStations': 'pomodoroFavoriteStations',
+    'userProfile': 'pomodoroUserProfile',
+};
+
+const ALL_CLOUD_KEYS = Object.keys(KEY_MAP);
 
 class CloudSync {
     constructor(authManager) {
@@ -18,20 +28,19 @@ class CloudSync {
     }
 
     /**
-     * Get data by key. Tries Firestore first (if logged in), falls back to localStorage.
+     * Get data by key. Tries cloud first (if logged in), falls back to localStorage.
      */
     async get(key, defaultValue = null) {
-        // If logged in, try Firestore
         if (this.authManager.isLoggedIn()) {
             try {
-                const uid = this.authManager.getUserId();
-                const docRef = doc(db, 'users', uid, 'data', 'appData');
-                const snap = await getDoc(docRef);
-                if (snap.exists() && snap.data()[key] !== undefined) {
-                    return snap.data()[key];
+                const data = await apiClient.syncKey(key, null);
+                // The endpoint returns { key: value }
+                const cloudKey = key;
+                if (data[cloudKey] !== undefined && data[cloudKey] !== null) {
+                    return data[cloudKey];
                 }
             } catch (error) {
-                console.warn(`CloudSync: Error reading from Firestore for key "${key}":`, error);
+                console.warn(`CloudSync: Error reading from cloud for key "${key}":`, error);
             }
         }
         // Fallback to localStorage
@@ -45,7 +54,7 @@ class CloudSync {
     }
 
     /**
-     * Save data by key. Saves to both localStorage (immediate) and Firestore (debounced).
+     * Save data by key. Saves to both localStorage (immediate) and cloud (debounced).
      */
     async save(key, value) {
         // Always save to localStorage immediately
@@ -56,40 +65,35 @@ class CloudSync {
             console.warn(`CloudSync: Error saving to localStorage for key "${key}":`, error);
         }
 
-        // If logged in, also save to Firestore (debounced to avoid excessive writes)
+        // If logged in, also save to cloud (debounced to avoid excessive writes)
         if (this.authManager.isLoggedIn()) {
-            this._debouncedFirestoreSave(key, value);
+            this._debouncedCloudSave(key, value);
         }
     }
 
     /**
-     * Force sync all localStorage data to Firestore (useful after login)
+     * Force sync all localStorage data to cloud (useful after login)
      */
     async syncToCloud() {
         if (!this.authManager.isLoggedIn()) return;
 
         try {
-            const uid = this.authManager.getUserId();
-            const docRef = doc(db, 'users', uid, 'data', 'appData');
-
             const data = {};
-            const keys = ['settings', 'tasks', 'stats', 'musicPrefs', 'musicVolume', 'theme', 'dailyGoal', 'favoriteStations'];
-
-            for (const key of keys) {
-                const lsKey = this._getLSKey(key);
+            for (const cloudKey of ALL_CLOUD_KEYS) {
+                const lsKey = this._getLSKey(cloudKey);
                 const value = localStorage.getItem(lsKey);
                 if (value) {
                     try {
-                        data[key] = JSON.parse(value);
+                        data[cloudKey] = JSON.parse(value);
                     } catch {
-                        data[key] = value;
+                        data[cloudKey] = value;
                     }
                 }
             }
 
             if (Object.keys(data).length > 0) {
-                await setDoc(docRef, { ...data, lastSync: serverTimestamp() }, { merge: true });
-                console.log('✅ All data synced to cloud');
+                await apiClient.syncToCloud(data);
+                console.log('All data synced to cloud');
             }
         } catch (error) {
             console.error('CloudSync: Error syncing to cloud:', error);
@@ -97,35 +101,21 @@ class CloudSync {
     }
 
     /**
-     * Pull all data from Firestore and update localStorage
+     * Pull all data from cloud and update localStorage
      */
     async syncFromCloud() {
-        if (!this.authManager.isLoggedIn()) return;
+        if (!this.authManager.isLoggedIn()) return false;
 
         try {
-            const uid = this.authManager.getUserId();
-            const docRef = doc(db, 'users', uid, 'data', 'appData');
-            const snap = await getDoc(docRef);
+            const data = await apiClient.syncFromCloud();
 
-            if (snap.exists()) {
-                const data = snap.data();
-                const keyMap = {
-                    'settings': 'pomodoroSettings',
-                    'tasks': 'pomodoroTasks',
-                    'stats': 'pomodoroStats',
-                    'musicPrefs': 'pomodoroLastStation',
-                    'musicVolume': 'pomodoroMusicVolume',
-                    'theme': 'pomodoroTheme',
-                    'dailyGoal': 'pomodoroDailyGoal',
-                    'favoriteStations': 'pomodoroFavoriteStations'
-                };
-
-                for (const [firestoreKey, lsKey] of Object.entries(keyMap)) {
-                    if (data[firestoreKey] !== undefined) {
-                        localStorage.setItem(lsKey, JSON.stringify(data[firestoreKey]));
+            if (data && Object.keys(data).length > 0) {
+                for (const [cloudKey, lsKey] of Object.entries(KEY_MAP)) {
+                    if (data[cloudKey] !== undefined) {
+                        localStorage.setItem(lsKey, JSON.stringify(data[cloudKey]));
                     }
                 }
-                console.log('✅ Data pulled from cloud');
+                console.log('Data pulled from cloud');
                 return true;
             }
             return false;
@@ -137,39 +127,22 @@ class CloudSync {
 
     // --- Private helpers ---
 
-    _debouncedFirestoreSave(key, value) {
+    _debouncedCloudSave(key, value) {
         if (this._debounceTimers[key]) {
             clearTimeout(this._debounceTimers[key]);
         }
 
         this._debounceTimers[key] = setTimeout(async () => {
             try {
-                const uid = this.authManager.getUserId();
-                if (!uid) return;
-
-                const docRef = doc(db, 'users', uid, 'data', 'appData');
-                await setDoc(docRef, {
-                    [key]: value,
-                    lastSync: serverTimestamp()
-                }, { merge: true });
+                await apiClient.syncKey(key, value);
             } catch (error) {
-                console.warn(`CloudSync: Error saving "${key}" to Firestore:`, error);
+                console.warn(`CloudSync: Error saving "${key}" to cloud:`, error);
             }
-        }, 2000); // 2 second debounce
+        }, 2000);
     }
 
     _getLSKey(key) {
-        const keyMap = {
-            'settings': 'pomodoroSettings',
-            'tasks': 'pomodoroTasks',
-            'stats': 'pomodoroStats',
-            'musicPrefs': 'pomodoroLastStation',
-            'musicVolume': 'pomodoroMusicVolume',
-            'theme': 'pomodoroTheme',
-            'dailyGoal': 'pomodoroDailyGoal',
-            'favoriteStations': 'pomodoroFavoriteStations'
-        };
-        return keyMap[key] || key;
+        return KEY_MAP[key] || key;
     }
 }
 

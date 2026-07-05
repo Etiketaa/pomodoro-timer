@@ -95,7 +95,7 @@ class Chatbox {
         const userTasks = this.getUserTasks();
         const pomodorosToday = this.getPomodorosToday();
 
-        fetch('/api/chat', {
+        fetch('/api/chatbot', {
             method: 'POST',
             body: JSON.stringify({
                 message: text1,

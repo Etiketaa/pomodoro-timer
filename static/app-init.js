@@ -1,14 +1,14 @@
 /**
  * App Initializer for Pomodoro Timer v2
- * Initializes Firebase Auth, CloudSync, and new UI components
- * This runs as a module after other scripts are loaded
+ * Initializes Auth, CloudSync, and new UI components.
+ * Uses JWT auth + PostgreSQL (no Firebase).
  */
 
 import { AuthManager, AuthModalController } from './auth.js';
 import { CloudSync } from './cloud-sync.js';
-import { UserChat } from './user-chat.js';
+import { UserChat } from './chat.js';
 
-// Initialize Auth and Cloud Sync
+// Initialize Auth, Cloud Sync, and Chat
 const authManager = new AuthManager();
 const authModal = new AuthModalController(authManager);
 const cloudSync = new CloudSync(authManager);
@@ -44,13 +44,14 @@ authManager.onAuthChange(async (user) => {
         // Pull data from cloud on login
         const pulled = await cloudSync.syncFromCloud();
         if (pulled) {
-            Toast.show('Datos sincronizados desde la nube ☁️', 'success');
+            Toast.show('Datos sincronizados desde la nube', 'success');
             // Dispatch event so script.js can refresh its state without full reload
             window.dispatchEvent(new CustomEvent('pomodoroDataSynced'));
         } else {
             // First login: push local data to cloud
             await cloudSync.syncToCloud();
-            Toast.show(`¡Bienvenido, ${user.displayName || user.email.split('@')[0]}! 🎉`, 'success');
+            const name = user.display_name || user.email?.split('@')[0] || 'Usuario';
+            Toast.show(`Bienvenido, ${name}!`, 'success');
         }
     } else if (!user) {
         hasSynced = false;
@@ -61,7 +62,7 @@ authManager.onAuthChange(async (user) => {
 document.getElementById('sync-btn')?.addEventListener('click', async () => {
     Toast.show('Sincronizando...', 'info', 2000);
     await cloudSync.syncToCloud();
-    Toast.show('Datos sincronizados ✅', 'success');
+    Toast.show('Datos sincronizados', 'success');
     document.getElementById('user-menu')?.classList.add('hidden');
 });
 
@@ -69,8 +70,8 @@ document.getElementById('sync-btn')?.addEventListener('click', async () => {
 window.PomodoroV2 = {
     authManager,
     cloudSync,
-    circularProgress,
     userChat,
+    circularProgress,
     updateSessionDots,
 
     /** Update circular progress based on timer state */
@@ -89,4 +90,4 @@ window.PomodoroV2 = {
     }
 };
 
-console.log('✅ Pomodoro Timer v2 initialized');
+console.log('Pomodoro Timer v2 initialized');

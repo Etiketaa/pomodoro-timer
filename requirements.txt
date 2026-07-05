@@ -1,4 +1,22 @@
+# Backend
 Flask
+flask-cors
 groq
 python-dotenv
-flask-cors
+
+# Database (Phase 1)
+psycopg2-binary
+
+# Auth (Phase 2)
+passlib[bcrypt]
+bcrypt==4.0.1
+PyJWT
+authlib
+requests
+
+# Real-time (Phase 5)
+flask-socketio
+eventlet
+
+# Encryption (Phase 6)
+cryptography

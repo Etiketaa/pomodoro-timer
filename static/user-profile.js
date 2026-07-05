@@ -199,11 +199,14 @@ class UserProfile {
         const uid = this.getUserId();
         if (!uid) return null;
         try {
-            const { db, doc, getDoc } = await import('./firebase-config.js');
-            const userRef = doc(db, 'users', uid);
-            const snap = await getDoc(userRef);
-            if (snap.exists() && snap.data().friendCode) {
-                return snap.data().friendCode;
+            const token = localStorage.getItem('pomodoroToken');
+            if (!token) return this.getShortId();
+            const res = await fetch('/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const { user } = await res.json();
+                if (user?.friend_code) return user.friend_code;
             }
         } catch (e) {
             console.warn('Could not get friend code:', e);
@@ -337,14 +340,19 @@ class UserProfile {
         try {
             const uid = this.getUserId();
             if (!uid) return;
-            const { db, doc, getDoc } = await import('./firebase-config.js');
-            const userRef = doc(db, 'users', uid);
-            const snap = await getDoc(userRef);
-            if (snap.exists() && snap.data().publicKey) {
-                const cryptoChat = new CryptoChat();
-                const fingerprint = await cryptoChat.getKeyFingerprint(snap.data().publicKey);
-                const fpEl = container.querySelector('#profile-key-fingerprint');
-                if (fpEl && fingerprint) fpEl.textContent = fingerprint;
+            const token = localStorage.getItem('pomodoroToken');
+            if (!token) return;
+            const res = await fetch('/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const { user } = await res.json();
+                if (user?.public_key && window.CryptoChat) {
+                    const cryptoChat = new CryptoChat();
+                    const fingerprint = await cryptoChat.getKeyFingerprint(user.public_key);
+                    const fpEl = container.querySelector('#profile-key-fingerprint');
+                    if (fpEl && fingerprint) fpEl.textContent = fingerprint;
+                }
             }
         } catch (e) {
             console.warn('Could not load fingerprint:', e);
@@ -431,16 +439,25 @@ class UserProfile {
                 const cryptoChat = new CryptoChat();
                 const newPublicKeyJwk = await cryptoChat.regenerateKeys(uid);
 
-                // Update Firestore with new public key
-                const { db, doc, setDoc } = await import('./firebase-config.js');
-                await setDoc(doc(db, 'users', uid), { publicKey: newPublicKeyJwk }, { merge: true });
+                // Update public key via API
+                const token = localStorage.getItem('pomodoroToken');
+                if (token) {
+                    await fetch('/api/auth/public-key', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ publicKey: newPublicKeyJwk })
+                    });
+                }
 
                 // Refresh fingerprint
                 const fingerprint = await cryptoChat.getKeyFingerprint(newPublicKeyJwk);
                 const fpEl = container.querySelector('#profile-key-fingerprint');
                 if (fpEl && fingerprint) fpEl.textContent = fingerprint;
 
-                if (window.Toast) Toast.show('🔑 Claves rotadas exitosamente', 'success', 4000);
+                if (window.Toast) Toast.show('Claves rotadas exitosamente', 'success', 4000);
             } catch (e) {
                 console.error('Key rotation failed:', e);
                 if (window.Toast) Toast.show('Error al rotar claves', 'error');

@@ -563,39 +563,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- FEEDBACK ---
-    const FIREBASE_URL = 'https://pomodoro-feedback-default-rtdb.firebaseio.com';
 
     async function submitFeedback(e) {
         e.preventDefault();
-        if (!FIREBASE_URL) {
-            alert('La funcionalidad de Feedback no está configurada.');
-            return;
-        }
 
-        const name = document.getElementById('feedback-name').value || 'Anónimo';
+        const name = document.getElementById('feedback-name').value || 'Anonimo';
         const rating = feedbackForm.querySelector('input[name="rating"]:checked')?.value;
         const message = document.getElementById('feedback-message').value;
 
         if (!rating || !message) {
-            if (window.Toast) Toast.show('Por favor, deja una calificación y un mensaje.', 'warning');
-            else alert('Por favor, deja una calificación y un mensaje.');
+            if (window.Toast) Toast.show('Deja una calificacion y un mensaje.', 'warning');
+            else alert('Deja una calificacion y un mensaje.');
             return;
         }
 
-        const feedbackData = { name, rating, message, createdAt: new Date().toISOString() };
-
         try {
-            const response = await fetch(`${FIREBASE_URL}/feedback.json`, {
+            const token = window.PomodoroV2?.authManager?.getUser?.() ? localStorage.getItem('pomodoroToken') : null;
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const response = await fetch('/api/feedback', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(feedbackData)
+                headers,
+                body: JSON.stringify({ name, rating: parseInt(rating), message })
             });
             if (!response.ok) throw new Error('No se pudo enviar el feedback.');
 
             feedbackForm.reset();
             fetchReviews();
-            if (window.Toast) Toast.show('¡Gracias por tu feedback! 💬', 'success');
-            else alert('¡Gracias por tu feedback!');
+            if (window.Toast) Toast.show('Gracias por tu feedback!', 'success');
+            else alert('Gracias por tu feedback!');
         } catch (error) {
             console.error("Error enviando feedback:", error);
             if (window.Toast) Toast.show('Error al enviar feedback', 'error');
@@ -604,32 +601,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchReviews() {
-        if (!FIREBASE_URL) return;
-
-        reviewsList.innerHTML = '<p>Cargando reseñas...</p>';
+        reviewsList.innerHTML = '<p>Cargando reviews...</p>';
         try {
-            const response = await fetch(`${FIREBASE_URL}/feedback.json`);
-            if (!response.ok) throw new Error('No se pudieron cargar las reseñas.');
+            const response = await fetch('/api/feedback?limit=20');
+            if (!response.ok) throw new Error('No se pudieron cargar las reviews.');
 
             const data = await response.json();
-            renderReviews(data);
+            renderReviews(data.reviews);
         } catch (error) {
-            console.error("Error cargando reseñas:", error);
-            reviewsList.innerHTML = '<p>No se pudieron cargar las reseñas.</p>';
+            console.error("Error cargando reviews:", error);
+            reviewsList.innerHTML = '<p>No se pudieron cargar las reviews.</p>';
         }
     }
 
     function renderReviews(reviews) {
         reviewsList.innerHTML = '';
-        if (!reviews) {
-            reviewsList.innerHTML = '<p>Aún no hay reseñas. ¡Sé el primero!</p>';
+        if (!reviews || reviews.length === 0) {
+            reviewsList.innerHTML = '<p>No hay reviews aun. Se el primero!</p>';
             return;
         }
 
-        Object.values(reviews).reverse().forEach(review => {
+        reviews.forEach(review => {
             const card = document.createElement('div');
             card.className = 'review-card';
-            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const stars = '\u2605'.repeat(review.rating) + '\u2606'.repeat(5 - review.rating);
             card.innerHTML = `
                 <div class="review-header">
                     <span class="review-name">${review.name}</span>

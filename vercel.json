@@ -6,15 +6,21 @@
       "use": "@vercel/python",
       "config": {
         "includeFiles": [
+          "api/**",
           "static/**",
           "templates/**",
           "sw.js",
+          "schema.sql",
           "requirements.txt"
         ]
       }
     }
   ],
   "routes": [
+    {
+      "src": "/api/index.py/socket.io/.*",
+      "dest": "/api/index.py"
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index.py"
