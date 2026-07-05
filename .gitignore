@@ -29,3 +29,4 @@ migrate_working_dir/
 *.iws
 .idea/
 .venv/
+VERCEL_ENV_VARS.txt

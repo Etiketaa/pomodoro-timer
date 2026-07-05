@@ -45,9 +45,66 @@ class AmbientSoundMixer {
             }
         };
 
+        this.presets = {
+            rainyCafe: { name: '☕ Lluvia + Café', sounds: { rain: 60, cafe: 40 } },
+            forestNight: { name: '🌲 Bosque Noche', sounds: { forest: 70, thunder: 20 } },
+            oceanChill: { name: '🌊 Oceano Relax', sounds: { waves: 60, fireplace: 30 } },
+            studyMode: { name: '📚 Estudio Profundo', sounds: { rain: 40, fireplace: 30, cafe: 20 } },
+            stormLounge: { name: '⛈️ Tormenta Lounge', sounds: { thunder: 50, rain: 40, fireplace: 20 } },
+            natureMix: { name: '🌿 Naturaleza Total', sounds: { forest: 50, waves: 30, rain: 20 } }
+        };
+
         this.isOpen = false;
         this._loadSavedState();
         this._createUI();
+    }
+
+    _addStyles() {
+        if (document.getElementById('ambient-presets-styles')) return;
+
+        const styles = document.createElement('style');
+        styles.id = 'ambient-presets-styles';
+        styles.textContent = `
+            .ambient-presets {
+                padding: 8px 12px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .presets-label {
+                font-size: 0.75rem;
+                color: var(--text-color, #fff);
+                opacity: 0.6;
+                display: block;
+                margin-bottom: 6px;
+            }
+
+            .presets-grid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .ambient-preset-btn {
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: var(--text-color, #fff);
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 0.7rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .ambient-preset-btn:hover {
+                background: rgba(255, 255, 255, 0.15);
+                border-color: var(--primary-color, #f97316);
+            }
+
+            .ambient-preset-btn:active {
+                transform: scale(0.95);
+            }
+        `;
+        document.head.appendChild(styles);
     }
 
     _loadSavedState() {
@@ -89,10 +146,23 @@ class AmbientSoundMixer {
             `;
         });
 
+        let presetsHtml = '';
+        Object.entries(this.presets).forEach(([key, preset]) => {
+            presetsHtml += `
+                <button class="ambient-preset-btn" data-preset="${key}">${preset.name}</button>
+            `;
+        });
+
         panel.innerHTML = `
             <div class="ambient-mixer-header">
                 <span>🎧 Sonidos Ambientales</span>
                 <button id="ambient-reset-btn" class="ambient-reset-btn" title="Reset todo">🔄</button>
+            </div>
+            <div class="ambient-presets">
+                <span class="presets-label">Presets:</span>
+                <div class="presets-grid">
+                    ${presetsHtml}
+                </div>
             </div>
             <div class="ambient-mixer-body">
                 ${soundsHtml}
@@ -135,6 +205,14 @@ class AmbientSoundMixer {
 
         document.getElementById('ambient-reset-btn')?.addEventListener('click', () => {
             this._resetAll();
+        });
+
+        // Preset buttons
+        panel.querySelectorAll('.ambient-preset-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const presetKey = e.target.dataset.preset;
+                this._applyPreset(presetKey);
+            });
         });
 
         // Close panel on outside click
@@ -215,6 +293,32 @@ class AmbientSoundMixer {
         this.panel.querySelectorAll('.ambient-volume-value').forEach(l => l.textContent = 'OFF');
 
         if (window.Toast) Toast.show('Sonidos ambientales reseteados', 'info');
+    }
+
+    _applyPreset(presetKey) {
+        const preset = this.presets[presetKey];
+        if (!preset) return;
+
+        // Reset all first
+        Object.keys(this.sounds).forEach(key => {
+            this._setVolume(key, 0);
+        });
+
+        // Apply preset volumes
+        Object.entries(preset.sounds).forEach(([key, volume]) => {
+            this._setVolume(key, volume);
+        });
+
+        // Update UI sliders
+        this.panel.querySelectorAll('.ambient-slider').forEach(slider => {
+            const key = slider.dataset.sound;
+            const vol = this.sounds[key]?.volume || 0;
+            slider.value = vol;
+            const label = slider.parentElement.querySelector('.ambient-volume-value');
+            label.textContent = vol > 0 ? vol + '%' : 'OFF';
+        });
+
+        if (window.Toast) Toast.show(`🎧 Preset: ${preset.name}`, 'success');
     }
 
     _updateToggleIndicator() {

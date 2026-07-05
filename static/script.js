@@ -117,11 +117,25 @@ document.addEventListener('DOMContentLoaded', () => {
     let ambientMixer = null;
     let userProfile = null;
 
+    // --- NOTIFICATIONS ---
+    function initNotifications() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }
+
+    function sendNotification(title, body, icon) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(title, { body, icon: icon || '/static/favicon.ico' });
+        }
+    }
+
     // --- INITIALIZATION ---
     function init() {
         loadTheme();
         loadSettings();
         loadTasks();
+        initNotifications();
         // Reschedule deletions for 'done' tasks on load
         tasks.forEach(task => {
             if (task.status === 'done' && task.deletionTime) {
@@ -164,6 +178,29 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize Workspace Customizer
         if (window.WorkspaceCustomizer) {
             new WorkspaceCustomizer();
+        }
+
+        // Initialize YouTube Streams
+        if (window.YouTubeStreams) {
+            window.youtubeStreams = new YouTubeStreams();
+            const ytBtn = document.getElementById('youtube-streams-btn');
+            if (ytBtn) {
+                ytBtn.addEventListener('click', () => window.youtubeStreams.togglePanel());
+            }
+        }
+
+        // Initialize Break Screen
+        if (window.BreakScreen) {
+            window.breakScreen = new BreakScreen();
+            window.addEventListener('breakScreen:end', () => {
+                // Break ended, resume ambient sounds
+                if (ambientMixer) ambientMixer.resumeAll();
+            });
+        }
+
+        // Initialize Focus Mode
+        if (window.FocusMode) {
+            new FocusMode();
         }
 
         // Update companions widget from chat contacts
@@ -275,10 +312,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (window.Toast) {
                         Toast.show('¡Pomodoro completado! Tomá un descanso 🎉', 'success');
                     }
+                    // Send notification
+                    sendNotification('¡Pomodoro completado! 🍅', 'Tomá un descanso merecido. Volvé cuando estés listo.');
+                    // Show break screen
+                    const breakDuration = pomodorosInCycle % 4 === 0 ? settings.longBreak : settings.shortBreak;
+                    if (window.breakScreen) {
+                        window.breakScreen.show(breakDuration);
+                    }
                 } else {
                     if (window.Toast) {
                         Toast.show('Descanso terminado. ¡A trabajar! 💪', 'info');
                     }
+                    // Send notification
+                    sendNotification('Descanso terminado 💪', '¡Hora de volver a enfocarse!');
                 }
                 switchMode();
             }
