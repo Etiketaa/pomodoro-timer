@@ -30,3 +30,9 @@ migrate_working_dir/
 .idea/
 .venv/
 VERCEL_ENV_VARS.txt
+
+# v0 reference (design only, not deployed)
+pomodoro-timer/
+
+# Frontend source (built output is in public/)
+frontend/dist/
