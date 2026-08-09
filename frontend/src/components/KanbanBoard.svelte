@@ -2,16 +2,20 @@
   type Task = {
     id: string;
     title: string;
-    description: string;
-    column: 'todo' | 'inProgress' | 'done';
-    createdAt: number;
+    status: 'todo' | 'doing' | 'done';
   };
 
+  const COLUMNS: { id: Task['status']; label: string }[] = [
+    { id: 'todo', label: 'Por hacer' },
+    { id: 'doing', label: 'En proceso' },
+    { id: 'done', label: 'Hecho' },
+  ];
+
+  const ORDER: Task['status'][] = ['todo', 'doing', 'done'];
+
   let tasks = $state<Task[]>(loadTasks());
-  let draggedTaskId = $state<string | null>(null);
-  let dragOverColumn = $state<string | null>(null);
-  let newTaskTitle = $state('');
-  let activeTab = $state<'todo' | 'inProgress' | 'done'>('todo');
+  let draft = $state('');
+  let activeTab = $state<Task['status']>('todo');
 
   function loadTasks(): Task[] {
     try {
@@ -26,218 +30,159 @@
   }
 
   function addTask() {
-    if (!newTaskTitle.trim()) return;
-    tasks = [...tasks, {
-      id: crypto.randomUUID(),
-      title: newTaskTitle.trim(),
-      description: '',
-      column: 'todo',
-      createdAt: Date.now(),
-    }];
-    newTaskTitle = '';
+    const title = draft.trim();
+    if (!title) return;
+    tasks = [...tasks, { id: crypto.randomUUID(), title, status: 'todo' }];
+    draft = '';
     saveTasks();
   }
 
-  function moveTask(taskId: string, toColumn: 'todo' | 'inProgress' | 'done') {
-    tasks = tasks.map(t => t.id === taskId ? { ...t, column: toColumn } : t);
+  function move(id: string, dir: 1 | -1) {
+    tasks = tasks.map(t => {
+      if (t.id !== id) return t;
+      const idx = ORDER.indexOf(t.status);
+      const next = ORDER[Math.min(ORDER.length - 1, Math.max(0, idx + dir))];
+      return { ...t, status: next };
+    });
     saveTasks();
   }
 
-  function deleteTask(taskId: string) {
-    tasks = tasks.filter(t => t.id !== taskId);
+  function remove(id: string) {
+    tasks = tasks.filter(t => t.id !== id);
     saveTasks();
   }
 
-  function onDragStart(e: DragEvent, taskId: string) {
-    draggedTaskId = taskId;
-    e.dataTransfer!.effectAllowed = 'move';
-  }
-
-  function onDragOver(e: DragEvent, column: string) {
-    e.preventDefault();
-    dragOverColumn = column;
-    e.dataTransfer!.dropEffect = 'move';
-  }
-
-  function onDragLeave() {
-    dragOverColumn = null;
-  }
-
-  function onDrop(e: DragEvent, column: 'todo' | 'inProgress' | 'done') {
-    e.preventDefault();
-    dragOverColumn = null;
-    if (draggedTaskId) {
-      moveTask(draggedTaskId, column);
-      draggedTaskId = null;
-    }
-  }
-
-  const COLUMNS = [
-    { id: 'todo' as const, label: 'Por hacer', emptyText: 'Sin tareas pendientes' },
-    { id: 'inProgress' as const, label: 'En progreso', emptyText: 'Nada en progreso' },
-    { id: 'done' as const, label: 'Hecho', emptyText: 'Nada completado aún' },
-  ];
-
-  function columnTasks(col: 'todo' | 'inProgress' | 'done') {
-    return tasks.filter(t => t.column === col);
-  }
-
-  function getRelativeTime(ts: number): string {
-    const diff = Date.now() - ts;
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'ahora';
-    if (mins < 60) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
-  }
+  const grouped = $derived(
+    COLUMNS.reduce<Record<Task['status'], Task[]>>((acc, col) => {
+      acc[col.id] = tasks.filter(t => t.status === col.id);
+      return acc;
+    }, { todo: [], doing: [], done: [] })
+  );
 </script>
 
-<div class="flex flex-col h-full">
-  <!-- Header -->
-  <div class="mb-4">
-    <h2 class="text-lg font-bold">Tareas</h2>
-    <p class="text-sm text-[var(--color-muted)]">{tasks.length} tarea{tasks.length !== 1 ? 's' : ''}</p>
-  </div>
-
-  <!-- Add task input (always visible) -->
-  <form class="mb-4" onsubmit={(e) => { e.preventDefault(); addTask(); }}>
+<section aria-label="Tablero de tareas" class="flex w-full flex-col gap-4">
+  <!-- Add task -->
+  <div class="flex items-center gap-2">
     <input
-      class="input-field"
+      class="h-11 flex-1 rounded-xl border border-border bg-card/60 px-4 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       type="text"
       placeholder="Añadí una tarea y presioná Enter"
-      bind:value={newTaskTitle}
       aria-label="Nueva tarea"
+      bind:value={draft}
+      onkeydown={(e) => { if (e.key === 'Enter') addTask(); }}
     />
-  </form>
+    <button
+      class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      onclick={addTask}
+      aria-label="Agregar tarea"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+  </div>
 
-  <!-- Mobile tabs -->
-  <div class="flex gap-1 mb-4 md:hidden" role="tablist">
+  <!-- Mobile tab switcher -->
+  <div
+    role="tablist"
+    aria-label="Estado de tareas"
+    class="flex items-center gap-1 rounded-full border border-border bg-card/60 p-1 md:hidden"
+  >
     {#each COLUMNS as col}
       <button
         role="tab"
-        aria-selected={activeTab === col.id}
-        class="tab flex-1"
+        aria-selected={col.id === activeTab}
+        class="flex-1 rounded-full px-2 py-2 text-xs font-medium transition-colors
+               {col.id === activeTab ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}"
         onclick={() => activeTab = col.id}
       >
         {col.label}
-        <span class="ml-1 text-xs opacity-60">{columnTasks(col.id).length}</span>
+        <span class="ml-1 opacity-70">{grouped[col.id].length}</span>
       </button>
     {/each}
   </div>
 
-  <!-- Mobile: single column view -->
-  <div class="flex-1 md:hidden overflow-y-auto min-h-0">
-    {#each COLUMNS.filter(c => c.id === activeTab) as col}
-      <div
-        class="min-h-[120px]"
-        ondragover={(e) => onDragOver(e, col.id)}
-        ondragleave={onDragLeave}
-        ondrop={(e) => onDrop(e, col.id)}
-        role="region"
-        aria-label={col.label}
-      >
-        {#each columnTasks(col.id) as task (task.id)}
-          <div
-            class="card mb-2 cursor-grab active:cursor-grabbing transition-opacity group"
-            class:opacity-40={draggedTaskId === task.id}
-            draggable="true"
-            role="listitem"
-            ondragstart={(e) => onDragStart(e, task.id)}
-          >
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex-1 min-w-0">
-                <h4 class="text-sm font-medium truncate">{task.title}</h4>
-                <span class="text-[10px] text-[var(--color-muted)]">{getRelativeTime(task.createdAt)}</span>
-              </div>
-              <div class="flex items-center gap-1 shrink-0">
-                {#if col.id !== 'done'}
-                  <button
-                    class="p-1 rounded text-[var(--color-muted)] hover:text-[var(--color-accent-green)]"
-                    onclick={() => moveTask(task.id, col.id === 'todo' ? 'inProgress' : 'done')}
-                    aria-label="Mover tarea"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="9 18 15 12 9 6"/>
-                    </svg>
-                  </button>
-                {/if}
-                <button
-                  class="p-1 rounded text-[var(--color-muted)] hover:text-[var(--color-accent-red)]"
-                  onclick={() => deleteTask(task.id)}
-                  aria-label="Eliminar tarea"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        {:else}
-          <div class="flex flex-col items-center justify-center py-10 text-[var(--color-muted)] opacity-40">
-            <p class="text-sm">{col.emptyText}</p>
-          </div>
-        {/each}
-      </div>
-    {/each}
-  </div>
-
-  <!-- Desktop: 3-column kanban -->
-  <div class="hidden md:grid flex-1 grid-cols-3 gap-3 min-h-0 overflow-hidden">
+  <!-- Columns -->
+  <div class="grid gap-4 md:grid-cols-3">
     {#each COLUMNS as col}
       <div
-        class="flex flex-col rounded-xl border transition-all duration-200 min-h-[160px]"
-        class:border-[var(--color-primary)]={dragOverColumn === col.id}
-        class:border-[var(--color-border)]={dragOverColumn !== col.id}
-        ondragover={(e) => onDragOver(e, col.id)}
-        ondragleave={onDragLeave}
-        ondrop={(e) => onDrop(e, col.id)}
-        role="region"
-        aria-label={col.label}
+        class="flex-col gap-3 rounded-2xl border border-border bg-card/40 p-3
+               {activeTab === col.id ? 'flex' : 'hidden'}
+               md:flex"
       >
-        <div class="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border)]">
-          <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">{col.label}</h3>
-          <span class="ml-auto text-[10px] text-[var(--color-muted)] bg-[var(--color-background)] px-1.5 py-0.5 rounded-full">
-            {columnTasks(col.id).length}
+        <!-- Column header (desktop only) -->
+        <div class="hidden items-center justify-between px-1 md:flex">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {col.label}
+          </h3>
+          <span class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+            {grouped[col.id].length}
           </span>
         </div>
 
-        <div class="flex-1 p-2 space-y-2 overflow-y-auto">
-          {#each columnTasks(col.id) as task (task.id)}
-            <div
-              class="card cursor-grab active:cursor-grabbing transition-opacity group"
-              class:opacity-40={draggedTaskId === task.id}
-              draggable="true"
-              role="listitem"
-              ondragstart={(e) => onDragStart(e, task.id)}
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-medium truncate">{task.title}</h4>
-                  {#if task.description}
-                    <p class="text-xs text-[var(--color-muted)] mt-1 line-clamp-2">{task.description}</p>
-                  {/if}
-                </div>
+        {#if grouped[col.id].length === 0}
+          <div class="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border px-4 py-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/>
+            </svg>
+            <p class="text-xs text-muted-foreground">
+              {col.id === 'todo' ? 'Sin tareas aún — añadí una arriba' : 'Nada por acá todavía'}
+            </p>
+          </div>
+        {:else}
+          {#each grouped[col.id] as task (task.id)}
+            <article class="group flex items-start gap-2 rounded-xl border border-border bg-card p-3">
+              <span
+                class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border
+                       {task.status === 'done' ? 'border-primary bg-primary text-primary-foreground' : 'border-border'}"
+              >
+                {#if task.status === 'done'}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                {/if}
+              </span>
+
+              <p class="flex-1 text-sm leading-relaxed
+                        {task.status === 'done' ? 'text-muted-foreground line-through' : ''}">
+                {task.title}
+              </p>
+
+              <div class="flex shrink-0 items-center gap-0.5">
                 <button
-                  class="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:text-[var(--color-accent-red)] text-[var(--color-muted)] shrink-0"
-                  onclick={() => deleteTask(task.id)}
+                  class="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  onclick={() => move(task.id, -1)}
+                  disabled={task.status === 'todo'}
+                  aria-label="Mover a la etapa anterior"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
+                <button
+                  class="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  onclick={() => move(task.id, 1)}
+                  disabled={task.status === 'done'}
+                  aria-label="Mover a la etapa siguiente"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+                <button
+                  class="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  onclick={() => remove(task.id)}
                   aria-label="Eliminar tarea"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                   </svg>
                 </button>
               </div>
-              <span class="text-[10px] text-[var(--color-muted)]">{getRelativeTime(task.createdAt)}</span>
-            </div>
-          {:else}
-            <div class="flex flex-col items-center justify-center py-8 text-[var(--color-muted)] opacity-40 pointer-events-none">
-              <p class="text-xs">{col.emptyText}</p>
-            </div>
+            </article>
           {/each}
-        </div>
+        {/if}
       </div>
     {/each}
   </div>
-</div>
+</section>

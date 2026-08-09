@@ -12,36 +12,36 @@
   let showChatbot = $state(false);
 </script>
 
-<div class="min-h-screen flex flex-col pb-16">
+<div class="min-h-screen bg-background text-foreground">
   <Navbar
     onSettings={() => showSettings = true}
     onStats={() => showStats = true}
     onChatbot={() => showChatbot = !showChatbot}
   />
 
-  <main class="flex-1 flex flex-col lg:flex-row gap-4 p-4 pt-2 max-w-6xl mx-auto w-full overflow-hidden">
-    <!-- Timer -->
-    <section class="flex-shrink-0 lg:w-[380px] flex items-center justify-center py-4 lg:py-8">
-      <Timer />
-    </section>
+  <main class="mx-auto w-full max-w-6xl px-4 pb-40 pt-6 md:pb-28">
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,380px)_1fr] lg:gap-10">
+      <!-- Focus column -->
+      <div class="flex flex-col gap-5 lg:sticky lg:top-20 lg:self-start">
+        <Timer />
+        <MusicPlayer />
+      </div>
 
-    <!-- Kanban -->
-    <section class="flex-1 min-w-0 flex flex-col overflow-hidden min-h-0">
-      <KanbanBoard />
-    </section>
-
-    <!-- Music (sidebar on desktop, below kanban on mobile) -->
-    <aside class="hidden lg:flex w-[260px] flex-col gap-4 pt-4">
-      <MusicPlayer />
-    </aside>
-  </main>
-
-  <!-- Mobile music (always visible at bottom on mobile) -->
-  <div class="lg:hidden fixed bottom-0 left-0 right-0 z-30 px-4 pb-[env(safe-area-inset-bottom)]">
-    <div class="max-w-lg mx-auto mb-1">
-      <MusicPlayer />
+      <!-- Tasks column -->
+      <div class="flex flex-col gap-4">
+        <div>
+          <h1 class="text-lg font-semibold text-balance">
+            Tu sesión de trabajo
+          </h1>
+          <p class="text-sm text-muted-foreground text-pretty">
+            Organizá tus tareas mientras el temporizador corre. Arrastrá
+            cada tarea entre etapas con las flechas.
+          </p>
+        </div>
+        <KanbanBoard />
+      </div>
     </div>
-  </div>
+  </main>
 
   <InstallBanner />
 

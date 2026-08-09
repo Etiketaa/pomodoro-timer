@@ -5,11 +5,13 @@
 
   type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
 
-  const MODES: Record<TimerMode, { label: string; minutes: number }> = {
-    focus: { label: 'Enfoque', minutes: 25 },
-    shortBreak: { label: 'Descanso corto', minutes: 5 },
-    longBreak: { label: 'Descanso largo', minutes: 15 },
-  };
+  const MODES: { id: TimerMode; label: string; minutes: number }[] = [
+    { id: 'focus', label: 'Enfoque', minutes: 25 },
+    { id: 'shortBreak', label: 'Descanso corto', minutes: 5 },
+    { id: 'longBreak', label: 'Descanso largo', minutes: 15 },
+  ];
+
+  const CYCLES_BEFORE_LONG = 4;
 
   let currentMode = $state<TimerMode>('focus');
   let timeLeft = $state(25 * 60);
@@ -17,24 +19,28 @@
   let sessions = $state(0);
   let intervalId: ReturnType<typeof setInterval> | null = null;
 
-  const totalSeconds = $derived(MODES[currentMode].minutes * 60);
+  const totalSeconds = $derived(MODES.find(m => m.id === currentMode)!.minutes * 60);
   const progress = $derived(1 - timeLeft / totalSeconds);
   const minutes = $derived(Math.floor(timeLeft / 60));
   const seconds = $derived(timeLeft % 60);
   const display = $derived(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
-  const circumference = $derived(2 * Math.PI * 140);
+  const R = 120;
+  const circumference = $derived(2 * Math.PI * R);
   const strokeDashoffset = $derived(circumference * (1 - progress));
 
   // Sync document.title
   $effect(() => {
-    document.title = `${display} — Pomodoro`;
-    return () => { document.title = 'Pomodoro Timer'; };
+    const label = MODES.find(m => m.id === currentMode)?.label ?? '';
+    document.title = isRunning ? `${display} · ${label}` : 'Lofi Pomodoro';
+    return () => { document.title = 'Lofi Pomodoro'; };
   });
 
-  // Keyboard shortcut: spacebar to toggle
+  // Spacebar toggle
   $effect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (e.code === 'Space' && e.target === document.body) {
+      const el = e.target as HTMLElement;
+      if (el?.tagName === 'INPUT' || el?.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
         e.preventDefault();
         toggleTimer();
       }
@@ -43,31 +49,50 @@
     return () => window.removeEventListener('keydown', handleKey);
   });
 
-  function playAlarm() {
+  function playChime() {
     try {
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 800;
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 1.5);
+      const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new Ctx();
+      const now = ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99]; // C5 E5 G5
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const start = now + i * 0.16;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.25, start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.9);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.95);
+      });
+      setTimeout(() => ctx.close(), 2000);
     } catch {}
+  }
+
+  function advanceMode() {
+    if (currentMode === 'focus') {
+      sessions++;
+      timer.saveSession();
+      const goLong = sessions % CYCLES_BEFORE_LONG === 0;
+      switchMode(goLong ? 'longBreak' : 'shortBreak', true);
+    } else {
+      switchMode('focus', true);
+    }
   }
 
   function startTimer() {
     if (isRunning) return;
     isRunning = true;
     intervalId = setInterval(() => {
-      if (timeLeft <= 0) {
+      if (timeLeft <= 1) {
         clearInterval(intervalId!);
         isRunning = false;
-        playAlarm();
-        onTimerEnd();
+        playChime();
+        timeLeft = 0;
+        advanceMode();
         return;
       }
       timeLeft--;
@@ -86,25 +111,12 @@
     timeLeft = totalSeconds;
   }
 
-  function onTimerEnd() {
-    if (currentMode === 'focus') {
-      sessions++;
-      timer.saveSession();
-      if (sessions % 4 === 0) {
-        switchMode('longBreak');
-      } else {
-        switchMode('shortBreak');
-      }
-    } else {
-      switchMode('focus');
-    }
-  }
-
-  function switchMode(mode: TimerMode) {
+  function switchMode(mode: TimerMode, autostart = false) {
     clearInterval(intervalId!);
-    isRunning = false;
     currentMode = mode;
-    timeLeft = MODES[mode].minutes * 60;
+    timeLeft = MODES.find(m => m.id === mode)!.minutes * 60;
+    isRunning = autostart;
+    if (autostart) startTimer();
   }
 
   function toggleTimer() {
@@ -112,60 +124,70 @@
     else startTimer();
   }
 
-  function skipSession() {
-    clearInterval(intervalId!);
-    isRunning = false;
-    onTimerEnd();
+  function nextMode() {
+    const idx = MODES.findIndex(m => m.id === currentMode);
+    switchMode(MODES[(idx + 1) % MODES.length].id);
   }
+
+  const currentLabel = $derived(MODES.find(m => m.id === currentMode)?.label ?? '');
 </script>
 
-<div class="flex flex-col items-center gap-6">
-  <!-- Tabs -->
-  <div class="flex gap-1 p-1 rounded-xl bg-[var(--color-card)]" role="tablist">
-    {#each (['focus', 'shortBreak', 'longBreak'] as const) as mode}
+<section aria-label="Temporizador Pomodoro" class="flex w-full flex-col items-center gap-6">
+  <!-- Mode tabs -->
+  <div
+    role="tablist"
+    aria-label="Modo del temporizador"
+    class="flex w-full max-w-sm items-center gap-1 rounded-full border border-border bg-card/60 p-1 backdrop-blur"
+  >
+    {#each MODES as m}
       <button
         role="tab"
-        aria-selected={mode === currentMode}
-        class="tab"
-        onclick={() => switchMode(mode)}
+        aria-selected={m.id === currentMode}
+        class="flex-1 rounded-full px-3 py-2 text-xs font-medium transition-colors sm:text-sm
+               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
+               {m.id === currentMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}"
+        onclick={() => switchMode(m.id)}
       >
-        {MODES[mode].label}
+        {m.label}
       </button>
     {/each}
   </div>
 
   <!-- Ring -->
-  <div class="relative">
-    <svg width="320" height="320" viewBox="0 0 320 320" class="transform -rotate-90">
+  <div class="relative aspect-square w-full max-w-[300px]">
+    <!-- soft glow behind ring when running -->
+    <div
+      aria-hidden="true"
+      class="absolute inset-6 rounded-full bg-primary/10 blur-2xl transition-opacity duration-700"
+      class:opacity-100={isRunning}
+      class:opacity-0={!isRunning}
+    ></div>
+
+    <svg viewBox="0 0 280 280" class="h-full w-full -rotate-90">
       <circle
-        cx="160" cy="160" r="140"
-        fill="none"
-        stroke="var(--color-border)"
-        stroke-width="10"
+        cx="140" cy="140" r={R}
+        fill="none" stroke="var(--border)" stroke-width="14"
       />
       <circle
-        cx="160" cy="160" r="140"
-        fill="none"
-        stroke="var(--color-primary)"
-        stroke-width="10"
+        cx="140" cy="140" r={R}
+        fill="none" stroke="var(--primary)" stroke-width="14"
         stroke-linecap="round"
         stroke-dasharray={circumference}
         stroke-dashoffset={strokeDashoffset}
         class="transition-[stroke-dashoffset] duration-1000 ease-linear"
-        style={isRunning ? 'filter: drop-shadow(0 0 12px var(--color-primary));' : ''}
+        style="filter: drop-shadow(0 0 12px color-mix(in oklch, var(--primary) 60%, transparent));"
       />
     </svg>
 
-    <!-- Center display -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center gap-1">
-      <span
-        class="text-[4.5rem] leading-none font-mono font-bold tracking-tight tabular-nums"
-        style={isRunning ? 'text-shadow: 0 0 24px rgba(232,122,58,0.3);' : ''}
-      >
+    <div class="absolute inset-0 flex flex-col items-center justify-center">
+      <span class="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+        {currentLabel}
+      </span>
+      <span class="font-mono text-5xl font-semibold tabular-nums sm:text-6xl">
         {display}
       </span>
-      <span class="text-sm text-[var(--color-muted)]">
-        {sessions > 0 ? `Sesión #${sessions}` : 'Listo'}
+      <span class="mt-1 text-xs text-muted-foreground">
+        {sessions} {sessions === 1 ? 'sesión' : 'sesiones'} de enfoque
       </span>
     </div>
   </div>
@@ -173,9 +195,9 @@
   <!-- Controls -->
   <div class="flex items-center gap-3">
     <button
-      class="btn btn-ghost p-3 rounded-full"
+      class="flex h-12 w-12 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       onclick={resetTimer}
-      aria-label="Reiniciar"
+      aria-label="Reiniciar temporizador"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
@@ -184,26 +206,26 @@
     </button>
 
     <button
-      class="w-16 h-16 rounded-full flex items-center justify-center bg-[var(--color-primary)] text-[var(--color-background)] font-bold transition-all duration-200 hover:brightness-110 active:scale-95"
+      class="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       onclick={toggleTimer}
       aria-label={isRunning ? 'Pausar' : 'Iniciar'}
     >
       {#if isRunning}
-        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="4" width="4" height="16" rx="1"/>
           <rect x="14" y="4" width="4" height="16" rx="1"/>
         </svg>
       {:else}
-        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" class="ml-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="ml-0.5">
           <polygon points="6,3 20,12 6,21"/>
         </svg>
       {/if}
     </button>
 
     <button
-      class="btn btn-ghost p-3 rounded-full"
-      onclick={skipSession}
-      aria-label="Saltar"
+      class="flex h-12 w-12 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      onclick={nextMode}
+      aria-label="Siguiente modo"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="5 4 15 12 5 20 5 4"/>
@@ -211,4 +233,8 @@
       </svg>
     </button>
   </div>
-</div>
+
+  <p class="text-xs text-muted-foreground">
+    Presioná <kbd class="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">Espacio</kbd> para iniciar o pausar
+  </p>
+</section>
