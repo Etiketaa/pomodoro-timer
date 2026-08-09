@@ -1,7 +1,7 @@
 # Backend
 Flask
 flask-cors
-groq
+openai
 python-dotenv
 
 # Database (Phase 1)

@@ -1,7 +1,7 @@
 import os
 import json
 import re
-from groq import Groq
+from openai import OpenAI
 from dotenv import load_dotenv
 
 # Get the project root directory (one level up from api/)
@@ -14,12 +14,16 @@ load_dotenv(dotenv_path=env_path)
 
 class GroqClient:
     def __init__(self):
-        self.api_key = os.getenv('GROQ_API_KEY')
+        self.api_key = os.getenv('NVIDIA_API_KEY')
         if not self.api_key:
-            raise ValueError("GROQ_API_KEY not found in environment variables")
+            raise ValueError("NVIDIA_API_KEY not found in environment variables")
         
-        self.client = Groq(api_key=self.api_key)
-        self.model = "llama-3.3-70b-versatile"
+        # NVIDIA API uses OpenAI-compatible endpoint
+        self.client = OpenAI(
+            base_url="https://integrate.api.nvidia.com/v1",
+            api_key=self.api_key
+        )
+        self.model = "meta/llama-3.3-70b-instruct"
         
     def get_system_prompt(self, user_tasks=None, pomodoros_today=0, timer_state=None, config=None, week_stats=None):
         """Generate system prompt with full app context"""
@@ -73,7 +77,7 @@ MATRIZ DE EISENHOWER (usá esto para clasificar tareas cuando el usuario pida pr
 │             │ (hoy o antes)        │ (agendar fecha)       │
 ├─────────────────────────────────────────────────────────────┤
 │ NO IMPORT.  │ 3. DELEGAR/SIMPLIF.  │ 4. ELIMINAR/DESPUÉS   │
-│             │ (reduciar o delegar) │ (no vale la pena)     │
+│             │ (reducir o delegar) │ (no vale la pena)     │
 └─────────────────────────────────────────────────────────────┘
 
 ACCIONES DISPONIBLES (respondé con JSON cuando el usuario pida ejecutar algo):
@@ -128,7 +132,7 @@ Respondé en español de forma natural. Si necesitás ejecutar una acción, incl
     def chat(self, user_message, conversation_history=None, user_tasks=None, 
              pomodoros_today=0, timer_state=None, config=None, week_stats=None):
         """
-        Send a message to Groq and get a response
+        Send a message to NVIDIA API and get a response
         """
         try:
             # Build messages array
@@ -149,20 +153,19 @@ Respondé en español de forma natural. Si necesitás ejecutar una acción, incl
                 "content": user_message
             })
             
-            print(f"[GROQ] Sending message: {user_message[:50]}...")
+            print(f"[NVIDIA] Sending message: {user_message[:50]}...")
             
-            # Call Groq API
+            # Call NVIDIA API
             chat_completion = self.client.chat.completions.create(
-                messages=messages,
                 model=self.model,
+                messages=messages,
                 temperature=0.7,
                 max_tokens=400,
-                top_p=1,
-                stream=False
+                top_p=1
             )
             
             response = chat_completion.choices[0].message.content
-            print(f"[GROQ] Response: {response[:100]}...")
+            print(f"[NVIDIA] Response: {response[:100]}...")
             
             # Extract actions from response
             actions = self.extract_actions(response)
@@ -173,7 +176,7 @@ Respondé en español de forma natural. Si necesitás ejecutar una acción, incl
             }
             
         except Exception as e:
-            print(f"[GROQ ERROR] {str(e)}")
+            print(f"[NVIDIA ERROR] {str(e)}")
             
             return {
                 'answer': "Disculpá, tuve un problema técnico. ¿Podés repetirme lo que necesitás? 😅",

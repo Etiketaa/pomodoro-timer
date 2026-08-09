@@ -99,7 +99,7 @@ def chat():
         
         if not groq_available:
             return jsonify({
-                'answer': 'Lo siento, el servicio de IA no está disponible en este momento. Por favor, instala las dependencias necesarias: pip install groq python-dotenv',
+                'answer': 'Lo siento, el servicio de IA no está disponible. Configurá NVIDIA_API_KEY en .env',
                 'actions': []
             }), 503
         
