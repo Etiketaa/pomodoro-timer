@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pomodoro-timer-cache-v4';
+const CACHE_NAME = 'pomodoro-timer-cache-v5';
 
 // Static assets to pre-cache
 const STATIC_ASSETS = [
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
   '/static/chat.js',
   '/static/theme-switcher.js',
   '/static/slideshow.js',
+  '/static/calendar.js',
   '/static/chatbot.js',
   '/static/manifest.json',
   '/static/alarm.mp3',

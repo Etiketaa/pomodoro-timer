@@ -1,53 +1,262 @@
-/* Estilos para el Weather Widget */
-.weather-widget {
-    background: linear-gradient(135deg, rgba(42, 42, 42, 0.6), rgba(26, 26, 26, 0.8));
-    border: 1px solid rgba(74, 4, 78, 0.3);
-    border-radius: 12px;
-    padding: 1rem;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
+/* ========================================
+   CALENDAR STYLES
+   ======================================== */
+
+.calendar-modal-content {
+    max-width: 550px;
+    width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
 }
 
-.weather-widget:hover {
-    border-color: rgba(249, 115, 22, 0.4);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
 }
 
-.weather-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 0.5rem;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.3));
-}
-
-.weather-info {
-    text-align: center;
-}
-
-.weather-info .temperature {
-    font-size: 1.8rem;
+.calendar-nav h3 {
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
-    margin-bottom: 0.25rem;
+    color: var(--text-color);
+    margin: 0;
 }
 
-.weather-info .description {
-    font-size: 0.9rem;
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.calendar-weekdays span {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: var(--text-secondary-color);
-    text-transform: capitalize;
-    margin-bottom: 0.25rem;
+    padding: 4px 0;
 }
 
-.weather-info .location {
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    min-height: 44px;
+}
+
+.calendar-day:hover:not(.empty) {
+    background: rgba(249, 115, 22, 0.1);
+    border-color: rgba(249, 115, 22, 0.3);
+}
+
+.calendar-day.empty {
+    cursor: default;
+}
+
+.calendar-day.today {
+    background: rgba(249, 115, 22, 0.15);
+    border-color: var(--primary-color);
+}
+
+.calendar-day.selected {
+    background: rgba(249, 115, 22, 0.25);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.3);
+}
+
+.calendar-day.has-pomodoros {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.day-number {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.calendar-task-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    position: absolute;
+    bottom: 4px;
+}
+
+.calendar-pomodoro-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #10b981;
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+}
+
+/* Day Panel */
+.calendar-day-panel {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.day-panel-header h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.day-panel-header .icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.day-panel-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.day-panel-empty {
     font-size: 0.85rem;
     color: var(--text-secondary-color);
-    opacity: 0.8;
+    text-align: center;
+    padding: 1rem;
+    opacity: 0.7;
+}
+
+.day-pomodoro-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #10b981;
+    font-weight: 500;
+}
+
+.pom-icon {
+    font-size: 1rem;
+}
+
+.day-task-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.day-task-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.day-task-status {
+    width: 4px;
+    height: 24px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.day-task-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.day-task-text {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-done-text {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.day-task-status-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary-color);
+}
+
+.day-task-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.day-task-done-btn,
+.day-task-delete-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.day-task-done-btn:hover {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.day-task-delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+@media (max-width: 480px) {
+    .calendar-day {
+        min-height: 36px;
+    }
+
+    .day-number {
+        font-size: 0.75rem;
+    }
+
+    .calendar-modal-content {
+        max-height: 90vh;
+    }
 }
 
 /* Mejoras adicionales para inputs y selectores */

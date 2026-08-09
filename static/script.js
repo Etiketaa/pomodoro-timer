@@ -1,63 +1,3 @@
-const OPENWEATHER_API_KEY = 'da3a47826e358e332366c7dea4460ae6'; // ¡TU CLAVE API DE OpenWeatherMap!
-
-// --- WEATHER WIDGET ---
-async function initWeather() {
-    if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === 'YOUR_OPENWEATHER_API_KEY') {
-        console.warn('OpenWeatherMap API key no configurada. El widget del clima no funcionará.');
-        return;
-    }
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const { latitude, longitude } = position.coords;
-            await getWeatherData(latitude, longitude);
-        }, (error) => {
-            console.error('Error obteniendo la ubicación:', error);
-        });
-    } else {
-        console.warn('Geolocalización no soportada por el navegador.');
-    }
-}
-
-async function getWeatherData(latitude, longitude) {
-    const weatherWidget = document.getElementById('weather-widget');
-    const temperatureElement = weatherWidget.querySelector('.temperature');
-    const descriptionElement = weatherWidget.querySelector('.description');
-    const locationElement = weatherWidget.querySelector('.location');
-    const iconElement = weatherWidget.querySelector('.weather-icon');
-
-    temperatureElement.textContent = 'Cargando...';
-    descriptionElement.textContent = '';
-    locationElement.textContent = '';
-    iconElement.style.backgroundImage = '';
-
-    try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=es`);
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`No se pudo obtener los datos del clima. Estado: ${response.status}, Mensaje: ${errorText}`);
-        }
-        const data = await response.json();
-        displayWeather(data);
-    } catch (error) {
-        console.error('Error al obtener el clima:', error);
-        temperatureElement.textContent = 'Error';
-    }
-}
-
-function displayWeather(data) {
-    const weatherWidget = document.getElementById('weather-widget');
-    const temperatureElement = weatherWidget.querySelector('.temperature');
-    const descriptionElement = weatherWidget.querySelector('.description');
-    const locationElement = weatherWidget.querySelector('.location');
-    const iconElement = weatherWidget.querySelector('.weather-icon');
-
-    temperatureElement.textContent = `${Math.round(data.main.temp)}°C`;
-    descriptionElement.textContent = data.weather[0].description;
-    locationElement.textContent = data.name;
-    iconElement.style.backgroundImage = `url(https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png)`;
-}
-
 // --- LOCALSTORAGE & HELPERS ---
 const getFromLS = (key, defaultValue) => JSON.parse(localStorage.getItem(key)) || defaultValue;
 const saveToLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
@@ -84,8 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pomodorosWeekSpan = document.getElementById('pomodoros-week');
     const chartCanvas = document.getElementById('pomodoro-chart');
 
-    const feedbackForm = document.getElementById('feedback-form');
-    const reviewsList = document.getElementById('reviews-list');
     const currentTaskDisplay = document.getElementById('current-task-display');
     const currentTaskTextSpan = currentTaskDisplay.querySelector('span');
     const alarmSound = new Audio('/static/alarm.mp3');
@@ -95,8 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskDetailsForm = document.getElementById('task-details-form');
     const statsModal = document.getElementById('stats-modal');
     const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
-    const feedbackModal = document.getElementById('feedback-modal');
-    const closeFeedbackModalBtn = document.getElementById('close-feedback-modal-btn');
     // New instructions modal elements
     const instructionsBtn = document.getElementById('instructions-btn');
     const instructionsModal = document.getElementById('instructions-modal');
@@ -149,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupMusicPlayer(); // Music player setup
         setupEventListeners();
         initSortable();
-        initWeather();
 
         // Initialize Daily Goal
         if (window.DailyGoal) {
@@ -602,80 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- FEEDBACK ---
-
-    async function submitFeedback(e) {
-        e.preventDefault();
-
-        const name = document.getElementById('feedback-name').value || 'Anonimo';
-        const rating = feedbackForm.querySelector('input[name="rating"]:checked')?.value;
-        const message = document.getElementById('feedback-message').value;
-
-        if (!rating || !message) {
-            if (window.Toast) Toast.show('Deja una calificacion y un mensaje.', 'warning');
-            else alert('Deja una calificacion y un mensaje.');
-            return;
-        }
-
-        try {
-            const token = window.PomodoroV2?.authManager?.getUser?.() ? localStorage.getItem('pomodoroToken') : null;
-            const headers = { 'Content-Type': 'application/json' };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
-
-            const response = await fetch('/api/feedback', {
-                method: 'POST',
-                headers,
-                body: JSON.stringify({ name, rating: parseInt(rating), message })
-            });
-            if (!response.ok) throw new Error('No se pudo enviar el feedback.');
-
-            feedbackForm.reset();
-            fetchReviews();
-            if (window.Toast) Toast.show('Gracias por tu feedback!', 'success');
-            else alert('Gracias por tu feedback!');
-        } catch (error) {
-            console.error("Error enviando feedback:", error);
-            if (window.Toast) Toast.show('Error al enviar feedback', 'error');
-            else alert('Hubo un error al enviar tu feedback.');
-        }
-    }
-
-    async function fetchReviews() {
-        reviewsList.innerHTML = '<p>Cargando reviews...</p>';
-        try {
-            const response = await fetch('/api/feedback?limit=20');
-            if (!response.ok) throw new Error('No se pudieron cargar las reviews.');
-
-            const data = await response.json();
-            renderReviews(data.reviews);
-        } catch (error) {
-            console.error("Error cargando reviews:", error);
-            reviewsList.innerHTML = '<p>No se pudieron cargar las reviews.</p>';
-        }
-    }
-
-    function renderReviews(reviews) {
-        reviewsList.innerHTML = '';
-        if (!reviews || reviews.length === 0) {
-            reviewsList.innerHTML = '<p>No hay reviews aun. Se el primero!</p>';
-            return;
-        }
-
-        reviews.forEach(review => {
-            const card = document.createElement('div');
-            card.className = 'review-card';
-            const stars = '\u2605'.repeat(review.rating) + '\u2606'.repeat(5 - review.rating);
-            card.innerHTML = `
-                <div class="review-header">
-                    <span class="review-name">${review.name}</span>
-                    <span class="review-rating">${stars}</span>
-                </div>
-                <p class="review-message">${review.message}</p>
-            `;
-            reviewsList.appendChild(card);
-        });
-    }
-
     // --- MUSIC PLAYER ---
     const MUSIC_STATIONS = {
         'lofi1': { name: 'Lofi Girl Radio', url: 'https://streams.ilovemusic.de/iloveradio17.mp3' },
@@ -1003,14 +864,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function openStatsModal() {
         statsModal.classList.remove('hidden');
         renderStats();
-        // Render history
         if (window.DataExport) {
             DataExport.renderHistory('history-container');
         }
     }
     function closeStatsModal() { statsModal.classList.add('hidden'); }
-    function openFeedbackModal() { feedbackModal.classList.remove('hidden'); fetchReviews(); }
-    function closeFeedbackModal() { feedbackModal.classList.add('hidden'); }
     // New instructions modal functions
     function openInstructionsModal() { instructionsModal.classList.remove('hidden'); }
     function closeInstructionsModal() { instructionsModal.classList.add('hidden'); }
@@ -1046,17 +904,11 @@ document.addEventListener('DOMContentLoaded', () => {
         closeTaskDetailsModalBtn.addEventListener('click', () => taskDetailsModal.classList.add('hidden'));
         taskDetailsModal.addEventListener('click', (e) => e.target === taskDetailsModal && taskDetailsModal.classList.add('hidden'));
 
-        feedbackForm.addEventListener('submit', submitFeedback);
-
         themeToggleBtn.addEventListener('click', toggleTheme);
 
         statsBtn.addEventListener('click', openStatsModal);
         closeStatsModalBtn.addEventListener('click', closeStatsModal);
         statsModal.addEventListener('click', (e) => e.target === statsModal && closeStatsModal());
-
-        feedbackBtn.addEventListener('click', openFeedbackModal);
-        closeFeedbackModalBtn.addEventListener('click', closeFeedbackModal);
-        feedbackModal.addEventListener('click', (e) => e.target === feedbackModal && closeFeedbackModal());
 
         // New instructions modal event listeners
         instructionsBtn.addEventListener('click', openInstructionsModal);
