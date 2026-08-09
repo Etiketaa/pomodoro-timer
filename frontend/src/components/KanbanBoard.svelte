@@ -11,8 +11,7 @@
   let draggedTaskId = $state<string | null>(null);
   let dragOverColumn = $state<string | null>(null);
   let newTaskTitle = $state('');
-  let newTaskDesc = $state('');
-  let showAddForm = $state(false);
+  let activeTab = $state<'todo' | 'inProgress' | 'done'>('todo');
 
   function loadTasks(): Task[] {
     try {
@@ -31,13 +30,11 @@
     tasks = [...tasks, {
       id: crypto.randomUUID(),
       title: newTaskTitle.trim(),
-      description: newTaskDesc.trim(),
+      description: '',
       column: 'todo',
       createdAt: Date.now(),
     }];
     newTaskTitle = '';
-    newTaskDesc = '';
-    showAddForm = false;
     saveTasks();
   }
 
@@ -76,96 +73,140 @@
   }
 
   const COLUMNS = [
-    { id: 'todo', label: 'To Do', color: 'var(--primary)', icon: 'circle-dot' },
-    { id: 'inProgress', label: 'In Progress', color: 'var(--accent-blue)', icon: 'loader' },
-    { id: 'done', label: 'Done', color: 'var(--accent-green)', icon: 'circle-check' },
-  ] as const;
+    { id: 'todo' as const, label: 'Por hacer', emptyText: 'Sin tareas pendientes' },
+    { id: 'inProgress' as const, label: 'En progreso', emptyText: 'Nada en progreso' },
+    { id: 'done' as const, label: 'Hecho', emptyText: 'Nada completado aún' },
+  ];
 
-  function columnTasks(col: string) {
+  function columnTasks(col: 'todo' | 'inProgress' | 'done') {
     return tasks.filter(t => t.column === col);
   }
 
   function getRelativeTime(ts: number): string {
     const diff = Date.now() - ts;
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1) return 'ahora';
+    if (mins < 60) return `${mins}m`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    if (hrs < 24) return `${hrs}h`;
+    return `${Math.floor(hrs / 24)}d`;
   }
 </script>
 
 <div class="flex flex-col h-full">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h2 class="text-xl font-bold text-text">Tasks</h2>
-      <p class="text-text-muted text-sm">{tasks.length} task{tasks.length !== 1 ? 's' : ''}</p>
-    </div>
-    <button
-      class="btn btn-primary text-sm"
-      onclick={() => showAddForm = !showAddForm}
-    >
-      {#if showAddForm}
-        Cancel
-      {:else}
-        <span class="flex items-center gap-1.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add Task
-        </span>
-      {/if}
-    </button>
+  <div class="mb-4">
+    <h2 class="text-lg font-bold">Tareas</h2>
+    <p class="text-sm text-[var(--color-muted)]">{tasks.length} tarea{tasks.length !== 1 ? 's' : ''}</p>
   </div>
 
-  <!-- Add Task Form -->
-  {#if showAddForm}
-    <form class="card mb-4 space-y-3 animate-slideDown" onsubmit={(e) => { e.preventDefault(); addTask(); }}>
-      <input
-        class="input"
-        type="text"
-        placeholder="Task title..."
-        bind:value={newTaskTitle}
-      />
-      <textarea
-        class="input resize-none h-20"
-        placeholder="Description (optional)..."
-        bind:value={newTaskDesc}
-      ></textarea>
-      <button class="btn btn-primary w-full" type="submit" disabled={!newTaskTitle.trim()}>
-        Create Task
-      </button>
-    </form>
-  {/if}
+  <!-- Add task input (always visible) -->
+  <form class="mb-4" onsubmit={(e) => { e.preventDefault(); addTask(); }}>
+    <input
+      class="input-field"
+      type="text"
+      placeholder="Añadí una tarea y presioná Enter"
+      bind:value={newTaskTitle}
+      aria-label="Nueva tarea"
+    />
+  </form>
 
-  <!-- Kanban Columns -->
-  <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 min-h-0 overflow-hidden">
+  <!-- Mobile tabs -->
+  <div class="flex gap-1 mb-4 md:hidden" role="tablist">
     {#each COLUMNS as col}
+      <button
+        role="tab"
+        aria-selected={activeTab === col.id}
+        class="tab flex-1"
+        onclick={() => activeTab = col.id}
+      >
+        {col.label}
+        <span class="ml-1 text-xs opacity-60">{columnTasks(col.id).length}</span>
+      </button>
+    {/each}
+  </div>
+
+  <!-- Mobile: single column view -->
+  <div class="flex-1 md:hidden overflow-y-auto min-h-0">
+    {#each COLUMNS.filter(c => c.id === activeTab) as col}
       <div
-        class="flex flex-col rounded-xl border transition-all duration-200 min-h-[200px] {dragOverColumn === col.id ? 'border-primary/60' : 'border-border/30'}"
-        style="border-color: {dragOverColumn === col.id ? col.color : ''};"
+        class="min-h-[120px]"
         ondragover={(e) => onDragOver(e, col.id)}
         ondragleave={onDragLeave}
-        ondrop={(e) => onDrop(e, col.id as 'todo' | 'inProgress' | 'done')}
+        ondrop={(e) => onDrop(e, col.id)}
         role="region"
         aria-label={col.label}
       >
-        <!-- Column Header -->
-        <div class="flex items-center gap-2 px-4 py-3 border-b border-border/20">
-          <div class="w-2 h-2 rounded-full" style="background: {col.color};"></div>
-          <h3 class="text-sm font-semibold text-text uppercase tracking-wider">{col.label}</h3>
-          <span class="ml-auto text-xs text-text-muted bg-bg-elevated px-2 py-0.5 rounded-full">
+        {#each columnTasks(col.id) as task (task.id)}
+          <div
+            class="card mb-2 cursor-grab active:cursor-grabbing transition-opacity group"
+            class:opacity-40={draggedTaskId === task.id}
+            draggable="true"
+            role="listitem"
+            ondragstart={(e) => onDragStart(e, task.id)}
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-medium truncate">{task.title}</h4>
+                <span class="text-[10px] text-[var(--color-muted)]">{getRelativeTime(task.createdAt)}</span>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                {#if col.id !== 'done'}
+                  <button
+                    class="p-1 rounded text-[var(--color-muted)] hover:text-[var(--color-accent-green)]"
+                    onclick={() => moveTask(task.id, col.id === 'todo' ? 'inProgress' : 'done')}
+                    aria-label="Mover tarea"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                {/if}
+                <button
+                  class="p-1 rounded text-[var(--color-muted)] hover:text-[var(--color-accent-red)]"
+                  onclick={() => deleteTask(task.id)}
+                  aria-label="Eliminar tarea"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        {:else}
+          <div class="flex flex-col items-center justify-center py-10 text-[var(--color-muted)] opacity-40">
+            <p class="text-sm">{col.emptyText}</p>
+          </div>
+        {/each}
+      </div>
+    {/each}
+  </div>
+
+  <!-- Desktop: 3-column kanban -->
+  <div class="hidden md:grid flex-1 grid-cols-3 gap-3 min-h-0 overflow-hidden">
+    {#each COLUMNS as col}
+      <div
+        class="flex flex-col rounded-xl border transition-all duration-200 min-h-[160px]"
+        class:border-[var(--color-primary)]={dragOverColumn === col.id}
+        class:border-[var(--color-border)]={dragOverColumn !== col.id}
+        ondragover={(e) => onDragOver(e, col.id)}
+        ondragleave={onDragLeave}
+        ondrop={(e) => onDrop(e, col.id)}
+        role="region"
+        aria-label={col.label}
+      >
+        <div class="flex items-center gap-2 px-3 py-2 border-b border-[var(--color-border)]">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">{col.label}</h3>
+          <span class="ml-auto text-[10px] text-[var(--color-muted)] bg-[var(--color-background)] px-1.5 py-0.5 rounded-full">
             {columnTasks(col.id).length}
           </span>
         </div>
 
-        <!-- Tasks -->
-        <div class="flex-1 p-3 space-y-2 overflow-y-auto scrollbar-thin">
+        <div class="flex-1 p-2 space-y-2 overflow-y-auto">
           {#each columnTasks(col.id) as task (task.id)}
             <div
-              class="card cursor-grab active:cursor-grabbing hover:border-primary/40 transition-all duration-200 group animate-fadeIn"
+              class="card cursor-grab active:cursor-grabbing transition-opacity group"
               class:opacity-40={draggedTaskId === task.id}
               draggable="true"
               role="listitem"
@@ -173,52 +214,30 @@
             >
               <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-medium text-text truncate">{task.title}</h4>
+                  <h4 class="text-sm font-medium truncate">{task.title}</h4>
                   {#if task.description}
-                    <p class="text-xs text-text-muted mt-1 line-clamp-2">{task.description}</p>
+                    <p class="text-xs text-[var(--color-muted)] mt-1 line-clamp-2">{task.description}</p>
                   {/if}
                 </div>
                 <button
-                  class="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent-red/20 text-text-muted hover:text-accent-red shrink-0"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:text-[var(--color-accent-red)] text-[var(--color-muted)] shrink-0"
                   onclick={() => deleteTask(task.id)}
-                  title="Delete task"
+                  aria-label="Eliminar tarea"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                   </svg>
                 </button>
               </div>
-              <div class="flex items-center gap-2 mt-2">
-                <span class="text-[10px] text-text-muted">{getRelativeTime(task.createdAt)}</span>
-              </div>
+              <span class="text-[10px] text-[var(--color-muted)]">{getRelativeTime(task.createdAt)}</span>
+            </div>
+          {:else}
+            <div class="flex flex-col items-center justify-center py-8 text-[var(--color-muted)] opacity-40 pointer-events-none">
+              <p class="text-xs">{col.emptyText}</p>
             </div>
           {/each}
-
-          {#if columnTasks(col.id).length === 0}
-            <div class="flex flex-col items-center justify-center py-8 text-text-muted/50 pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>
-              </svg>
-              <p class="text-xs mt-2">Drop tasks here</p>
-            </div>
-          {/if}
         </div>
       </div>
     {/each}
   </div>
 </div>
-
-<style>
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  .animate-slideDown { animation: slideDown 0.2s ease-out; }
-  .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
-  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-</style>
