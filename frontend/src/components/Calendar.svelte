@@ -10,6 +10,7 @@
   let view = $state<'month' | 'week'>('month');
   let current = $state(new Date());
   let selectedDate = $state<string | null>(null);
+  let draft = $state('');
 
   function loadTasks(): Task[] {
     try {
@@ -140,6 +141,14 @@
 
   function unassignTask(taskId: string) {
     tasks = tasks.map(t => t.id === taskId ? { ...t, date: undefined } : t);
+    saveTasks();
+  }
+
+  function addTaskForDate() {
+    const title = draft.trim();
+    if (!title || !selectedDate) return;
+    tasks = [...tasks, { id: crypto.randomUUID(), title, status: 'todo', date: selectedDate }];
+    draft = '';
     saveTasks();
   }
 
@@ -305,6 +314,30 @@
           </div>
         </div>
       {/if}
+
+      <!-- Add new task for this date -->
+      <div class="border-t border-border pt-3 mt-3">
+        <p class="text-xs text-muted-foreground mb-2">Crear tarea para este día:</p>
+        <div class="flex items-center gap-2">
+          <input
+            class="h-9 flex-1 rounded-lg border border-border bg-card/60 px-3 text-xs outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            type="text"
+            placeholder="Nueva tarea..."
+            bind:value={draft}
+            onkeydown={(e) => { if (e.key === 'Enter') addTaskForDate(); }}
+          />
+          <button
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-40"
+            onclick={addTaskForDate}
+            disabled={!draft.trim()}
+            aria-label="Agregar tarea"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   {/if}
 </section>
