@@ -6,6 +6,7 @@
   import SettingsModal from './components/SettingsModal.svelte';
   import StatsModal from './components/StatsModal.svelte';
   import InstallBanner from './components/InstallBanner.svelte';
+  import Calendar from './components/Calendar.svelte';
 
   let showSettings = $state(false);
   let showStats = $state(false);
@@ -39,6 +40,7 @@
           </p>
         </div>
         <KanbanBoard />
+        <Calendar />
       </div>
     </div>
   </main>
