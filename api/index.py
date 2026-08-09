@@ -90,30 +90,38 @@ def chat():
         conversation_history = data.get('history', [])
         user_tasks = data.get('tasks', [])
         pomodoros_today = data.get('pomodoros_today', 0)
+        timer_state = data.get('timer_state', None)
+        config = data.get('config', None)
+        week_stats = data.get('week_stats', None)
         
         if not user_message:
             return jsonify({'error': 'No message provided'}), 400
         
         if not groq_available:
             return jsonify({
-                'answer': 'Lo siento, el servicio de IA no está disponible en este momento. Por favor, instala las dependencias necesarias: pip install groq python-dotenv'
+                'answer': 'Lo siento, el servicio de IA no está disponible en este momento. Por favor, instala las dependencias necesarias: pip install groq python-dotenv',
+                'actions': []
             }), 503
         
         # Get Groq client and generate response
         client = get_groq_client()
-        response = client.chat(
+        result = client.chat(
             user_message=user_message,
             conversation_history=conversation_history,
             user_tasks=user_tasks,
-            pomodoros_today=pomodoros_today
+            pomodoros_today=pomodoros_today,
+            timer_state=timer_state,
+            config=config,
+            week_stats=week_stats
         )
         
-        return jsonify({'answer': response})
+        return jsonify(result)
         
     except Exception as e:
         print(f"Error in chat endpoint: {str(e)}")
         return jsonify({
-            'answer': '¡Hola! Soy tu asistente de productividad. Puedo ayudarte a organizar tareas, priorizarlas y darte consejos para concentrarte. ¿En qué te ayudo? 😊'
+            'answer': '¡Hola! Soy tu asistente de productividad. Puedo ayudarte a organizar tareas, priorizarlas y darte consejos para concentrarte. ¿En qué te ayudo? 😊',
+            'actions': []
         }), 200
 
 
