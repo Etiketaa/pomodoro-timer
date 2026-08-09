@@ -30,28 +30,16 @@
       "dest": "/api/index.py"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
+      "src": "/(assets/.*)",
+      "dest": "/public/$1"
     },
     {
-      "src": "/favicon\\.svg",
-      "dest": "/favicon.svg"
-    },
-    {
-      "src": "/icons\\.svg",
-      "dest": "/icons.svg"
-    },
-    {
-      "src": "/manifest\\.json",
-      "dest": "/manifest.json"
-    },
-    {
-      "src": "/sw\\.js",
-      "dest": "/sw.js"
+      "src": "/(favicon\\.svg|icons\\.svg|manifest\\.json|sw\\.js)",
+      "dest": "/public/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/public/index.html"
     }
   ]
 }
