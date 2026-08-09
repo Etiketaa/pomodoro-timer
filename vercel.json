@@ -18,12 +18,40 @@
   ],
   "routes": [
     {
-      "src": "/api/index.py/socket.io/.*",
+      "src": "/api/(.*)",
       "dest": "/api/index.py"
     },
     {
-      "src": "/(.*)",
+      "src": "/auth/(.*)",
       "dest": "/api/index.py"
+    },
+    {
+      "src": "/dashboard/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/favicon\\.svg",
+      "dest": "/favicon.svg"
+    },
+    {
+      "src": "/icons\\.svg",
+      "dest": "/icons.svg"
+    },
+    {
+      "src": "/manifest\\.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/sw\\.js",
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

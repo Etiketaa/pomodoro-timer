@@ -1,0 +1,49 @@
+{
+  "name": "Pomodoro Timer Lofi",
+  "short_name": "Pomodoro",
+  "description": "Tu espacio de productividad con música lofi, tablero Kanban, sonidos ambientales y más.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#f97316",
+  "orientation": "any",
+  "categories": [
+    "productivity",
+    "utilities",
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "/static/images/pomo-1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/pomo-2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Iniciar Pomodoro",
+      "short_name": "Pomodoro",
+      "description": "Iniciar un timer Pomodoro de 25 minutos",
+      "url": "/?mode=pomodoro",
+      "icons": [
+        {
+          "src": "/static/images/pomo-1.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Descanso Corto",
+      "short_name": "Break",
+      "description": "Iniciar un descanso corto de 5 minutos",
+      "url": "/?mode=shortBreak"
+    }
+  ]
+}
