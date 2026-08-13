@@ -24,6 +24,14 @@
       "dest": "/api/index.py"
     },
     {
+      "src": "/app",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/gallery",
+      "dest": "/api/index.py"
+    },
+    {
       "src": "/sw\\.js",
       "dest": "/public/sw.js"
     },
@@ -34,6 +42,10 @@
     {
       "src": "/(favicon\\.svg|icons\\.svg|manifest\\.json)",
       "dest": "/public/$1"
+    },
+    {
+      "src": "/static/(.+)",
+      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",

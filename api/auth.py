@@ -8,7 +8,7 @@ import secrets
 from flask import Blueprint, request, jsonify, redirect, url_for
 from passlib.hash import bcrypt
 from authlib.integrations.flask_client import OAuth
-from db import query_one, execute
+from db import query_one, query_all, execute
 from crypto import generate_token, login_required
 from dotenv import load_dotenv
 
