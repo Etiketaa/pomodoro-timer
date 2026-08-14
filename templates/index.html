@@ -620,6 +620,25 @@
     <script src="/static/chatbot.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script type="module" src="/static/app-init.js"></script>
+    <script>
+    /* Fallback: if app-init.js module fails, bind auth-btn to open modal */
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('auth-btn');
+        var modal = document.getElementById('auth-modal');
+        if (!btn || !modal) return;
+        btn.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+            var lt = document.getElementById('auth-login-tab');
+            var rt = document.getElementById('auth-register-tab');
+            var lf = document.getElementById('login-form');
+            var rf = document.getElementById('register-form');
+            if (lt) lt.classList.add('active');
+            if (rt) rt.classList.remove('active');
+            if (lf) lf.classList.remove('hidden');
+            if (rf) rf.classList.add('hidden');
+        });
+    });
+    </script>
     <!-- Chatbot AI Assistant -->
     <div class="chatbox">
         <button class="chatbox__button"></button>

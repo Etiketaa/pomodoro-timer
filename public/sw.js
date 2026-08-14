@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pomodoro-timer-cache-v5';
+const CACHE_NAME = 'pomodoro-timer-cache-v6';
 
 // Static assets to pre-cache
 const STATIC_ASSETS = [
