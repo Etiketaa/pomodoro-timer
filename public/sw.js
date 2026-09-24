@@ -1,34 +1,15 @@
-const CACHE_NAME = 'pomodoro-timer-cache-v6';
+const CACHE_NAME = 'pomodoro-timer-cache-v7';
 
-// Static assets to pre-cache
+// Static assets to pre-cache (SPA build)
 const STATIC_ASSETS = [
   '/',
-  '/app',
-  '/static/style.css',
-  '/static/additional-styles.css',
-  '/static/chatbot-styles.css',
-  '/static/v2-styles.css',
-  '/static/script.js',
-  '/static/toast.js',
-  '/static/circular-progress.js',
-  '/static/goals.js',
-  '/static/export.js',
-  '/static/ambient-sound.js',
-  '/static/user-profile.js',
-  '/static/user-chat.js',
-  '/static/app-init.js',
-  '/static/auth.js',
-  '/static/cloud-sync.js',
-  '/static/api-client.js',
-  '/static/socket-client.js',
-  '/static/chat.js',
-  '/static/theme-switcher.js',
-  '/static/slideshow.js',
-  '/static/calendar.js',
-  '/static/chatbot.js',
-  '/static/manifest.json',
-  '/static/alarm.mp3',
-  '/static/favicon.ico'
+  '/index.html',
+  '/manifest.json',
+  '/favicon.svg',
+  '/icons.svg',
+  '/fonts/fonts.css',
+  '/assets/index-CALF_Cam.js',
+  '/assets/index-CMJTqJRU.css'
 ];
 
 // Install: pre-cache static assets
@@ -85,8 +66,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // For static assets (CSS, JS, images): Cache First
-  if (url.pathname.startsWith('/static/')) {
+  // For static assets (CSS, JS, fonts): Cache First
+  if (url.pathname.startsWith('/assets/') || url.pathname.startsWith('/fonts/')) {
     event.respondWith(
       caches.match(event.request)
         .then(cached => {
