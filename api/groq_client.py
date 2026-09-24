@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from datetime import datetime
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -19,11 +20,15 @@ class GroqClient:
             raise ValueError("NVIDIA_API_KEY not found in environment variables")
         
         # NVIDIA API uses OpenAI-compatible endpoint
+        # timeouts cortos: NVIDIA puede tardar mucho en devolver un error
+        # transitorio; así una llamada lenta falla en <2 min (ver agent_client).
         self.client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
-            api_key=self.api_key
+            api_key=self.api_key,
+            timeout=120.0,
+            max_retries=1,
         )
-        self.model = "meta/llama-3.3-70b-instruct"
+        self.model = "mistralai/mistral-nemotron"
         
     def get_system_prompt(self, user_tasks=None, pomodoros_today=0, timer_state=None, config=None, week_stats=None):
         """Generate system prompt with full app context"""
@@ -33,10 +38,15 @@ class GroqClient:
         if user_tasks and len(user_tasks) > 0:
             tasks_context = "\n\nTAREAS ACTUALES DEL USUARIO:\n"
             for i, task in enumerate(user_tasks[:15], 1):
-                status_emoji = {"todo": "📋", "inProgress": "⚡", "done": "✅"}.get(task.get('status', 'todo'), "📋")
+                status_emoji = {"todo": "📋", "doing": "⚡", "inProgress": "⚡", "done": "✅"}.get(task.get('status', 'todo'), "📋")
                 due = f" (vence: {task['dueDate']})" if task.get('dueDate') else ""
+                if task.get('date') and not due:
+                    due = f" (vence: {task['date']})"
                 desc = f" - {task['description']}" if task.get('description') else ""
-                tasks_context += f"{i}. [{task.get('id')}] {status_emoji} {task.get('text', 'Sin título')}{desc}{due}\n"
+                title = task.get('title') or task.get('text') or 'Sin título'
+                energy = f" | energía: {task.get('energy')}" if task.get('energy') else ""
+                subs = f" | {len(task.get('subtasks') or [])} sub-tareas" if task.get('subtasks') else ""
+                tasks_context += f"{i}. [{task.get('id')}] {status_emoji} {title}{desc}{energy}{subs}{due}\n"
         
         # Timer context
         timer_context = ""
@@ -83,9 +93,9 @@ MATRIZ DE EISENHOWER (usá esto para clasificar tareas cuando el usuario pida pr
 ACCIONES DISPONIBLES (respondé con JSON cuando el usuario pida ejecutar algo):
 
 PARA TAREAS:
-- CREAR: {{"action": "crear_tarea", "text": "nombre", "priority": "urgent_important|important|urgent|none", "dueDate": "YYYY-MM-DD|null"}}
+- CREAR: {{"action": "crear_tarea", "title": "nombre", "energy": "high|medium|low", "date": "YYYY-MM-DD|null"}}
 - BORRAR: {{"action": "borrar_tarea", "id": id_tarea}}
-- MOVER: {{"action": "mover_tarea", "id": id_tarea, "status": "todo|inProgress|done"}}
+- MOVER: {{"action": "mover_tarea", "id": id_tarea, "status": "todo|doing|done"}}
 
 PARA EL TIMER:
 - INICIAR: {{"action": "iniciar_timer"}}
@@ -104,13 +114,15 @@ REGLAS:
 6. Si el usuario solo consulta o charla, respondé normalmente sin JSON
 7. Sé conciso (máx 4-5 líneas en respuestas normales)
 8. Usá emojis para hacer el mensaje amigable
-9. Cuando crees una tarea, asignale prioridad según la matriz si el usuario dio contexto
+9. Cuando crees una tarea, asignale energía según el contexto (high si es importante/exigente, low si es liviana) y vencimiento si el usuario lo dio
 10. Si no tenés suficiente info para priorizar, preguntá
 
 CONTEXTO ACTUAL DEL USUARIO:
 - Pomodoros completados hoy: {pomodoros_today}{tasks_context}{timer_context}{config_context}{stats_context}
 
-Respondé en español de forma natural. Si necesitás ejecutar una acción, incluí SOLO el JSON en tu respuesta, sin texto adicional alrededor del JSON."""
+Hoy es {datetime.now().strftime('%A %d de %B de %Y')}. Calculá fechas relativas ("hoy", "mañana", "el lunes") a partir de esta fecha.
+
+Respondé en español de forma natural. Si vas a ejecutar una acción, escribí una confirmación breve y natural en castellano (sin mostrar el JSON), y después incluí el JSON de la acción al final de tu respuesta."""
 
     def extract_actions(self, response):
         """Extract JSON actions from assistant response"""

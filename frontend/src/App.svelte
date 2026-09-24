@@ -7,6 +7,7 @@
   import StatsModal from './components/StatsModal.svelte';
   import InstallBanner from './components/InstallBanner.svelte';
   import Calendar from './components/Calendar.svelte';
+  import AgentChat from './components/AgentChat.svelte';
 
   let showSettings = $state(false);
   let showStats = $state(false);
@@ -53,5 +54,9 @@
 
   {#if showStats}
     <StatsModal onclose={() => showStats = false} />
+  {/if}
+
+  {#if showChatbot}
+    <AgentChat onClose={() => showChatbot = false} />
   {/if}
 </div>

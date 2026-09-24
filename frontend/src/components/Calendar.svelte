@@ -304,7 +304,7 @@
             {#each unassignedTasks as t}
               <button
                 class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-left transition-colors hover:bg-card/60"
-                onclick={() => assignTask(t.id, selectedDate)}
+                onclick={() => { if (selectedDate) assignTask(t.id, selectedDate); }}
               >
                 <span class="h-1.5 w-1.5 rounded-full shrink-0 {statusColor(t.status)}"></span>
                 <span class="text-xs text-foreground truncate">{t.title}</span>

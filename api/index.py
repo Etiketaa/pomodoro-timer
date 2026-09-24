@@ -42,6 +42,10 @@ app.register_blueprint(chat_bp)
 from feedback import feedback_bp
 app.register_blueprint(feedback_bp)
 
+# Register agent blueprint (features agénticas: split/plan/ritual/insights)
+from agent import agent_bp
+app.register_blueprint(agent_bp, url_prefix='/api/agent')
+
 # Initialize Socket.IO
 from socketio_handler import init_socketio
 init_socketio(app)
@@ -137,4 +141,6 @@ def catch_all(path):
 # This block is not used by Vercel, but it's good for local development
 if __name__ == '__main__':
     from socketio_handler import socketio
+    # socketio.run ya usa threaded=True internamente; el timeout corto del
+    # cliente OpenAI evita que una llamada lenta a NVIDIA congele el server.
     socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
