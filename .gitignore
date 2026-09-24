@@ -36,3 +36,5 @@ pomodoro-timer/
 
 # Frontend source (built output is in public/)
 frontend/dist/
+.vercel
+.env*
