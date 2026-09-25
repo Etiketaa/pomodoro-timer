@@ -12,6 +12,8 @@ import traceback
 
 from flask import Blueprint, jsonify, request
 
+from ratelimit import agent_rate_limited
+
 agent_bp = Blueprint('agent', __name__)
 
 
@@ -39,6 +41,7 @@ def _fail(msg, code=200):
 #  Split de tareas
 # --------------------------------------------------------------------- #
 @agent_bp.route('/split', methods=['POST'])
+@agent_rate_limited
 def split():
     data = request.get_json(silent=True) or {}
     title = (data.get('title') or '').strip()
@@ -65,6 +68,7 @@ def split():
 #  Plan del día
 # --------------------------------------------------------------------- #
 @agent_bp.route('/plan', methods=['POST'])
+@agent_rate_limited
 def plan():
     data = request.get_json(silent=True) or {}
     if not isinstance(data.get('tasks'), list):
@@ -92,6 +96,7 @@ def plan():
 #  Coach del ritual de cierre
 # --------------------------------------------------------------------- #
 @agent_bp.route('/ritual', methods=['POST'])
+@agent_rate_limited
 def ritual():
     data = request.get_json(silent=True) or {}
 
@@ -118,6 +123,7 @@ def ritual():
 #  Insights semanales + tareas atascadas
 # --------------------------------------------------------------------- #
 @agent_bp.route('/insights', methods=['POST'])
+@agent_rate_limited
 def insights():
     data = request.get_json(silent=True) or {}
     if not isinstance(data.get('tasks'), list):

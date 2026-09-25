@@ -24,11 +24,7 @@
       "dest": "/api/index.py"
     },
     {
-      "src": "/app",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/gallery",
+      "src": "/healthz",
       "dest": "/api/index.py"
     },
     {
@@ -40,12 +36,8 @@
       "dest": "/public/$1"
     },
     {
-      "src": "/(favicon\\.svg|icons\\.svg|manifest\\.json)",
+      "src": "/(favicon\\.svg|icons\\.svg|manifest\\.json|fonts/.+|images/.+)",
       "dest": "/public/$1"
-    },
-    {
-      "src": "/static/(.+)",
-      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",
