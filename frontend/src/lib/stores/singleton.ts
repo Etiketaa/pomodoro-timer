@@ -1,4 +1,5 @@
 import { createTasksStore } from './tasks.svelte.ts';
+import { createSalaStore } from './sala.svelte.ts';
 
 /**
  * Instancia ÚNICA del store de tareas.
@@ -9,4 +10,8 @@ import { createTasksStore } from './tasks.svelte.ts';
  */
 export const tasksStore = createTasksStore();
 
+/** Instancia ÚNICA del store de salas — mismo motivo que arriba. */
+export const salaStore = createSalaStore();
+
 export type { Task, Subtask, Energy, DailyNote, ShutdownEntry, StreakData, TasksStore } from './tasks.svelte.ts';
+export type { Sala, SalaResultado, Franja } from './sala.svelte.ts';

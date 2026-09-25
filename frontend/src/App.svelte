@@ -1,15 +1,18 @@
 <script lang="ts">
-  import Timer from './components/Timer.svelte';
-  import KanbanBoard from './components/KanbanBoard.svelte';
   import MusicPlayer from './components/MusicPlayer.svelte';
   import Navbar from './components/Navbar.svelte';
   import SettingsModal from './components/SettingsModal.svelte';
   import StatsModal from './components/StatsModal.svelte';
   import InstallBanner from './components/InstallBanner.svelte';
-  import Calendar from './components/Calendar.svelte';
   import AgentChat from './components/AgentChat.svelte';
   import WelcomeModal from './components/WelcomeModal.svelte';
+
+  import SalaAbrir from './components/SalaAbrir.svelte';
+  import SalaActiva from './components/SalaActiva.svelte';
+  import SalaHistorial from './components/SalaHistorial.svelte';
+
   import { profile, welcomeSeen } from './lib/stores/profile.svelte';
+  import { salaStore } from './lib/stores/singleton';
 
   let showSettings = $state(false);
   let showStats = $state(false);
@@ -32,28 +35,25 @@
     onProfile={() => showWelcome = true}
   />
 
-  <main class="mx-auto w-full max-w-6xl px-4 pb-40 pt-6 md:pb-28">
-    <div class="grid gap-8 lg:grid-cols-[minmax(0,380px)_1fr] lg:gap-10">
-      <!-- Focus column -->
-      <div class="flex flex-col gap-5 lg:sticky lg:top-20 lg:self-start">
-        <Timer />
-        <MusicPlayer />
+  <main class="mx-auto w-full max-w-3xl px-4 pb-40 pt-6 md:pb-28">
+    <!--
+      La sala abierta manda: si estás adentro, no hay nada más en pantalla.
+      El Kanban, el calendario y el reloj grande salieron de la primera
+      vista a propósito — la tesis dice que el pomodoro es mecánica interna,
+      no protagonista, y que la sala es la unidad, no la tarea suelta.
+    -->
+    {#if salaStore.activa}
+      <SalaActiva sala={salaStore.activa} />
+    {:else}
+      <div class="flex flex-col gap-6">
+        <SalaAbrir />
+        <SalaHistorial />
       </div>
+    {/if}
 
-      <!-- Tasks column -->
-      <div class="flex flex-col gap-4">
-        <div>
-          <h1 class="text-lg font-semibold text-balance">
-            Tu sesión de trabajo
-          </h1>
-          <p class="text-sm text-muted-foreground text-pretty">
-            Organizá tus tareas mientras el temporizador corre. Arrastrá
-            cada tarea entre etapas con las flechas.
-          </p>
-        </div>
-        <KanbanBoard />
-        <Calendar />
-      </div>
+    <!-- El ambiente viaja con vos: sale de la lista y queda abajo. -->
+    <div class="mt-8">
+      <MusicPlayer />
     </div>
   </main>
 
