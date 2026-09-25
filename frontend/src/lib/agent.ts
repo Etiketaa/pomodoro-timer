@@ -5,6 +5,7 @@
  */
 import { post, get } from './api';
 import type { Energy, Task, ShutdownEntry } from './stores/singleton';
+import { profilePayload } from './stores/profile.svelte';
 
 export type AgentPart = { title: string; estimatedMinutes: number };
 
@@ -54,6 +55,7 @@ export async function agentSplit(
     title,
     energy,
     context,
+    profile: profilePayload(),
   });
   return unwrap(res);
 }
@@ -71,6 +73,7 @@ export async function agentPlan(args: {
     streak: args.streak ?? 0,
     note: args.note ?? '',
     yesterdayFocus: args.yesterdayFocus ?? '',
+    profile: profilePayload(),
   });
   return unwrap(res);
 }
@@ -83,7 +86,10 @@ export async function agentRitual(args: {
   completedCount: number;
   streak: number;
 }): Promise<RitualReflection> {
-  const res = await post<AgentResponse<RitualReflection>>('/api/agent/ritual', args);
+  const res = await post<AgentResponse<RitualReflection>>('/api/agent/ritual', {
+    ...args,
+    profile: profilePayload(),
+  });
   return unwrap(res);
 }
 
@@ -98,6 +104,7 @@ export async function agentInsights(args: {
     shutdownEntries: args.shutdownEntries,
     completedCounts: args.completedCounts,
     streak: args.streak,
+    profile: profilePayload(),
   });
   return unwrap(res);
 }

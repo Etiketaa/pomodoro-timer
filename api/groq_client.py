@@ -30,7 +30,7 @@ class GroqClient:
         )
         self.model = "mistralai/mistral-nemotron"
         
-    def get_system_prompt(self, user_tasks=None, pomodoros_today=0, timer_state=None, config=None, week_stats=None):
+    def get_system_prompt(self, user_tasks=None, pomodoros_today=0, timer_state=None, config=None, week_stats=None, user_profile=None):
         """Generate system prompt with full app context"""
         
         # Build tasks context
@@ -68,6 +68,45 @@ class GroqClient:
         stats_context = ""
         if week_stats:
             stats_context = f"\n\nESTADÍSTICAS: Hoy {pomodoros_today} pomodoros | Esta semana {week_stats.get('weekTotal', 0)} pomodoros"
+
+        # User profile context (qué quiere mejorar, problemas de organización)
+        profile_context = ""
+        if user_profile:
+            goals = user_profile.get('goals') or []
+            goals_map = {
+                "enfoque": "enfocarse más",
+                "organizacion": "organizar su día",
+                "procrastinacion": "dejar de postergar",
+                "energia": "manejar su energía",
+                "velocidad": "ser más rápido",
+                "equilibrio": "equilibrar trabajo/descanso",
+            }
+            goal_labels = [goals_map.get(str(g), str(g)) for g in goals if goals_map.get(str(g))]
+            areas = {
+                "administracion": "Administración",
+                "ventas": "Ventas / atención",
+                "logistica": "Logística / operaciones",
+                "tecnico": "Técnico / desarrollo",
+                "creativo": "Creativo / diseño",
+                "otro": "Otro",
+            }
+            area = user_profile.get('workArea') or ''
+            parts = []
+            if area in areas:
+                parts.append(f"- Área de trabajo: {areas[area]}")
+            if goal_labels:
+                parts.append(f"- Qué quiere mejorar: {', '.join(goal_labels)}")
+            need_ctx = user_profile.get('needTaskContext')
+            if need_ctx is not None:
+                parts.append(f"- ¿Quiere contexto de sus tareas al aconsejar?: {'sí' if need_ctx else 'no'}")
+            org = (user_profile.get('organizationProblems') or '').strip()
+            if org:
+                parts.append(f"- Problemas de organización: {org[:200]}")
+            extra = (user_profile.get('extra') or '').strip()
+            if extra:
+                parts.append(f"- Otra información: {extra[:200]}")
+            if parts:
+                profile_context = "\n\nPERFIL DEL USUARIO (usalo para personalizar consejos y priorizar):\n" + "\n".join(parts)
 
         return f"""Eres un asistente de productividad experto llamado "Pomo". Tu objetivo es ayudar al usuario a ser más productivo usando la técnica Pomodoro y la Matriz de Eisenhower.
 
@@ -118,7 +157,7 @@ REGLAS:
 10. Si no tenés suficiente info para priorizar, preguntá
 
 CONTEXTO ACTUAL DEL USUARIO:
-- Pomodoros completados hoy: {pomodoros_today}{tasks_context}{timer_context}{config_context}{stats_context}
+- Pomodoros completados hoy: {pomodoros_today}{tasks_context}{timer_context}{config_context}{stats_context}{profile_context}
 
 Hoy es {datetime.now().strftime('%A %d de %B de %Y')}. Calculá fechas relativas ("hoy", "mañana", "el lunes") a partir de esta fecha.
 
@@ -142,7 +181,7 @@ Respondé en español de forma natural. Si vas a ejecutar una acción, escribí 
         return actions
 
     def chat(self, user_message, conversation_history=None, user_tasks=None, 
-             pomodoros_today=0, timer_state=None, config=None, week_stats=None):
+             pomodoros_today=0, timer_state=None, config=None, week_stats=None, user_profile=None):
         """
         Send a message to NVIDIA API and get a response
         """
@@ -151,7 +190,7 @@ Respondé en español de forma natural. Si vas a ejecutar una acción, escribí 
             messages = [
                 {
                     "role": "system",
-                    "content": self.get_system_prompt(user_tasks, pomodoros_today, timer_state, config, week_stats)
+                    "content": self.get_system_prompt(user_tasks, pomodoros_today, timer_state, config, week_stats, user_profile)
                 }
             ]
             

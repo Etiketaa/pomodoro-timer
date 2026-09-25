@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pomodoro-timer-cache-v8';
+const CACHE_NAME = 'pomodoro-timer-cache-v9';
 
 // Static assets to pre-cache (SPA build)
 const STATIC_ASSETS = [
@@ -10,8 +10,8 @@ const STATIC_ASSETS = [
   '/images/pomo-1-192.png',
   '/images/pomo-1-512.png',
   '/fonts/fonts.css',
-  '/assets/index-BSMrFOoX.js',
-  '/assets/index-5SqdhAyw.css'
+  '/assets/index-Bywq4PNn.js',
+  '/assets/index-CxU0T5_n.css'
 ];
 
 // Install: pre-cache static assets

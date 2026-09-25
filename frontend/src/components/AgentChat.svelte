@@ -1,5 +1,6 @@
 <script lang="ts">
   import { tasksStore } from '../lib/stores/singleton';
+  import { profilePayload } from '../lib/stores/profile.svelte';
   import { post } from '../lib/api';
 
   interface Props {
@@ -95,6 +96,7 @@
         timer_state: null,
         config: null,
         week_stats: null,
+        profile: profilePayload(),
       });
       const actionsNote = executeActions(res.actions ?? []);
       // Si se ejecutaron acciones, ocultamos el JSON crudo del modelo y mostramos las notas.

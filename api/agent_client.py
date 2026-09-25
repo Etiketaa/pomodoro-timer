@@ -106,6 +106,55 @@ class AgentClient:
     #  Serialización de contexto (formato del store nuevo)
     # ------------------------------------------------------------------ #
     @staticmethod
+    def _fmt_profile(profile):
+        """Serializa el perfil del usuario (área, qué mejorar, contexto, problemas).
+
+        Devuelve un string vacío si no hay perfil o no aporta nada, para no
+        ensuciar el prompt cuando el usuario nunca completó el onboarding.
+        """
+        if not profile or not isinstance(profile, dict):
+            return ""
+        lines = []
+        area = profile.get("workArea") or ""
+        areas = {
+            "administracion": "Administración",
+            "ventas": "Ventas / atención",
+            "logistica": "Logística / operaciones",
+            "tecnico": "Técnico / desarrollo",
+            "creativo": "Creativo / diseño",
+            "otro": "Otro",
+        }
+        if area in areas:
+            lines.append(f"- Área de trabajo: {areas[area]}")
+        goals_map = {
+            "enfoque": "enfocarse más",
+            "organizacion": "organizar su día",
+            "procrastinacion": "dejar de postergar",
+            "energia": "manejar su energía",
+            "velocidad": "ser más rápido",
+            "equilibrio": "equilibrar trabajo/descanso",
+        }
+        goals = profile.get("goals") or []
+        goal_labels = [goals_map.get(str(g), str(g)) for g in goals if goals_map.get(str(g))]
+        if goal_labels:
+            lines.append(f"- Qué quiere mejorar: {', '.join(goal_labels)}")
+        need_ctx = profile.get("needTaskContext")
+        if need_ctx is not None:
+            lines.append(
+                f"- ¿Quiere contexto de sus tareas al aconsejar?: "
+                f"{'sí' if need_ctx else 'no'}"
+            )
+        org = (profile.get("organizationProblems") or "").strip()
+        if org:
+            lines.append(f"- Problemas de organización: {org}")
+        extra = (profile.get("extra") or "").strip()
+        if extra:
+            lines.append(f"- Otra información: {extra}")
+        if not lines:
+            return ""
+        return "PERFIL DEL USUARIO (usalo para personalizar la respuesta):\n" + "\n".join(lines)
+
+    @staticmethod
     def _fmt_tasks(tasks, limit=20):
         """Serializa tareas del store nuevo (title/energy/status/subtasks)."""
         if not tasks:
@@ -127,8 +176,9 @@ class AgentClient:
     # ------------------------------------------------------------------ #
     #  Split de tareas
     # ------------------------------------------------------------------ #
-    def split_task(self, title, energy="medium", context=""):
+    def split_task(self, title, energy="medium", context="", profile=None):
         """Descompone una tarea vaga en pasos accionables de ~10 min."""
+        profile_txt = self._fmt_profile(profile)
         system = (
             f"{_SYSTEM_BASE}\n\n"
             "Tu trabajo: descomponer UNA tarea vaga en micro-pasos accionables "
@@ -146,7 +196,8 @@ class AgentClient:
         user = (
             f"TAREA A DIVIDIR: {title}\n"
             f"ENERGÍA DISPONIBLE: {energy}\n"
-            f"{('CONTEXTO ADICIONAL: ' + context) if context else ''}"
+            f"{('CONTEXTO ADICIONAL: ' + context) if context else ''}\n"
+            f"{profile_txt}"
         )
         data = self._complete_json(system, user, temperature=0.4)
         parts = data.get("parts", [])
@@ -165,8 +216,9 @@ class AgentClient:
     # ------------------------------------------------------------------ #
     #  Plan diario
     # ------------------------------------------------------------------ #
-    def daily_plan(self, pending, energy_today, streak, note, yesterday_focus=""):
+    def daily_plan(self, pending, energy_today, streak, note, yesterday_focus="", profile=None):
         """Sugiere los top 3 focos del día."""
+        profile_txt = self._fmt_profile(profile)
         system = (
             f"{_SYSTEM_BASE}\n\n"
             "Tu trabajo: armar el plan del día. Elegís EXACTAMENTE 3 focos, "
@@ -179,6 +231,8 @@ class AgentClient:
             "si sigue pendiente.\n"
             "- Balance según la energía: si la energía es baja, priorizá "
             "tareas livianas y proponé un solo foco pesado.\n"
+            "- Si hay perfil del usuario, alineá los focos con lo que quiere "
+            "mejorar y evitá sus problemas de organización conocidos.\n"
             "- Respetá el orden: el foco 1 es el que hay que atacar primero.\n"
             "Reglas:\n"
             "- Si elegís una tarea existente, usás su id EXACTO del contexto.\n"
@@ -193,7 +247,8 @@ class AgentClient:
             f"ENERGÍA HOY: {energy_today}\n"
             f"RACHA: {streak} día(s)\n"
             f"NOTA DEL DÍA (brain dump): {(note or '(vacía)')[:600]}\n"
-            f"FOCO QUE DIJO QUE QUERÍA HACER HOY: {(yesterday_focus or '(ninguno)')}"
+            f"FOCO QUE DIJO QUE QUERÍA HACER HOY: {(yesterday_focus or '(ninguno)')}\n"
+            f"{profile_txt}"
         )
         data = self._complete_json(system, user, temperature=0.4, max_tokens=700)
         focus = data.get("focus", [])[:3]
@@ -217,8 +272,9 @@ class AgentClient:
     #  Ritual de cierre
     # ------------------------------------------------------------------ #
     def ritual_reflection(self, went_well, was_hard, tomorrow_focus, mood,
-                          completed_count, streak):
+                          completed_count, streak, profile=None):
         """Coach del shutdown ritual: 2-3 líneas + un tip para mañana."""
+        profile_txt = self._fmt_profile(profile)
         system = (
             f"{_SYSTEM_BASE}\n\n"
             "Tu trabajo: cerrar el día del usuario con una reflexión breve como "
@@ -231,6 +287,8 @@ class AgentClient:
             "(máx 15 palabras), basada en lo que dijo.\n"
             "Si el usuario terminó enérgico, celebrálo. Si terminó bajo, "
             "normalizá y proponé algo chico.\n"
+            "Si hay perfil del usuario, conectá la reflexión con lo que "
+            "quiere mejorar (sin sermonear).\n"
             "Salida EXACTA en JSON:\n"
             '{"reflection": "texto", "tip": "texto"}'
         )
@@ -240,7 +298,8 @@ class AgentClient:
             f"FOCO PARA MAÑANA: {tomorrow_focus or '(sin definir)'}\n"
             f"CÓMO TERMINÓ EL DÍA: {mood}\n"
             f"TAREAS COMPLETADAS HOY: {completed_count}\n"
-            f"RACHA ACTUAL: {streak} día(s)"
+            f"RACHA ACTUAL: {streak} día(s)\n"
+            f"{profile_txt}"
         )
         data = self._complete_json(system, user, temperature=0.5, max_tokens=500)
         return {
@@ -251,8 +310,9 @@ class AgentClient:
     # ------------------------------------------------------------------ #
     #  Insights semanales + tareas atascadas
     # ------------------------------------------------------------------ #
-    def weekly_insights(self, tasks, shutdown_entries, completed_counts, streak):
+    def weekly_insights(self, tasks, shutdown_entries, completed_counts, streak, profile=None):
         """Detecta patrones de la semana y tareas que llevan muchos días en doing."""
+        profile_txt = self._fmt_profile(profile)
         # --- Detección local (determinística, no depende del LLM) ---
         stuck = []
         for t in tasks:
@@ -308,6 +368,8 @@ class AgentClient:
             "Reglas:\n"
             "- No inventes datos. Si no hay suficiente data semanal (<2 entradas "
             "de ritual), decilo y proponé una recomendación general.\n"
+            "- Si hay perfil del usuario, priorizá los patrones que tengan que "
+            "ver con lo que quiere mejorar.\n"
             "- Cada insight: 1 frase concreta + qué ajuste harías.\n"
             "- Salida EXACTA en JSON:\n"
             '{"summary": "una línea de síntesis", '
@@ -317,7 +379,8 @@ class AgentClient:
             f"COMPLETADAS ESTA SEMANA (por día): {completed_counts or '(sin datos)'}\n"
             f"TAREAS HECHAS (últimas): {', '.join(done_titles) if done_titles else '(ninguna)'}\n"
             f"RACHA ACTUAL: {streak}\n"
-            f"ENTRADAS DEL RITUAL (últimos 7 días):\n{shutdown_txt}"
+            f"ENTRADAS DEL RITUAL (últimos 7 días):\n{shutdown_txt}\n"
+            f"{profile_txt}"
         )
         data = self._complete_json(system, user, temperature=0.4, max_tokens=700)
         insights = [i.strip() for i in data.get("insights", []) if i and i.strip()][:5]

@@ -116,7 +116,8 @@ def chat():
             pomodoros_today=pomodoros_today,
             timer_state=timer_state,
             config=config,
-            week_stats=week_stats
+            week_stats=week_stats,
+            user_profile=data.get('profile'),
         )
         
         return jsonify(result)

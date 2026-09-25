@@ -8,10 +8,20 @@
   import InstallBanner from './components/InstallBanner.svelte';
   import Calendar from './components/Calendar.svelte';
   import AgentChat from './components/AgentChat.svelte';
+  import WelcomeModal from './components/WelcomeModal.svelte';
+  import { profile, welcomeSeen } from './lib/stores/profile.svelte';
 
   let showSettings = $state(false);
   let showStats = $state(false);
   let showChatbot = $state(false);
+  let showWelcome = $state(false);
+
+  // Paso previo al uso: si no hay perfil y nunca se mostró la bienvenida, abrirla.
+  $effect(() => {
+    if (!profile.data && !welcomeSeen.value && !showWelcome) {
+      showWelcome = true;
+    }
+  });
 </script>
 
 <div class="min-h-screen bg-background text-foreground">
@@ -19,6 +29,7 @@
     onSettings={() => showSettings = true}
     onStats={() => showStats = true}
     onChatbot={() => showChatbot = !showChatbot}
+    onProfile={() => showWelcome = true}
   />
 
   <main class="mx-auto w-full max-w-6xl px-4 pb-40 pt-6 md:pb-28">
@@ -58,5 +69,9 @@
 
   {#if showChatbot}
     <AgentChat onClose={() => showChatbot = false} />
+  {/if}
+
+  {#if showWelcome}
+    <WelcomeModal onClose={() => showWelcome = false} />
   {/if}
 </div>

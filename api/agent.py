@@ -53,6 +53,7 @@ def split():
             title=title,
             energy=data.get('energy', 'medium'),
             context=(data.get('context') or '').strip(),
+            profile=data.get('profile'),
         )
         return _ok({'parts': result['parts']})
     except Exception as e:
@@ -79,6 +80,7 @@ def plan():
             streak=int(data.get('streak') or 0),
             note=data.get('note') or '',
             yesterday_focus=data.get('yesterdayFocus') or '',
+            profile=data.get('profile'),
         )
         return _ok(result)
     except Exception as e:
@@ -104,6 +106,7 @@ def ritual():
             mood=data.get('mood') or 'medium',
             completed_count=int(data.get('completedCount') or 0),
             streak=int(data.get('streak') or 0),
+            profile=data.get('profile'),
         )
         return _ok(result)
     except Exception as e:
@@ -129,6 +132,7 @@ def insights():
             shutdown_entries=data.get('shutdownEntries') or [],
             completed_counts=data.get('completedCounts') or [],
             streak=int(data.get('streak') or 0),
+            profile=data.get('profile'),
         )
         return _ok(result)
     except Exception as e:
