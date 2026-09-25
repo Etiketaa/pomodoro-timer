@@ -1,6 +1,14 @@
-const CACHE_NAME = 'pomodoro-timer-cache-v9';
+const CACHE_NAME = 'pomodoro-timer-cache-v10';
 
 // Static assets to pre-cache (SPA build)
+// BUILD_ASSETS lo reemplaza scripts/postbuild.mjs con los hashes reales del
+// bundle. Antes estos nombres estaban escritos a mano, así que cada rebuild
+// dejaba la precarga apuntando a archivos que ya no existían. Se deja como
+// array vacío (no un token) para que el archivo sea JS válido siempre.
+const BUILD_ASSETS = [
+  '/assets/index-BjWVm2cE.js',
+  '/assets/index-D2JQbBnb.css'
+];
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,9 +17,10 @@ const STATIC_ASSETS = [
   '/icons.svg',
   '/images/pomo-1-192.png',
   '/images/pomo-1-512.png',
+  '/images/pomo-2-192.png',
+  '/images/pomo-2-512.png',
   '/fonts/fonts.css',
-  '/assets/index-Bywq4PNn.js',
-  '/assets/index-CxU0T5_n.css'
+  ...BUILD_ASSETS
 ];
 
 // Install: pre-cache static assets
