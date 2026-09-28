@@ -1,0 +1,8 @@
+# No hay nada que indexar. La sala guarda todo en el navegador del usuario
+# (localStorage) y no renderiza contenido en el servidor: un crawler no ve
+# ni un compromiso, ni una Constancia, ni una nota. Es un shell vacío.
+#
+# Ademas esto evita que el catch-all de la SPA le sirva index.html a un
+# robot que pide /robots.txt, que es lo que lo hacia fallar en Lighthouse.
+User-agent: *
+Disallow: /

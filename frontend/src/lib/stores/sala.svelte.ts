@@ -92,6 +92,62 @@ export const FRANJA_LABEL: Record<Franja, string> = {
   noche: 'de noche',
 };
 
+export type Estacion = {
+  /** Id del canal en SomaFM. Es también el path del stream. */
+  id: string;
+  nombre: string;
+  /** Lo que el canal dice de sí mismo, entre comillas. */
+  sePresenta: string;
+};
+
+const STREAM = (id: string) => `https://ice1.somafm.com/${id}-128-mp3`;
+
+/**
+ * La atmósfera de cada franja.
+ *
+ * Ojo con el alcance de esto: es una curaduría, no un hallazgo. Lo único
+ * verificado es que los cuatro streams existen y suenan (SomaFM, MP3 128 kbps,
+ * HTTP 206 + `audio/mpeg`, comprobado el 2026-09-28). Que la curva de densidad
+ * sirva para concentrarse es una intuición minha, no un dato.
+ *
+ * El criterio es de densidad, no de vibra. De menos a más:
+ *
+ *   madrugada   Drone Zone          "texturas atmosféricas, beats mínimos"
+ *   mañana      Groove Salad        "ambient/downtempo, bien frío"
+ *   tarde       Space Station Soma  "ambient y electrónica mid-tempo": más empuje
+ *   noche       Secret Agent        lounge, para bajar
+ *
+ * La tarde es la que más empuja porque es la hora en que el trabajo se pone
+ * difícil, no la más relajada. Si a vos te pasa al revés, cambiala acá: es un
+ * objeto, no una constante escondida.
+ */
+export const ATMOSFERA: Record<Franja, Estacion> = {
+  madrugada: {
+    id: 'dronezone',
+    nombre: 'Drone Zone',
+    sePresenta: 'texturas atmosféricas con beats mínimos',
+  },
+  manana: {
+    id: 'groovesalad',
+    nombre: 'Groove Salad',
+    sePresenta: 'ambient y downtempo, bien frío',
+  },
+  tarde: {
+    id: 'spacestation',
+    nombre: 'Space Station Soma',
+    sePresenta: 'ambient y electrónica mid-tempo',
+  },
+  noche: {
+    id: 'secretagent',
+    nombre: 'Secret Agent',
+    sePresenta: 'lounge, para bajar',
+  },
+};
+
+export function streamDe(e: Estacion) {
+  return STREAM(e.id);
+}
+
 export const RESULTADO_LABEL: Record<SalaResultado, string> = {
   terminado: 'Terminado',
   parcial: 'A medias',

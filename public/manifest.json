@@ -1,16 +1,15 @@
 {
-  "name": "Pomodoro Timer Lofi",
-  "short_name": "Pomodoro",
-  "description": "Tu espacio de productividad con música lofi, tablero Kanban, sonidos ambientales y más.",
+  "name": "La sala",
+  "short_name": "La sala",
+  "description": "Abrís una sala con un compromiso, trabajás, y al salir queda escrito qué terminaste.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#f97316",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "categories": [
     "productivity",
-    "utilities",
-    "education"
+    "utilities"
   ],
   "icons": [
     {
@@ -40,10 +39,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Iniciar Pomodoro",
-      "short_name": "Pomodoro",
-      "description": "Iniciar un timer Pomodoro de 25 minutos",
-      "url": "/?mode=pomodoro",
+      "name": "Abrir una sala",
+      "short_name": "Abrir sala",
+      "description": "Escribir el compromiso y entrar a trabajar",
+      "url": "/?abrir=1",
       "icons": [
         {
           "src": "/images/pomo-1-192.png",
@@ -52,10 +51,10 @@
       ]
     },
     {
-      "name": "Descanso Corto",
-      "short_name": "Break",
-      "description": "Iniciar un descanso corto de 5 minutos",
-      "url": "/?mode=shortBreak"
+      "name": "Ver constancia",
+      "short_name": "Constancia",
+      "description": "Tu mapa de calor de las últimas 12 semanas",
+      "url": "/?tab=constancia"
     }
   ]
 }

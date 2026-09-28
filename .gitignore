@@ -38,3 +38,7 @@ pomodoro-timer/
 frontend/dist/
 .vercel
 .env*
+
+# Documento de trabajo entre sesiones. No va al repo: es mas un handoff
+# para mi que una fuente. (Se coló en 3ad50a9 por un add -A.)
+CONTEXTO.md

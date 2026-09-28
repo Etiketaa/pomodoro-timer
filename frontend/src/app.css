@@ -44,13 +44,79 @@
   --ring: oklch(0.72 0.17 48);
 }
 
+/*
+ * Layout móvil.
+ *
+ * `viewport-fit=cover` ya estaba en index.html, pero sin nadie que consuma
+ * env(safe-area-inset-*) no hace nada: en un iPhone con notch la barra de
+ * inicio se come el fondo de la app y los botones del último piso quedan
+ * debajo del gesto de "ir a inicio". Estos tokens son los que lo arreglan.
+ */
+:root {
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
+  /* Alto de la barra de pestañas: 44px de target + aire arriba y abajo. */
+  --tabbar: 3.75rem;
+  /* Alto del CTA fijo de la sala: 48px, que es el mínimo táctil. */
+  --cta: 3.75rem;
+  /* Mínimo táctil: iOS pide 44pt, Android 48dp. Nos quedamos con 48. */
+  --tap: 3rem;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    /* Evita el rebote horizontal en iOS Safari al rotar. */
+    overflow-x: hidden;
   }
+  /* Los targets táctiles no bajan de 48px. Es la diferencia entre "se usa"
+     y "se sufre". */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .pt-safe { padding-top: var(--safe-t); }
+  .pb-safe { padding-bottom: var(--safe-b); }
+
+  /* max() en vez del valor crudo a propósito. Con `var(--safe-l)` pelado, un
+     teléfono sin notch (safe = 0) queda con padding lateral 0 y el contenido
+     pegado al borde; en landscape con notch, 1rem no alcanza y el recorte se
+     come la primera palabra. max() da 1rem en el primer caso y el notch en el
+     segundo, y no depende de si esta clase le gana a `px-4` en la cascada. */
+  .px-safe {
+    padding-left: max(var(--safe-l), 1rem);
+    padding-right: max(var(--safe-r), 1rem);
+  }
+
+  /* Reservar el espacio de la barra de pestañas para que el scroll termine
+     arriba de ella, no debajo. La media query va acá adentro y no como
+     `lg:pb-24` en el markup: en desktop no hay barra de pestañas ni CTA
+     fijo, y depender de que la utilidad le gane a la capa de componentes
+     deja 148px de padding muerto si el orden de cascada cambia. */
+  .pb-tabbar { padding-bottom: calc(var(--tabbar) + var(--safe-b) + 1rem); }
+  /* Con un CTA fijo encima de la barra de pestañas hay que reservar el alto
+     de los dos, más aire. */
+  .pb-cta {
+    padding-bottom: calc(var(--tabbar) + var(--safe-b) + var(--cta) + 1.75rem);
+  }
+
+  @media (width >= 64rem) {
+    .pb-tabbar,
+    .pb-cta { padding-bottom: 6rem; }
+  }
+
+  /* Los targets táctiles no bajan de 48px: iOS pide 44pt, Android 48dp. */
+  .min-tap { min-height: var(--tap); min-width: var(--tap); }
 }
 
 @keyframes scaleIn {
