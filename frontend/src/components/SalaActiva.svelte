@@ -109,7 +109,7 @@
     <button
       type="button"
       onclick={() => (mostrarCierre = true)}
-      class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+      class="min-tap rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
     >
       Salir de la sala
     </button>

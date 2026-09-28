@@ -99,14 +99,14 @@
       <button
         type="button"
         onclick={onClose}
-        class="rounded-xl border border-border px-4 py-2 text-sm text-muted-foreground"
+        class="min-tap rounded-xl border border-border px-4 py-2 text-sm text-muted-foreground"
       >
         Seguir trabajando
       </button>
       <button
         type="button"
         onclick={confirmar}
-        class="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+        class="min-tap rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
       >
         Cerrar sala
       </button>

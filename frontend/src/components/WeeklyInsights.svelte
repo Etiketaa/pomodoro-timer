@@ -77,7 +77,7 @@
   <div class="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-card animate-scaleIn">
     <div class="sticky top-0 z-10 flex items-center justify-between rounded-t-2xl border-b border-border bg-card px-6 py-4">
       <h2 class="text-lg font-semibold">Insights semanales 🔎</h2>
-      <button class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onClose} aria-label="Cerrar">
+      <button class="min-tap flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onClose} aria-label="Cerrar">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>

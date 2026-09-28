@@ -216,7 +216,7 @@
     {/if}
 
     <button
-      class="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+      class="flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
       onclick={toggleMute}
       aria-label={muted ? 'Activar sonido' : 'Silenciar'}
     >
@@ -230,13 +230,24 @@
         </svg>
       {/if}
     </button>
+<!--
+        El slider medía 6px de alto: esa era también su área de toque, que es
+        lo que hace inalcanzable un control a 1px de la fila correcta. Acá el
+        input mide 44 y la pista visible sigue siendo finita, dibujada a mano
+        porque `appearance-none` borra la nativa. El -5px del pulgar es
+        ((pista 6 - pulgar 16) / 2): lo centra sobre la pista.
+      -->
     <input
       type="range"
       min="0" max="100"
       value={muted ? 0 : volume}
       oninput={(e) => setVolume(parseInt((e.target as HTMLInputElement).value))}
       aria-label="Volumen"
-      class="hidden h-1.5 w-24 cursor-pointer appearance-none rounded-full bg-muted accent-primary sm:block"
+      class="hidden h-11 w-24 cursor-pointer appearance-none bg-transparent sm:block
+        [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-muted
+        [&::-webkit-slider-thumb]:mt-[-5px] [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary
+        [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-muted
+        [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary"
     />
   </div>
 </div>

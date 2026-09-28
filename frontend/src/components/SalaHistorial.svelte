@@ -3,6 +3,17 @@
   import { RESULTADO_LABEL } from '../lib/stores/sala.svelte';
 
   /**
+   * `nivelEncabezado` decide si el encabezado es h1 o h2, y lo pasa App.svelte segun
+   * cual vista esta activa. En mobile esta es la pantalla entera y le
+   * corresponde h1; en desktop convive con la otra seccion como hermana, y ahi
+   * es h2. Asi hay exactamente un h1 en cualquier estado, que era lo que faltaba.
+   *
+   * De paso el encabezado deja de ser una etiqueta en versalitas gris y pasa a
+   * ser un titulo: era la pantalla de apertura de la app y no tenia ningun h1.
+   */
+  let { nivelEncabezado = 1 }: { nivelEncabezado?: 1 | 2 } = $props();
+
+  /**
    * Historial de salas. El foco NO es la racha sino el mapa de calor: Lally
    * et al. (2010) dan una mediana de 66 días hasta automaticidad con un rango
    * de 18 a 254. Una racha que se rompe castiga justo a la gente que tarda
@@ -32,9 +43,9 @@
 
 <section class="rounded-2xl border border-border bg-card/40 p-5">
   <div class="flex items-baseline justify-between">
-    <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+    <svelte:element this={nivelEncabezado === 1 ? 'h1' : 'h2'} class="text-base font-semibold">
       Constancia
-    </h2>
+    </svelte:element>
     <p class="text-xs text-muted-foreground tabular-nums">
       {salaStore.terminadas}/{salaStore.totalCerradas} terminadas · 12 semanas
     </p>

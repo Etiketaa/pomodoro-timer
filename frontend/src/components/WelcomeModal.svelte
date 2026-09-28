@@ -116,13 +116,13 @@
       </div>
       <div class="mt-6 flex items-center justify-between">
         <button
-          class="h-10 rounded-lg border border-border bg-card/60 px-4 text-sm transition-colors hover:bg-card/80"
+          class="min-tap rounded-lg border border-border bg-card/60 px-4 text-sm transition-colors hover:bg-card/80"
           onclick={handleSkip}
         >
           Ahora no
         </button>
         <button
-          class="h-10 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] disabled:opacity-50"
+          class="min-tap rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] disabled:opacity-50"
           onclick={() => step = 2}
           disabled={!step1Ready}
         >
@@ -194,7 +194,7 @@
       </div>
       <div class="mt-6 flex items-center justify-between">
         <button
-          class="h-10 rounded-lg border border-border bg-card/60 px-4 text-sm transition-colors hover:bg-card/80"
+          class="min-tap rounded-lg border border-border bg-card/60 px-4 text-sm transition-colors hover:bg-card/80"
           onclick={() => step = 1}
         >
           ← Atrás

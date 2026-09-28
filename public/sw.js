@@ -6,8 +6,8 @@ const CACHE_NAME = 'pomodoro-timer-cache-v10';
 // dejaba la precarga apuntando a archivos que ya no existían. Se deja como
 // array vacío (no un token) para que el archivo sea JS válido siempre.
 const BUILD_ASSETS = [
-  '/assets/index-C1Ee5YyE.css',
-  '/assets/index-y4_vfdgy.js'
+  '/assets/index-BwxsFfBq.css',
+  '/assets/index-Mhdnc7gj.js'
 ];
 const STATIC_ASSETS = [
   '/',

@@ -3,6 +3,17 @@
   import { FRANJA_LABEL, franjaAhora } from '../lib/stores/sala.svelte';
 
   /**
+   * `nivelEncabezado` decide si el encabezado es h1 o h2, y lo pasa App.svelte segun
+   * cual vista esta activa. En mobile esta es la pantalla entera y le
+   * corresponde h1; en desktop convive con la otra seccion como hermana, y ahi
+   * es h2. Asi hay exactamente un h1 en cualquier estado, que era lo que faltaba.
+   *
+   * De paso el encabezado deja de ser una etiqueta en versalitas gris y pasa a
+   * ser un titulo: era la pantalla de apertura de la app y no tenia ningun h1.
+   */
+  let { nivelEncabezado = 1 }: { nivelEncabezado?: 1 | 2 } = $props();
+
+  /**
    * Abrir una sala = escribir el compromiso. Eso es todo lo que se pide.
    *
    * La tentación de poner un campo de duración acá es exactamente la que
@@ -36,9 +47,9 @@
 </script>
 
 <section class="rounded-2xl border border-border bg-card/40 p-5 md:p-6">
-  <h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+  <svelte:element this={nivelEncabezado === 1 ? 'h1' : 'h2'} class="text-base font-semibold">
     Abrir sala
-  </h2>
+  </svelte:element>
 
   <p class="mt-1 text-sm text-muted-foreground text-pretty">
     Escribí qué terminás. Es la frase que vas a ver mientras trabajás.
@@ -60,7 +71,7 @@
       </span>
       <select
         bind:value={taskId}
-        class="rounded-lg border border-border bg-background/60 p-2 text-sm outline-none focus:border-ring"
+        class="min-tap rounded-lg border border-border bg-background/60 p-2 text-sm outline-none focus:border-ring"
       >
         <option value={undefined}>Sin tarea</option>
         {#each pendientes as t (t.id)}
@@ -77,7 +88,7 @@
             type="button"
             onclick={() => (energia = val)}
             aria-pressed={energia === val}
-            class="flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors {
+            class="min-tap flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors {
               energia === val
                 ? 'border-ring bg-accent text-accent-foreground'
                 : 'border-border text-muted-foreground hover:text-foreground'
@@ -98,7 +109,7 @@
       type="button"
       onclick={abrir}
       disabled={!compromiso.trim()}
-      class="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-40"
+      class="min-tap rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-40"
     >
       Entrar
     </button>

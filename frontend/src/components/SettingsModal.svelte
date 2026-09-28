@@ -54,8 +54,8 @@
 
   <div class="relative rounded-2xl border border-border bg-card w-full max-w-md max-h-[85vh] overflow-y-auto animate-scaleIn">
     <div class="sticky top-0 rounded-t-2xl px-6 py-4 flex items-center justify-between z-10 border-b border-border bg-card">
-      <h2 class="text-lg font-semibold">Settings</h2>
-      <button class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onclose} aria-label="Close">
+      <h2 class="text-lg font-semibold">Ajustes</h2>
+      <button class="min-tap flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onclose} aria-label="Cerrar">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
@@ -65,17 +65,17 @@
     <div class="px-6 py-4 space-y-6">
       <!-- Timer Durations -->
       <section>
-        <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Timer Duration</h3>
+        <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Duración del temporizador</h3>
         <div class="grid grid-cols-3 gap-3">
           {#each [
-            { label: 'Focus', bind: focusMinutes, min: 5, max: 120 },
-            { label: 'Short Break', bind: shortBreakMinutes, min: 1, max: 30 },
-            { label: 'Long Break', bind: longBreakMinutes, min: 5, max: 60 },
+            { label: 'Foco', bind: focusMinutes, min: 5, max: 120 },
+            { label: 'Descanso corto', bind: shortBreakMinutes, min: 1, max: 30 },
+            { label: 'Descanso largo', bind: longBreakMinutes, min: 5, max: 60 },
           ] as item}
             <div class="rounded-xl border border-border bg-card/60 p-3 flex flex-col items-center gap-1">
               <label class="text-xs text-muted-foreground">{item.label}</label>
               <input
-                class="w-16 text-center bg-transparent text-lg font-semibold outline-none border-b border-border focus:border-primary transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                class="min-h-11 w-16 text-center bg-transparent text-lg font-semibold outline-none border-b border-border focus:border-primary transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 type="number"
                 min={item.min} max={item.max}
                 bind:value={item.bind}
@@ -84,27 +84,27 @@
           {/each}
         </div>
         <div class="rounded-xl border border-border bg-card/60 p-3 mt-3 flex items-center justify-between">
-          <label for="interval-input" class="text-sm">Long Break Interval</label>
+          <label for="interval-input" class="text-sm">Intervalo de descanso largo</label>
           <div class="flex items-center gap-1">
-            <span class="text-xs text-muted-foreground">Every</span>
+            <span class="text-xs text-muted-foreground">Cada</span>
             <input
               id="interval-input"
-              class="w-10 text-center bg-transparent text-sm font-semibold outline-none border-b border-border focus:border-primary transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              class="min-h-11 w-10 text-center bg-transparent text-sm font-semibold outline-none border-b border-border focus:border-primary transition-colors [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               type="number" min="2" max="10"
               bind:value={longBreakInterval}
             />
-            <span class="text-xs text-muted-foreground">focus</span>
+            <span class="text-xs text-muted-foreground">focos</span>
           </div>
         </div>
       </section>
 
       <!-- Behavior -->
       <section>
-        <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Behavior</h3>
+        <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Comportamiento</h3>
         <div class="space-y-2">
           {#each [
-            { label: 'Auto-start Breaks', bind: autoStartBreaks },
-            { label: 'Auto-start Focus', bind: autoStartFocus },
+            { label: 'Arrancar descansos solo', bind: autoStartBreaks },
+            { label: 'Arrancar foco solo', bind: autoStartFocus },
           ] as item}
             <label class="rounded-xl border border-border bg-card/60 p-3 flex items-center justify-between cursor-pointer">
               <span class="text-sm">{item.label}</span>
@@ -122,16 +122,16 @@
         <h3 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Audio</h3>
         <div class="rounded-xl border border-border bg-card/60 p-3 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-sm">Volume</span>
+            <span class="text-sm">Volumen</span>
             <span class="text-xs text-muted-foreground tabular-nums">{volume}%</span>
           </div>
           <input
             type="range" min="0" max="100"
             bind:value={volume}
-            class="w-full appearance-none h-1.5 rounded-full bg-muted accent-primary focus:outline-none"
+            class="h-11 w-full cursor-pointer appearance-none bg-transparent focus:outline-none [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-muted [&::-webkit-slider-thumb]:mt-[-5px] [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-muted [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary"
           />
           <label class="flex items-center justify-between cursor-pointer">
-            <span class="text-sm">Notifications</span>
+            <span class="text-sm">Notificaciones</span>
             <input type="checkbox" class="sr-only" bind:checked={notifications} />
             <div class="w-10 h-6 rounded-full transition-colors p-0.5 {notifications ? 'bg-primary' : 'bg-muted'}">
               <div class="w-5 h-5 rounded-full bg-white transition-transform {notifications ? 'translate-x-4' : ''}"></div>
@@ -142,8 +142,8 @@
     </div>
 
     <div class="sticky bottom-0 rounded-b-2xl px-6 py-4 flex gap-3 border-t border-border bg-card">
-      <button class="flex-1 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium hover:opacity-90" onclick={onclose}>Cancel</button>
-      <button class="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90" onclick={save}>Save</button>
+      <button class="min-tap flex-1 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium hover:opacity-90" onclick={onclose}>Cancelar</button>
+      <button class="min-tap flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90" onclick={save}>Guardar</button>
     </div>
   </div>
 </div>

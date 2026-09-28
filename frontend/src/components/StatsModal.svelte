@@ -27,14 +27,14 @@
   role="dialog"
   tabindex="-1"
   aria-modal="true"
-  aria-label="Statistics"
+  aria-label="Estadísticas"
 >
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
   <div class="relative rounded-2xl border border-border bg-card w-full max-w-md max-h-[85vh] overflow-y-auto animate-scaleIn">
     <div class="sticky top-0 rounded-t-2xl px-6 py-4 flex items-center justify-between z-10 border-b border-border bg-card">
-      <h2 class="text-lg font-semibold">Statistics</h2>
-      <button class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onclose} aria-label="Close">
+      <h2 class="text-lg font-semibold">Estadísticas</h2>
+      <button class="min-tap flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onclose} aria-label="Cerrar">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
@@ -50,13 +50,13 @@
           </svg>
           <div>
             <span class="text-2xl font-bold text-primary">{stats.streak}</span>
-            <span class="text-sm text-muted-foreground ml-1">day streak</span>
+            <span class="text-sm text-muted-foreground ml-1">días seguidos</span>
           </div>
         </div>
         {#if isActiveToday}
-          <p class="text-xs text-primary mt-2">Active today!</p>
+          <p class="text-xs text-primary mt-2">¡Activo hoy!</p>
         {:else}
-          <p class="text-xs text-muted-foreground mt-2">Start a session to keep your streak</p>
+          <p class="text-xs text-muted-foreground mt-2">Abrí una sala para empezar tu racha</p>
         {/if}
       </div>
 
@@ -77,7 +77,7 @@
 
       <!-- Quick Insight -->
       <div class="rounded-xl border border-border bg-card/60 p-4">
-        <p class="text-sm font-medium">Productivity Trend</p>
+        <p class="text-sm font-medium">Ritmo</p>
         <p class="text-xs text-muted-foreground mt-1">
           {#if stats.totalSessions === 0}
             Start your first Pomodoro session to see your stats grow.
@@ -93,7 +93,7 @@
     </div>
 
     <div class="sticky bottom-0 rounded-b-2xl px-6 py-4 border-t border-border bg-card">
-      <button class="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90" onclick={onclose}>OK</button>
+      <button class="min-tap w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90" onclick={onclose}>OK</button>
     </div>
   </div>
 </div>

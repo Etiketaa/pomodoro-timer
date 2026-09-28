@@ -11,6 +11,7 @@
   import SalaAbrir from './components/SalaAbrir.svelte';
   import SalaActiva from './components/SalaActiva.svelte';
   import SalaHistorial from './components/SalaHistorial.svelte';
+  import Perfil from './components/Perfil.svelte';
 
   import { profile, welcomeSeen } from './lib/stores/profile.svelte';
   import { salaStore } from './lib/stores/singleton';
@@ -26,7 +27,7 @@
    * columna porque hay ancho de sobra y forzar un tab bar en una pantalla
    * grande solo agrega un toque.
    */
-  let tab = $state<'sala' | 'constancia'>('sala');
+  let tab = $state<'sala' | 'constancia' | 'perfil'>('sala');
 
   /**
    * Los atajos del manifest llegan como query params. Sin esto, el long-press
@@ -68,10 +69,9 @@
        reemplaza el TabBar, que está donde el pulgar llega. -->
   <div class="hidden lg:block">
     <Navbar
-      onSettings={() => showSettings = true}
-      onStats={() => showStats = true}
-      onChatbot={() => showChatbot = !showChatbot}
-      onProfile={() => showWelcome = true}
+      {tab}
+      onChange={(t) => (tab = t)}
+      haySalaAbierta={!!salaStore.activa}
     />
   </div>
 
@@ -87,19 +87,26 @@
     -->
     {#if salaStore.activa}
       <SalaActiva sala={salaStore.activa} />
+    {:else if tab === 'perfil'}
+      <Perfil
+        onEditarPerfil={() => showWelcome = true}
+        onStats={() => showStats = true}
+        onSettings={() => showSettings = true}
+        onChatbot={() => showChatbot = true}
+      />
     {:else if tab === 'sala'}
-      <SalaAbrir />
+      <SalaAbrir nivelEncabezado={1} />
     {:else}
-      <SalaHistorial />
+      <SalaHistorial nivelEncabezado={1} />
     {/if}
 
     <!-- En desktop las dos secciones conviven: no hay pulgar que sufra. -->
-    {#if !salaStore.activa}
+    {#if !salaStore.activa && tab !== 'perfil'}
       <div class="mt-6 hidden lg:block">
         {#if tab === 'sala'}
-          <SalaHistorial />
+          <SalaHistorial nivelEncabezado={2} />
         {:else}
-          <SalaAbrir />
+          <SalaAbrir nivelEncabezado={2} />
         {/if}
       </div>
     {/if}
@@ -116,7 +123,6 @@
   <TabBar
     {tab}
     onChange={(t) => (tab = t)}
-    onProfile={() => showWelcome = true}
     haySalaAbierta={!!salaStore.activa}
   />
 

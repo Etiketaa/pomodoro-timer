@@ -151,12 +151,12 @@
       </div>
       <div class="flex items-center gap-2">
         <button
-          class="rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground transition-colors hover:text-foreground"
+          class="min-tap rounded-full border border-border px-2.5 py-1 text-[10px] text-muted-foreground transition-colors hover:text-foreground"
           onclick={() => { messages = []; }}
         >
           Limpiar
         </button>
-        <button class="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onClose} aria-label="Cerrar">
+        <button class="min-tap flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground" onclick={onClose} aria-label="Cerrar">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -205,7 +205,7 @@
           aria-label="Mensaje al asistente"
         ></textarea>
         <button
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform hover:scale-105 disabled:opacity-40"
+          class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform hover:scale-105 disabled:opacity-40"
           onclick={send}
           disabled={loading || !input.trim()}
           aria-label="Enviar"
