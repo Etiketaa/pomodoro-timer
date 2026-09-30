@@ -99,11 +99,22 @@
               </p>
             {/if}
           </div>
+          <!--
+            El ícono mide 14px y el área de toque era 22px: menos de la mitad
+            del mínimo de 48px que la app se propone, y además con
+            `opacity-0` + `group-hover`, que en táctil no hay hover. Era un
+            botón que no se veía ni se podía tocar justo en el caso para el
+            que está diseñado.
+
+            Ahora el área es .min-tap (48px) con el ícono centrado, y el
+            desvanecido solo donde hay hover de verdad: en puntero grueso se
+            muestra siempre, atenuado.
+          -->
           <button
             type="button"
             onclick={(e) => borrar(s.id, e)}
             aria-label="Borrar sala del historial"
-            class="shrink-0 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100"
+            class="flex min-tap shrink-0 items-center justify-center rounded-lg text-muted-foreground opacity-70 transition-opacity hover:text-destructive hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="pointer-events-none">
               <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />

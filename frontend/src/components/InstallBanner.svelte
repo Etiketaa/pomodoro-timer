@@ -1,7 +1,22 @@
 <script lang="ts">
   import { pwa, installApp } from '../lib/pwa.svelte';
 
-  let dismissed = $state(false);
+  /**
+   * `haySalaAbierta` solo cambia el offset vertical (ver .bottom-banner-cta en
+   * app.css): con una sala abierta el CTA de "Salir de la sala" ocupa el
+   * espacio que el banner usó.
+   */
+  let { haySalaAbierta = false }: { haySalaAbierta?: boolean } = $props();
+
+  /**
+   * El descarte se LEE al montar. Antes se escribía en localStorage y nunca se
+   * volvía a leer, así que el "descartar" no descartaba nada: el banner volvía
+   * en cada recarga. Una dismissión que no persiste es una mentira.
+   */
+  let dismissed = $state(
+    typeof localStorage !== 'undefined' &&
+      localStorage.getItem('pwa-install-dismissed') === '1'
+  );
   let busy = $state(false);
 
   const show = $derived(!dismissed && !pwa.standalone && (pwa.canInstall || pwa.isIOS));
@@ -19,7 +34,17 @@
 </script>
 
 {#if show}
-  <div class="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+  <!--
+    z-20 y no z-40 a propósito: el banner es lo menos importante de la
+    pantalla. Con z-40 ganaba el empate contra la barra de pestañas por
+    orden del DOM y tapaba el CTA de cerrar la sala, que es la única acción
+    que la tesis declara urgente.
+  -->
+  <div
+    class="pointer-events-none fixed inset-x-0 z-20 flex justify-center px-4 {haySalaAbierta
+      ? 'bottom-banner-cta'
+      : 'bottom-banner'}"
+  >
     <div class="pointer-events-auto flex w-full max-w-md items-center gap-2.5 rounded-full border border-border bg-card/95 py-2 pl-3 pr-2 shadow-xl shadow-black/30 backdrop-blur">
       <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-rose-500 shadow-inner">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">

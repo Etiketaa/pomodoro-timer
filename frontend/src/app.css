@@ -58,8 +58,11 @@
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
 
-  /* Alto de la barra de pestañas: 44px de target + aire arriba y abajo. */
-  --tabbar: 3.75rem;
+  /* Alto de la barra de pestañas. Medida 63px de verdad (10 de padding + 22 de
+     ícono + 4 de hueco + 16 de etiqueta + 10 de padding + 1 de borde), así que
+     3.75rem se quedaban 3px cortos y el borde inferior del botón "Salir de la
+     sala" quedaba tapado por la barra. 4rem cubre lo que la barra mide. */
+  --tabbar: 4rem;
   /* Alto del CTA fijo de la sala: 48px, que es el mínimo táctil. */
   --cta: 3.75rem;
   /* Mínimo táctil: iOS pide 44pt, Android 48dp. Nos quedamos con 48. */
@@ -110,9 +113,30 @@
     padding-bottom: calc(var(--tabbar) + var(--safe-b) + var(--cta) + 1.75rem);
   }
 
+  /*
+   * El banner de instalar la app flota, y lo que hay anclado abajo manda
+   * siempre: la barra de pestañas y el CTA de "Salir de la sala" son la
+   * navegación y la acción principal, el banner es una promoción. Antes iba
+   * en `bottom-0 z-40`, igual que la barra, y el DOM los ponía en el mismo
+   * plano: el banner quedaba 63px debajo de la barra y tapaba 94px del CTA
+   * con la sala abierta. Medido con el probe, 390x844.
+   *
+   * Por eso va con offset explícito y no con `bottom-0`: tiene que saber qué
+   * hay abajo. Y en desktop no hay ni barra ni CTA, así que la media query
+   * lo devuelve al borde — como con .pb-tabbar, la cascada no decide.
+   */
+  .bottom-banner { bottom: calc(var(--tabbar) + var(--safe-b) + 0.5rem); }
+  /* El +1.25rem del CTA son sus 0.75rem de padding arriba más el aire: sin
+     eso el banner se monte 5px sobre el borde del botón "Salir de la sala". */
+  .bottom-banner-cta {
+    bottom: calc(var(--cta) + var(--tabbar) + var(--safe-b) + 1.25rem);
+  }
+
   @media (width >= 64rem) {
     .pb-tabbar,
     .pb-cta { padding-bottom: 6rem; }
+    .bottom-banner,
+    .bottom-banner-cta { bottom: calc(var(--safe-b) + 1rem); }
   }
 
   /* Los targets táctiles no bajan de 48px: iOS pide 44pt, Android 48dp. */

@@ -118,7 +118,7 @@
     </div>
   </main>
 
-  <InstallBanner />
+  <InstallBanner haySalaAbierta={!!salaStore.activa} />
 
   <TabBar
     {tab}

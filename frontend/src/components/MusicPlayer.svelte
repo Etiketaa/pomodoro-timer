@@ -127,7 +127,15 @@
   }
 </script>
 
-<div class="flex items-center gap-3 rounded-2xl border border-border bg-card/70 p-3 backdrop-blur">
+<!--
+  `flex-wrap` con un min-width en la columna del nombre: a 390px la fila no
+  entra, así que los controles bajan solos en vez de competir por el ancho. Es
+  el mismo criterio que usa la barra de pestañas, y evita el recorte del
+  nombre: con los controles abajo, la columna pasa de 104px a los 310px que
+  necesita "Space Station Soma" entero. En sm+ todo entra en una línea y el
+  wrap no hace nada.
+-->
+<div class="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border bg-card/70 p-3 backdrop-blur">
   <button
     class="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
     onclick={toggle}
@@ -149,7 +157,10 @@
     {/if}
   </button>
 
-  <div class="flex min-w-0 flex-1 flex-col">
+  <!-- El piso de 13rem es lo que dispara el wrap: es el ancho que necesita
+       "Space Station Soma" entero, y sin él los controles se comen la fila y
+       el nombre vuelve a recortarse. -->
+  <div class="flex min-w-[13rem] flex-1 flex-col">
     <div class="flex items-center gap-1.5 text-sm font-medium">
       <svg
         xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -171,6 +182,15 @@
         Conectando…
       {:else if playing}
         En vivo · {FRANJA_LABEL[franja]} · {estacion.sePresenta}
+      {:else if esDefault}
+        <!--
+          Sin override, estacion ES porFranja: la flecha repetía el nombre que
+          ya se ve en la línea de arriba, y con eso la línea pasaba de 134 a
+          234px, que es lo que la cortaba a la mitad en 390px. La flecha solo
+          dice algo cuando hay una estación elegida a mano, porque recién ahí
+          nombra a la que volverías.
+        -->
+        En pausa · {FRANJA_LABEL[franja]}
       {:else}
         <!--
           "la de {FRANJA_LABEL}" salía como "la de de mañana", porque la
@@ -182,13 +202,24 @@
     </span>
   </div>
 
-  <div class="flex items-center gap-2">
+  <!-- El ml-14 alinea los controles con la columna del nombre cuando bajan de
+       línea (44 del botón de play + 12 de hueco), para que no queden colgando
+       debajo del ícono. En sm+ vuelven a la misma línea y el margen sobra. -->
+  <div class="ml-14 flex items-center gap-2 sm:ml-0">
     <!--
       El selector es un <select> nativo y no un popover a propósito: es la
       forma más barata de no romper teclado ni lector de pantalla, y en esta
       app lo raro es que algo se abra en capas.
     -->
     <label class="sr-only" for="estacion">Estación de radio</label>
+    <!--
+      El ancho del select se come el del nombre de la estación, que es lo que
+      más importa: a 390px el nombre quedaba en 41px, ilegible, y el status en
+      61. Medido con el probe. El select cede primero porque su valor completo
+      está en la lista desplegada; el nombre no tiene dónde esconderse. Por
+      eso el tope en móvil es 5.5rem y recién en sm (640px, donde además entra
+      el slider de volumen) se abre a 9.5rem.
+    -->
     <select
       id="estacion"
       value={estacion.id}
@@ -198,7 +229,7 @@
         );
         if (elegida) elegir(elegida);
       }}
-      class="min-tap max-w-[9.5rem] rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground outline-none focus-visible:border-ring"
+      class="min-tap max-w-[5.5rem] rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground outline-none focus-visible:border-ring sm:max-w-[9.5rem]"
     >
       {#each Object.entries(ATMOSFERA) as [f, e] (e.id)}
         <option value={e.id}>{e.nombre}</option>
