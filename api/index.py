@@ -76,9 +76,10 @@ def healthz():
 def chat():
     """Chat del asistente (Groq). Lo consume frontend/src/components/AgentChat.svelte.
 
-    OJO: este es el chat del asistente, distinto de /api/chat/* que es
-    chat entre usuarios. Si se decide sacar la caja de chat, se borra este
-    endpoint junto con AgentChat.svelte — no antes.
+    OJO: este es el chat del asistente, distinto de las rutas de chat_bp
+    (/chats, /contacts), que son chat entre usuarios y no tienen nada que ver
+    con esta. Si se decide sacar la caja de chat, se borra este endpoint junto
+    con AgentChat.svelte — no antes.
     """
     try:
         data = request.get_json(silent=True) or {}
@@ -87,8 +88,16 @@ def chat():
             return jsonify({'error': 'No message provided'}), 400
 
         if not groq_available:
+            # Antes este mensaje pedía revisar NVIDIA_API_KEY, que es la
+            # variable de otro proveedor y ya está seteada: mandaba a
+            # configurar algo que no era la causa y dejaba al usuario frente
+            # a un error sin salida. Falta el paquete, no la clave.
             return jsonify({
-                'answer': 'El servicio de IA no está disponible. Configurá NVIDIA_API_KEY en .env',
+                'answer': (
+                    'El chat no está disponible ahora: falta instalar el cliente '
+                    'de Groq (pip install groq). Los otros asistentes funcionan '
+                    'normalmente.'
+                ),
                 'actions': []
             }), 503
 
