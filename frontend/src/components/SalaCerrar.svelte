@@ -21,6 +21,13 @@
 
   const falta = $derived(resultado !== null && resultado !== 'terminado');
 
+  // La nota que escribiste durante la sesión, re-leída acá. Antes se guardaba
+  // y no volvía a aparecer nunca: el ritual te preguntaba "¿lo terminaste?"
+  // escondiendo justo lo que anotaste mientras trabajabas. Eso convertía la
+  // pregunta en un examen de memoria. Con la nota a la vista podés verificar
+  // en vez de adivinar. Se muestra solo si hay algo escrito.
+  const nota = $derived(sala.nota.trim());
+
   function confirmar() {
     if (!resultado) {
       error = 'Elegí cómo terminó.';
@@ -51,6 +58,22 @@
     <p class="mt-1 text-sm text-muted-foreground text-pretty">
       El compromiso era «{sala.compromiso}».
     </p>
+
+    <!--
+      Tu nota, textual, con los saltos de línea que le pusiste. Va antes que
+      las opciones a propósito: primero leés lo que anotaste, después elegís.
+      Es texto plano, sin cursiva ni comillas, para que se lea como un
+      borrador tuyo y no como algo que la app te está diciendo.
+    -->
+    {#if nota}
+      <div
+        class="mt-3 rounded-xl border-l-2 border-ring/40 bg-muted/40 py-2.5 pl-3.5 pr-3"
+      >
+        <p class="whitespace-pre-wrap text-sm text-muted-foreground text-pretty">
+          {nota}
+        </p>
+      </div>
+    {/if}
 
     <div class="mt-4 flex flex-col gap-2">
       {#each OPCIONES as op (op.valor)}

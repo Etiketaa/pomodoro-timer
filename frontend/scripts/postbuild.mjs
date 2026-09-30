@@ -6,9 +6,11 @@
  * estaban escritos a mano, y por eso cualquier rebuild dejaba la precarga
  * apuntando a archivos inexistentes.
  *
- * También sube la versión de caché para que los clientes con un SW viejo
- * (o sea, con otro CACHE_NAME) se purguen al activar el nuevo.
+ * También versiona el caché para que los clientes con un SW viejo (o sea,
+ * con otro CACHE_NAME) se purguen al activar el nuevo. El nombre sale de un
+ * hash de los assets, no de un contador: ver el comentario largo abajo.
  */
+import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -34,10 +36,42 @@ if (!sw.includes('const BUILD_ASSETS = [];')) {
   process.exit(1);
 }
 
+// Versiona el caché a partir del contenido real del bundle.
+//
+// Por qué no un número que se incrementa: probé las dos formas. El contador
+// se bumpea desde el número que hay en el archivo, así que depende de que
+// alguien commitee el sw.js generado entre builds. Si hacés dos builds sin
+// commitear, los dos dan v11, y un cliente que ya tenía v11 de un deploy
+// anterior no purga nada: el bundle viejo se queda en el caché para siempre.
+// Derivarlo del contenido no depende de acordarse de commitear: si el bundle
+// cambió, el nombre del caché cambia.
+//
+// Esto antes no pasaba. El comentario de este archivo decía que bumpeaba la
+// versión, pero CACHE_NAME solo aparecía adentro, o sea únicamente en el
+// comentario. Como el bundle se sirve Cache First y los nombres llevan hash,
+// cada build metía sus assets nuevos en el MISMO caché y el handler de
+// activate —que borra solo los cachés con otro nombre— no purgaba nada.
+// Resultado: cada cliente acumulaba un bundle de ~110 KB por build, para
+// siempre. Bump manual tampoco servía: es fácil olvidarlo.
+const CACHE_LINE = /^const CACHE_NAME = 'pomodoro-timer-cache-[a-z0-9]+';$/m;
+if (!CACHE_LINE.test(sw)) {
+  console.error("postbuild: no encontré la línea const CACHE_NAME = 'pomodoro-timer-cache-…';");
+  console.error('Sin poder versionarla, los cachés viejos no se purgarían. No sigo.');
+  process.exit(1);
+}
+
+const digest = createHash('sha256')
+  .update(files.map((f) => f.trim()).join('\n'))
+  .digest('hex')
+  .slice(0, 8);
+const cacheName = `pomodoro-timer-cache-${digest}`;
+
 writeFileSync(
   SW,
-  sw.replace('const BUILD_ASSETS = [];', `const BUILD_ASSETS = [\n${files.join(',\n')}\n];`)
+  sw
+    .replace(CACHE_LINE, `const CACHE_NAME = '${cacheName}';`)
+    .replace('const BUILD_ASSETS = [];', `const BUILD_ASSETS = [\n${files.join(',\n')}\n];`)
 );
 
-console.log(`postbuild: ${files.length} asset(s) inyectados en sw.js`);
+console.log(`postbuild: ${files.length} asset(s) inyectados en sw.js, caché ${cacheName}`);
 for (const f of files) console.log(`  ${f.trim()}`);

@@ -25,25 +25,36 @@ app.config['SECRET_KEY'] = os.getenv('JWT_SECRET', 'dev-secret')
 # Enable CORS for API routes
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Initialize authlib for Google OAuth
-from auth import oauth
-oauth.init_app(app)
-
-# Register auth blueprint
-from auth import auth_bp
-app.register_blueprint(auth_bp)
-
-# Register sync blueprint
-from sync import sync_bp
-app.register_blueprint(sync_bp)
-
-# Register chat blueprint
-from chat import chat_bp
-app.register_blueprint(chat_bp)
-
-# Register feedback blueprint
-from feedback import feedback_bp
-app.register_blueprint(feedback_bp)
+# ------------------------------------------------------------------
+# Blueprints que ya NO se registran
+#
+# La app es local-first: todo vive en localStorage y el servidor solo
+# corre los asistentes. Estos blueprints quedaron con cero llamadas desde
+# el frontend —verificado con grep sobre frontend/src— y se dejaron de
+# montar para que no exista la superficie HTTP, no solo para que no se use.
+#
+#   auth.py      7 rutas: register, login, google, google/callback, me,
+#                       public-key, search
+#   sync.py      2 rutas: /data, /data/<key>  (respaldo en la nube)
+#   chat.py      5 rutas: /chats, /chats/<id>/messages, /contacts
+#                       (chat entre usuarios, distinto de /api/chatbot)
+#   feedback.py  registro de feedback
+#   socketio_handler.py  montado, y el frontend no importa socket.io ni
+#                       lo tiene como dependencia: no hay cliente.
+#
+# Los archivos siguen en disco. Borrarlos es otra decisión, y no es
+# inocua: ratelimit.py importa crypto.verify_token (perezoso, dentro de
+# un try/except) para el rate limit por usuario, así que sacar crypto.py
+# degradaría ese límite a por-IP sin avisar.
+#
+# Por qué importa aunque no se usen: auth.py enumeraba cuentas. /register
+# respondía "Este email ya está registrado" sin pedir autenticación, y
+# /login distinguía "no existe una cuenta con este email" de "contraseña
+# incorrecta", sin rate limit, mientras que los endpoints de IA sí lo
+# tienen. Con un despliegue público eso es un oráculo de adivinar
+# contraseñas. Mientras la app no tenga login no había forma de llegar,
+# pero la base de datos (Neon) está viva con al menos una cuenta real.
+# ------------------------------------------------------------------
 
 # Register agent blueprint (features agénticas: split/plan/ritual/insights)
 from agent import agent_bp
@@ -51,10 +62,6 @@ app.register_blueprint(agent_bp, url_prefix='/api/agent')
 
 # Rate limiting para lo que gasta plata (endpoints de LLM)
 from ratelimit import agent_rate_limited
-
-# Initialize Socket.IO
-from socketio_handler import init_socketio
-init_socketio(app)
 
 # Import Groq client
 try:
@@ -157,7 +164,8 @@ def spa(path):
 
 # This block is not used by Vercel, but it's good for local development
 if __name__ == '__main__':
-    from socketio_handler import socketio
-    # socketio.run ya usa threaded=True internamente; el timeout corto del
-    # cliente OpenAI evita que una llamada lenta a NVIDIA congele el server.
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)
+    # Antes era socketio.run(), porque el handler de Socket.IO estaba
+    # montado. Ya no: el frontend no tiene cliente de socket.io, así que
+    # app.run() alcanza y no arrastra el servidor de websockets.
+    # threaded=True para que una llamada lenta a NVIDIA no congele todo.
+    app.run(host='127.0.0.1', port=5055, debug=True, threaded=True)
