@@ -92,6 +92,19 @@
               {#if s.minutos}· {s.minutos} min{/if}
               {#if s.cerradaAt}· {fecha(s.cerradaAt)}{/if}
             </p>
+            {#if s.nota?.trim()}
+              <!--
+                La nota que escribiste durante la sesión, textual. Se muestra
+                recién acá y en el cierre, en los dos con el mismo lenguaje
+                visual: borde izquierdo + fondo muted + whitespace-pre-wrap,
+                para que "tu nota" se reconozca igual donde aparezca.
+              -->
+              <p
+                class="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap rounded-r-xl border-l-2 border-ring/40 bg-muted/40 py-2 pl-3 pr-3 text-xs text-muted-foreground text-pretty"
+              >
+                {s.nota}
+              </p>
+            {/if}
             {#if s.proximaAccion}
               <p class="mt-1 text-xs text-muted-foreground/90">
                 <span class="text-foreground/60">seguir:</span>
